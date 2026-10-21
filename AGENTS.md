@@ -2,7 +2,7 @@
 
 ## Purpose and current boundary
 
-Build a small personal web application that ports an existing spreadsheet time-logging workflow. Preserve the useful behavior first, then improve it in small reviewed increments. The current delivery is documentation and handoff only; follow the handoff's learning protocol before implementation.
+Build a small personal web application that ports an existing spreadsheet time-logging workflow. Preserve the useful behavior first, then improve it in small reviewed increments. The initial context/plan milestone was approved by Cristian on 2026-10-21. Implement the first local-drafts slice and request review of the result before expanding scope.
 
 Read `README.md`, `docs/development-plan.md`, `docs/behavior-specification.md`, `docs/legacy-workflow.md`, and the current handoff before making decisions. Distinguish user decisions, recommendations, observations and unverified hypotheses.
 
@@ -10,7 +10,7 @@ Read `README.md`, `docs/development-plan.md`, `docs/behavior-specification.md`, 
 
 - Speak Portuguese with Cristian. Use natural English for new identifiers, file names, tests and technical comments. The initial product UI is planned in Portuguese.
 - Default to personal/learning collaboration. Explain unfamiliar frontend concepts and consequential design choices briefly, without treating Cristian as a programming beginner.
-- Node.js is selected; React is authorized. Other tools in the plan remain recommendations until the first design validation.
+- Node.js, React, Vite, TypeScript, Express and SQLite are approved for the first slice. Use Vitest for totalization and persistence; check the interface manually. Additional tools remain optional.
 - A single repository and a small application are sufficient. Add dependencies and abstractions only for an identified need.
 
 ## Private material
@@ -24,7 +24,7 @@ Read `README.md`, `docs/development-plan.md`, `docs/behavior-specification.md`, 
 
 ## Behavior and verification
 
-- Use the lightweight BDD loop in `docs/behavior-specification.md`. Specifications are not implemented tests until connected to meaningful assertions.
+- Cristian explicitly dispensed with BDD, Cucumber and mandatory formal scenarios on 2026-10-21. Use meaningful Vitest tests for totalization and persistence. Existing behavior examples are historical references, not an obligatory workflow.
 - Verify the actual legacy flow before translating it. Do not preserve a known defect merely to claim parity, and do not silently change a business rule.
 - Keep activity IDs configurable and account for project-specific mappings. The same activity label is not a globally unique identifier.
 - Confirm remote writes using the service's actual success contract. Do not assume any HTTP 200 proves a successful time entry.

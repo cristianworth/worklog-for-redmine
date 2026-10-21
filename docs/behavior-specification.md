@@ -1,12 +1,10 @@
-# Especificação de comportamento
+# Exemplos históricos de comportamento
 
-## Como usar BDD neste projeto
+## Situação atual
 
-Adotar um ciclo pequeno: conversar sobre um comportamento, esclarecer exemplos, registrar o resultado esperado, automatizar o exemplo relevante e implementar o menor recorte que o atende.
+Em 21/10/2026, Cristian dispensou BDD, Cucumber e a obrigação de formalizar funcionalidades em cenários. Este documento preserva exemplos de planejamento; não é um processo obrigatório nem uma suíte executável.
 
-Os exemplos abaixo estão **propostos, não implementados e não executados**. Precisam da validação de contexto do sucessor/Cristian. Os blocos seguem Dado/Quando/Então para facilitar a conversa; não existem arquivos `.feature`, runner Cucumber, definições de passos ou cobertura automatizada nesta entrega.
-
-Começar com Vitest para regras/integrações simuladas e alguns testes Playwright do fluxo completo. Introduzir Cucumber apenas se a manutenção conjunta de Gherkin executável trouxer benefício concreto.
+O primeiro recorte usa Vitest para totalização (`src/shared/worklogs.test.ts`) e persistência (`src/server/storage.test.ts`). A interface será conferida manualmente. Playwright fica para depois, se trouxer benefício.
 
 Todos os números, nomes de projetos e respostas usados aqui são fictícios. Não representam a configuração do servidor privado.
 
@@ -149,4 +147,4 @@ E nenhuma hora deve ser registrada por essa consulta
 
 ## Registro de automação
 
-Na implementação, ligar cada cenário ao teste que realmente o verifica e registrar a última execução relevante. Enquanto não houver runner/código, o status de todos os cenários é **não automatizado**. Testes reais de gravação no Redmine dependem de autorização específica e não devem ocorrer em uma suíte rotineira.
+Os blocos acima não são testes executáveis. Os testes reais do primeiro recorte estão nos arquivos indicados no início; o resultado atual deve ser obtido com `npm test`. Regras de envio, inclusive B03, permanecem fora do primeiro recorte. Não realizar gravações reais no Redmine em testes rotineiros.
