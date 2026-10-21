@@ -1,0 +1,48 @@
+# Private spreadsheet reference and extracted VBA must remain local.
+*.xlsm
+*.xls
+*.xlsx
+*.bas
+*.cls
+*.frm
+*.frx
+*.bin
+/private/
+/local/
+
+# Credentials and machine-specific configuration.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.p12
+
+# Local application data, backups and logs.
+/data/
+/backups/
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+*.log
+
+# Dependencies, generated files and test artifacts.
+node_modules/
+dist/
+build/
+coverage/
+.vite/
+.vitest/
+playwright-report/
+test-results/
+*.tsbuildinfo
+
+# Editor and operating-system files.
+.idea/
+.DS_Store
+Thumbs.db
+~$*
