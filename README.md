@@ -44,6 +44,8 @@ Vitest checks duration arithmetic and persistence, including database reopening,
 
 React + Vite + TypeScript; Node + Express + SQLite through Node's built-in `node:sqlite` module. A single repository and process, bound to the local computer. Some Node 24 versions emit an experimental SQLite warning.
 
+The next planned slice shows a free date range as stacked days, with a fixed end date or an “until today” mode and a quick issue-code copy action. Day templates and activity settings remain deferred; their planned buttons will be marked unavailable until implemented. See the plan for priorities.
+
 Authentication, issue lookup, project-specific activity IDs, Redmine submission and optional issue-status changes remain future slices. Saving a draft does not send anything to Redmine. This project is independent of Redmine.
 
 ## Documentation and private reference

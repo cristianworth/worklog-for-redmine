@@ -2,7 +2,7 @@
 
 ## Purpose and current boundary
 
-Build a small personal web application that ports an existing spreadsheet time-logging workflow. Preserve the useful behavior first, then improve it in small reviewed increments. The initial context/plan milestone was approved by Cristian on 2026-10-21. Implement the first local-drafts slice and request review of the result before expanding scope.
+Build a small personal web application that ports an existing spreadsheet time-logging workflow. Preserve the useful behavior first, then improve it in small reviewed increments. The context/plan and first local-drafts milestones were approved by Cristian on 2026-10-21. The first implementation is commit dd8bd4d. Consult the updated development plan for the proposed period-based editing slice and deferred features; do not treat roadmap entries as already implemented.
 
 Read `README.md`, `docs/development-plan.md`, `docs/behavior-specification.md`, `docs/legacy-workflow.md`, and the current handoff before making decisions. Distinguish user decisions, recommendations, observations and unverified hypotheses.
 
