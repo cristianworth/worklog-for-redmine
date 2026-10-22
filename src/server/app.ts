@@ -1,3 +1,4 @@
+import { validateActivityCatalog } from "../shared/activities";
 import express from "express";
 import {
   isWorkDate,
@@ -47,6 +48,27 @@ export function createApp(
   });
   app.get("/api/redmine/issues/:id", async (req, res) => {
     res.json(await redmine.issue(req.params.id));
+  });
+  app.get("/api/activities", (_req, res) => {
+    res.set("Cache-Control", "no-store");
+    res.json(store.readActivities());
+  });
+  app.put("/api/activities", (req, res) => {
+    let catalog;
+    try {
+      catalog = validateActivityCatalog(req.body);
+    } catch (error) {
+      res.status(400).json({
+        error: error instanceof Error ? error.message : "Catálogo inválido.",
+      });
+      return;
+    }
+    try {
+      res.json(store.saveActivities(catalog));
+    } catch (error) {
+      if (!(error instanceof ConflictError)) throw error;
+      res.status(409).json({ error: error.message });
+    }
   });
   app.get("/api/days", (req, res) => {
     let period;
@@ -131,6 +153,6 @@ export const handleErrors: express.ErrorRequestHandler = (
   );
   res.status(500).json({
     error:
-      "Não foi possível acessar os rascunhos. Tente novamente sem fechar a página.",
+      "Não foi possível acessar os dados locais. Tente novamente sem fechar a página.",
   });
 };

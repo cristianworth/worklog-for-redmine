@@ -4,7 +4,7 @@
 
 Em 22/10/2026, o endereço privado configurado na planilha resolveu por DNS. Consultas sem credenciais a `/login` e `/users/current.json` falharam no Node com `CERT_HAS_EXPIRED`, tanto na configuração normal quanto com os certificados confiáveis do Windows. O Python também encontrou uma falha de confiança na cadeia. O Node é o transporte da aplicação; o certificado vencido é a barreira confirmada para ele.
 
-Cristian confirmou usar o mesmo endereço e autorizou usar esse servidor apesar do certificado inválido. Com exceção restrita e os caminhos completos configurados na planilha (incluindo o subcaminho da instalação), o formulário de login respondeu **200** e `/users/current.json` respondeu **401 em JSON**, sem credenciais. Isso confirma que chegamos à autenticação; ainda não confirma aceitação de uma chave específica ou permissões da conta. Nenhuma credencial, cookie, hora ou mudança de status foi enviada.
+Cristian confirmou usar o mesmo endereço e autorizou usar esse servidor apesar do certificado inválido. Com exceção restrita e os caminhos completos configurados na planilha (incluindo o subcaminho da instalação), o formulário de login respondeu **200** e `/users/current.json` respondeu **401 em JSON**, sem credenciais. Nesse primeiro teste chegamos à autenticação sem enviar credenciais. Depois, Cristian preencheu a chave localmente: uma nova instância do cliente confirmou autenticação e leitura de assunto, status e projeto de uma tarefa. Um processo aberto antes da edição ainda indicava ausência de chave e respondeu 401; reiniciar carrega o `.env` atual. Nenhuma hora ou mudança de status foi enviada.
 
 ## Exceção local autorizada
 
@@ -12,7 +12,7 @@ Cristian confirmou usar o mesmo endereço e autorizou usar esse servidor apesar 
 
 A exceção aceita erros de cadeia de confiança, nome e datas do certificado; não consegue isolar apenas o vencimento. HTTPS continua criptografado, mas sem a autenticação do servidor pelo certificado há risco de interceptação. A decisão foi aceita por Cristian para o endereço privado conhecido; não é uma recomendação para outros servidores.
 
-O arquivo `.env` local foi preparado com o endereço completo da planilha e a exceção autorizada, sem chave ou senha. Ele está ignorado pelo Git. Desative a exceção quando o certificado for corrigido.
+O arquivo `.env` local foi preparado com o endereço completo da planilha e a exceção autorizada, inicialmente sem chave ou senha. Cristian preencheu a chave localmente; ela não é exibida nem versionada. O arquivo está ignorado pelo Git. Desative a exceção quando o certificado for corrigido.
 
 ## Sequência de validação
 
@@ -31,4 +31,4 @@ Leitura estática do VBA confirmou dois caminhos: `ConsultarIssueRedmine` faz GE
 - [Flags de certificado do WinHTTP](https://learn.microsoft.com/en-us/windows/win32/winhttp/option-flags#winhttp_option_security_flags)
 - [Consulta de tarefa](https://www.redmine.org/projects/redmine/wiki/Rest_Issues#Showing-an-issue)
 
-O padrão documentado suporta chave no cabeçalho. A compatibilidade e as permissões desta instância permanecem pendentes. Os testes usam somente respostas fictícias, inclusive redirecionamentos, falhas de certificado e autenticação.
+O padrão documentado suporta chave no cabeçalho. Autenticação e leitura de tarefa foram verificadas nesta instância; criação de horas e suas permissões ainda serão validadas na P3. Os testes usam somente respostas fictícias, inclusive redirecionamentos, falhas de certificado e autenticação.

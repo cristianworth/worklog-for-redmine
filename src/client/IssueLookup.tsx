@@ -11,10 +11,12 @@ export function IssueLookup({
   issue,
   label,
   disabled,
+  onProject,
 }: {
   issue: string;
   label: string;
   disabled: boolean;
+  onProject(projectId: number): void;
 }) {
   const code = issue.trim();
   const [result, setResult] = useState<{
@@ -47,10 +49,15 @@ export function IssueLookup({
         data.id !== Number(code) ||
         typeof data.subject !== "string" ||
         typeof data.status?.name !== "string" ||
-        typeof data.project?.name !== "string"
+        typeof data.project?.name !== "string" ||
+        !Number.isSafeInteger(data.project.id) ||
+        data.project.id <= 0
       )
         throw new Error("Resposta inválida para a tarefa consultada.");
-      if (!controller.signal.aborted) setResult({ code, data });
+      if (!controller.signal.aborted) {
+        setResult({ code, data });
+        onProject(data.project.id);
+      }
     } catch (error) {
       if (!controller.signal.aborted)
         setResult({
@@ -92,7 +99,9 @@ export function IssueLookup({
         <div className="issue-result" role="status">
           <strong>{current.data.subject}</strong>
           <span>{current.data.status.name}</span>
-          <small>{current.data.project.name}</small>
+          <small>
+            {current.data.project.name} · Projeto #{current.data.project.id}
+          </small>
         </div>
       )}
     </div>

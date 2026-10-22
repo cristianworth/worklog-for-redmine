@@ -67,3 +67,7 @@ Foram feitas extração/leitura estática e consultas autenticadas somente de le
 - [Enumerações de atividades](https://www.redmine.org/projects/redmine/wiki/Rest_Enumerations).
 
 A documentação oficial descreve o produto Redmine. Compatibilidade com a versão e as customizações da instância privada ainda precisa ser verificada.
+
+## Catálogo entregue na aplicação
+
+Na P2.1, a conversão fixa do VBA foi conferida novamente: `ObtenhaEnumeradorDoTextoAtividade` usa `Select Case` e não lê a tabela por `Cells`/`Range`. O novo catálogo mantém nome e ID configuráveis por projeto, com validação de duplicidade e persistência local. Corrige a limitação já identificada sem copiar códigos privados como defaults. Os nomes existentes nos rascunhos continuam preservados; a resolução usa o projeto da tarefa consultada e não autoriza envio por si só.

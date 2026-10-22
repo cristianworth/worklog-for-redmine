@@ -132,12 +132,6 @@ export function RedmineSettings({ onClose }: { onClose(): void }) {
           {message}
         </p>
       )}
-      <div className="future-settings">
-        <span>Catálogo de atividades por projeto</span>
-        <button className="button quiet" disabled>
-          Em breve
-        </button>
-      </div>
     </section>
   );
 }

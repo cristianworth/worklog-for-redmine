@@ -1,41 +1,47 @@
 # Roadmap — Worklog for Redmine
 
-Atualizado em 22/10/2026. Lista de acompanhamento; decisões e detalhes ficam no [plano](docs/development-plan.md).
+Atualizado em 22/10/2026. Acompanhamento das entregas; decisões e limites no [plano](docs/development-plan.md).
 
 ## Entregas
 
-- [x] **P0 — Contexto:** referência privada e escopo conferidos; plano aprovado.
-- [x] **P1 — Um dia de rascunhos:** editar, totalizar, salvar e reabrir. Validado por Cristian.
-- [x] **P1.1 — Período livre:** dias em sequência por scroll, copiar código e salvar vários dias.
-- [x] **P1.2 — Usabilidade:** Até hoje previsível, filtro automático, total e envio destacados; identificação do banco local. Implementado; revisão de uso continua disponível.
-- [ ] **P2 — Acesso e consulta:** configuração privada, teste de autenticação e consulta de tarefa. Implementado e verificado em simulação; acesso anônimo real conferido; validação autenticada pendente.
-- [ ] **P2.1 — Atividades:** cadastro de nome/ID por projeto, equivalente ao catálogo da planilha.
-- [ ] **P3 — Envio individual:** revisar uma linha salva, validar campos, confirmar criação e bloquear reenvio incerto. Simulação primeiro; gravação real exige alvo e autorização específicos.
-- [ ] **P4 — Envio do período:** selecionar dias/linhas, revisar e acompanhar resultados individuais e falhas parciais.
-- [ ] **P5 — Modelo do dia:** preencher recorrências uma vez, sem sobrescrever dias existentes. O botão atual continua indisponível.
-- [ ] **P5.1 — Status opcional:** operação separada do registro de horas, preservando resultados já confirmados.
-- [ ] **P6 — Consolidação local:** fluxo completo, teclado, mensagens, testes e instruções proporcionais.
-- [ ] **P7 — Demo pública:** mesma interface, dados fictícios e armazenamento exclusivo do navegador; envio simulado e restauração dos exemplos. Sem banco/API/Redmine reais.
-- [ ] **P8 — Publicação:** confirmar conta, visibilidade, licença e proveniência; revisar conteúdo e publicar código/demo com instruções.
+- [x] **P0 — Contexto:** referência privada e plano aprovados.
+- [x] **P1 — Um dia:** editar, totalizar, salvar e reabrir. Validado por Cristian.
+- [x] **P1.1 — Período livre:** dias por scroll, copiar código e salvar vários dias.
+- [x] **P1.2 — Usabilidade:** Até hoje, filtro automático, destaques e identificação do banco local.
+- [x] **P2 — Acesso e consulta:** configuração privada, exceção de certificado restrita e consulta explícita por linha. Autenticação e leitura real de assunto/status/projeto verificadas com a chave local; nenhuma hora enviada.
+- [x] **P2.1 — Atividades:** catálogo manual de nome/ID por projeto, persistência local e sugestões conforme a tarefa consultada. Implementado e conferido com exemplos fictícios; aguarda revisão de uso de Cristian.
+- [ ] **P3 — Envio individual:** revisão de uma linha salva, validação, confirmação e proteção contra reenvio incerto. Simulação primeiro; um alvo real específico já foi autorizado e está registrado privadamente.
+- [ ] **P4 — Envio do período:** seleção/revisão de dias e linhas, resultado individual e falhas parciais. Não ampliar a autorização de teste para um lote real.
+- [ ] **P5 — Modelo do dia:** recorrências aplicadas uma vez, sem sobrescrever dias existentes.
+- [ ] **P5.1 — Status opcional:** operação separada das horas; manter confirmações existentes se a movimentação falhar.
+- [ ] **P6 — Consolidação local:** teclado, mensagens, testes e instruções proporcionais.
+- [ ] **P7 — Demo pública:** dados fictícios, armazenamento do visitante, envio simulado e restauração. Sem acesso ao banco/API/Redmine reais.
+- [ ] **P8 — Publicação:** confirmar conta, visibilidade, licença e proveniência; revisar conteúdo e publicar código/demo.
 
-## Entrega atual: P2 em chunks
+## P2.1 — chunks entregues
 
-| Chunk                             | Entrega e critério                                                                                                                                                              | Estado                                                               |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| A — Caracterização e configuração | Conferir login/consultas no VBA; criar `.env.example` e carregar configuração somente no servidor, mantendo rascunhos disponíveis sem integração                                | Concluído                                                            |
-| B — Consultas no backend          | Testar `/users/current.json` e consultar `/issues/:id.json`; validar JSON, projeto e status; distinguir autenticação, permissão, TLS e rede sem expor chave ou respostas brutas | Concluído                                                            |
-| C — Interface                     | Habilitar Configurações com teste de acesso e consulta explícita por linha; mostrar assunto/status/projeto sem alterar rascunhos ou enviar horas                                | Concluído                                                            |
-| D — Revisão integrada             | Testes simulados com dados fictícios, build e conferência visual. Validar uma consulta real quando houver acesso seguro                                                         | Simulação e acesso sem credenciais concluídos; autenticação pendente |
+| Chunk                       | Entrega e verificação                                                                                                                                                                                                     | Estado    |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| A — Catálogo local          | Nome, código de atividade e código do projeto no mesmo SQLite; nomes/IDs únicos dentro de cada projeto; gravação com revisão e conflito; abrir banco antigo sem mudar dias existentes                                     | Concluído |
+| B — Configurações           | Adicionar/editar/remover e salvar catálogo separadamente; descartar/recarregar explicitamente; fechar o painel preserva edições e a saída da página avisa de mudanças pendentes                                           | Concluído |
+| C — Preenchimento e revisão | Consultar tarefa identifica o projeto; sugestões e resolução de ID ficam nesse projeto; trocar código invalida o vínculo anterior. Textos históricos e rascunhos incompletos continuam salvos sem remapeamento automático | Concluído |
 
-Verificação desta entrega: **93 testes em 7 arquivos passaram**, com build TypeScript/Vite aprovado. Conferência visual cobriu configuração ausente, sucesso simulado, consulta sem alterar o rascunho e troca de código durante resposta pendente. A exceção de certificado restrita foi conferida no backend e na interface contra a API real: erro de autenticação, sem enviar chave. Nenhuma hora foi enviada e o banco existente não recebeu dados de teste.
+Verificação: **110 testes em 9 arquivos passaram**, com build aprovado. Revisão visual em banco temporário e serviço fictício conferiu o mesmo nome com IDs distintos por projeto, atualização após salvar catálogo, edições preservadas ao fechar Configurações e recuperação após recarga. Nenhum dado fictício foi gravado no banco de uso e nenhuma hora foi enviada.
 
-**Próximo passo:** preencher a chave localmente e validar autenticação e uma consulta real de leitura; depois iniciar P2.1, atividades por projeto. P3/P4 continuam sem gravações reais autorizadas.
+## Próxima etapa — P3 em chunks
 
-## Pendências e limites conhecidos
+| Chunk                        | Resultado esperado                                                                                                                                                              |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A — Contrato e validação     | Conferir envio individual/coletivo no VBA e o contrato aceito pela instância; resolver atividade no projeto e verificar campos/limites antes do envio                           |
+| B — Preparação e revisão     | Selecionar uma linha salva, consultar dados necessários e apresentar exatamente o que será enviado; testar respostas de sucesso/falha em simulação                              |
+| C — Resultado e persistência | Guardar identificação remota e separar confirmado, rejeitado e incerto; impedir clique/reenvio automático de registros confirmados ou incertos                                  |
+| D — Revisão integrada        | Validar simulação e então o único teste real já autorizado. Consultar primeiro se já existe lançamento correspondente; registrar resultado privadamente e manter status do card |
 
-- **Acesso real, conferido em 22/10/2026:** DNS resolve; Node retorna `CERT_HAS_EXPIRED` em `/login` e `/users/current.json`, inclusive com certificados do Windows. Nenhuma credencial foi enviada. Cristian confirmou usar o mesmo endereço da planilha. Após autorização de Cristian para uma exceção restrita ao servidor conhecido, login respondeu 200 e API respondeu 401 JSON sem credenciais. Preservar o subcaminho da instalação. Exceção opt-in implementada; autenticação real pendente de chave local.
-- A API exige autenticação (401); ainda não foi possível concluir se aceitará uma chave específica. O primeiro transporte implementado é a consulta JSON já encontrada no VBA. Se a API não estiver disponível, caracterizar o caminho HTML/sessão antes de ampliar; não exigir migração do envio para API como pré-condição.
-- Credenciais de acesso real serão inseridas localmente; não colocar senha/chave em chat, fixtures ou Git. Login no navegador não autentica o backend.
-- O catálogo por projeto e novos tipos de campo continuam pendentes; não há construtor genérico de campos. A configuração inicial trata acesso, depois atividades.
-- Os dados históricos da planilha já foram apropriados. Servem como referência privada, nunca como carga de pendências ou alvo de reenvio.
-- Envio ao Redmine, modelo do dia e demo continuam indisponíveis até suas respectivas etapas. Não há total semanal nem cópia de linhas para outros dias no escopo.
+## Limites e pendências
+
+- Catálogo começa vazio; cadastro manual, sem importar IDs da planilha ou descobrir atividades automaticamente. A configuração local não comprova que um ID é aceito pelo servidor; P3 deve validar o contexto remoto antes de gravar.
+- O nome digitado permanece no rascunho. O catálogo resolve nome + projeto para código; mudar/remover cadastro não reescreve rascunhos antigos. Após abrir a página, consultar a tarefa novamente para identificar seu projeto.
+- Novos tipos de campo exigem implementação própria; não há construtor genérico de validações. Modelo do dia e demo continuam indisponíveis.
+- A exceção de certificado foi aceita para o servidor privado conhecido; manter padrão estrito, escopo por origem e aviso visível. O `.env` é lido ao iniciar o processo; reiniciar após alterações.
+- Os registros históricos da planilha já foram apropriados e não devem ser reenviados. O teste futuro específico tem autorização própria; detalhes e estado ficam fora do Git. Uma autorização não permite repetir uma criação confirmada ou incerta.
+- Sem total semanal, cópia de linhas para outros dias ou hospedagem compartilhada no escopo atual. A demo pública continua entre as últimas etapas.

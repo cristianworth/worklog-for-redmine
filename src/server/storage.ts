@@ -1,3 +1,7 @@
+import {
+  validateActivityCatalog,
+  type ActivityCatalog,
+} from "../shared/activities";
 import { DatabaseSync } from "node:sqlite";
 import {
   validateDay,
@@ -13,6 +17,42 @@ export function openDraftStore(filename: string) {
   db.exec(`CREATE TABLE IF NOT EXISTS draft_days (
     date TEXT PRIMARY KEY, revision INTEGER NOT NULL, entries TEXT NOT NULL
   )`);
+
+  db.exec(`CREATE TABLE IF NOT EXISTS activity_catalog (
+    id INTEGER PRIMARY KEY CHECK (id = 1), revision INTEGER NOT NULL, activities TEXT NOT NULL
+  )`);
+
+  function readActivities(): ActivityCatalog {
+    const row = db
+      .prepare("SELECT revision, activities FROM activity_catalog WHERE id = 1")
+      .get() as { revision: number; activities: string } | undefined;
+    return row
+      ? validateActivityCatalog({
+          revision: row.revision,
+          activities: JSON.parse(row.activities),
+        })
+      : { revision: 0, activities: [] };
+  }
+  function saveActivities(input: unknown): ActivityCatalog {
+    const catalog = validateActivityCatalog(input);
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      if (readActivities().revision !== catalog.revision)
+        throw new ConflictError(
+          "O catálogo foi alterado em outra aba. Suas edições continuam aqui; copie-as e recarregue o catálogo antes de salvar.",
+        );
+      const saved = { ...catalog, revision: catalog.revision + 1 };
+      db.prepare(
+        `INSERT INTO activity_catalog (id, revision, activities) VALUES (1, ?, ?)
+        ON CONFLICT(id) DO UPDATE SET revision = excluded.revision, activities = excluded.activities`,
+      ).run(saved.revision, JSON.stringify(saved.activities));
+      db.exec("COMMIT");
+      return saved;
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+  }
 
   type DayRow = { date: string; revision: number; entries: string };
   const decode = (row: DayRow): DraftDay =>
@@ -64,5 +104,13 @@ export function openDraftStore(filename: string) {
   function save(input: unknown): DraftDay {
     return saveMany([input])[0];
   }
-  return { read, readRange, save, saveMany, close: () => db.close() };
+  return {
+    read,
+    readRange,
+    save,
+    saveMany,
+    readActivities,
+    saveActivities,
+    close: () => db.close(),
+  };
 }

@@ -38,6 +38,11 @@ import {
 } from "./editor";
 import { DaySection } from "./DaySection";
 import { RedmineSettings } from "./RedmineSettings";
+import { ActivityCatalogEditor } from "./ActivityCatalogEditor";
+import {
+  validateActivityCatalog,
+  type ActivityCatalog,
+} from "../shared/activities";
 
 function initialPeriod(): PeriodPreference {
   try {
@@ -78,6 +83,34 @@ export function App() {
   const [preferenceNotice, setPreferenceNotice] = useState("");
   const [copied, setCopied] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [catalog, setCatalog] = useState<ActivityCatalog | null>(null);
+  const [catalogError, setCatalogError] = useState("");
+  const [catalogDirty, setCatalogDirty] = useState(false);
+  const [catalogRetry, setCatalogRetry] = useState(0);
+  useEffect(() => {
+    const controller = new AbortController();
+    setCatalogError("");
+    fetch("/api/activities", { signal: controller.signal })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok)
+          throw new Error(
+            data.error || "Não foi possível carregar o catálogo.",
+          );
+        const loaded = validateActivityCatalog(data);
+        if (!controller.signal.aborted)
+          setCatalog((current) =>
+            !current || loaded.revision >= current.revision ? loaded : current,
+          );
+      })
+      .catch(() => {
+        if (!controller.signal.aborted)
+          setCatalogError(
+            "Não foi possível carregar o catálogo. Seus rascunhos continuam disponíveis. Confira se o servidor foi reiniciado após a atualização e tente recarregar o catálogo.",
+          );
+      });
+    return () => controller.abort();
+  }, [catalogRetry]);
   const [retry, setRetry] = useState(0);
   const effectiveEnd = endDate(period, today);
 
@@ -172,14 +205,14 @@ export function App() {
 
   useEffect(() => {
     const warn = (event: BeforeUnloadEvent) => {
-      if (editor.dirtyDates.length) {
+      if (editor.dirtyDates.length || catalogDirty) {
         event.preventDefault();
         event.returnValue = "";
       }
     };
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
-  }, [editor.dirtyDates.length]);
+  }, [editor.dirtyDates.length, catalogDirty]);
 
   useEffect(() => {
     if (!copied) return;
@@ -312,14 +345,26 @@ export function App() {
             >
               <Settings2 size={17} aria-hidden="true" />
               Configurações
+              {catalogDirty && (
+                <small className="catalog-pending">Não salvo</small>
+              )}
             </button>
           </div>
         </div>
       </header>
       <main>
-        {settingsOpen && (
-          <RedmineSettings onClose={() => setSettingsOpen(false)} />
-        )}
+        <div className="settings-area" hidden={!settingsOpen}>
+          {settingsOpen && (
+            <RedmineSettings onClose={() => setSettingsOpen(false)} />
+          )}
+          <ActivityCatalogEditor
+            catalog={catalog}
+            loadError={catalogError}
+            onSaved={setCatalog}
+            onDirtyChange={setCatalogDirty}
+            onReload={() => setCatalogRetry((current) => current + 1)}
+          />
+        </div>
         <div className="page-heading">
           <div>
             <p className="eyebrow">SEUS DIAS, EM ORDEM</p>
@@ -542,6 +587,7 @@ export function App() {
             <DaySection
               key={date}
               day={editor.days[date] ?? emptyDay(date)}
+              activities={catalog?.activities ?? []}
               dirty={editor.dirtyDates.includes(date)}
               disabled={blocked}
               today={today}
@@ -557,11 +603,6 @@ export function App() {
             Abrindo seus dias…
           </div>
         )}
-        <datalist id="activity-suggestions">
-          <option value="Desenvolvimento" />
-          <option value="Revisão" />
-          <option value="Reunião" />
-        </datalist>
         <div
           className={`save-bar ${dirtyCount || saving ? "has-pending" : ""}`}
         >

@@ -1,4 +1,9 @@
-import { useEffect, useRef } from "react";
+import {
+  activitiesForProject,
+  resolveActivity,
+  type Activity,
+} from "../shared/activities";
+import { useEffect, useRef, useState } from "react";
 import { Check, Copy, Plus, Trash2, CalendarDays } from "lucide-react";
 import { formatDuration, parseDuration } from "../shared/worklogs";
 import { IssueLookup } from "./IssueLookup";
@@ -7,6 +12,7 @@ import { daySummary, type EditorDay, type EditorEntry } from "./editor";
 
 interface Props {
   day: EditorDay;
+  activities: Activity[];
   dirty: boolean;
   disabled: boolean;
   today: string;
@@ -17,6 +23,7 @@ interface Props {
 
 export function DaySection({
   day,
+  activities,
   dirty,
   disabled,
   today,
@@ -24,6 +31,9 @@ export function DaySection({
   onChange,
   onCopy,
 }: Props) {
+  const [projects, setProjects] = useState<
+    Record<string, { issue: string; projectId: number }>
+  >({});
   const focusId = useRef<string | null>(null);
   const section = useRef<HTMLElement>(null);
   const summary = daySummary(day);
@@ -48,6 +58,12 @@ export function DaySection({
     ]);
   }
   function update(id: string, field: keyof EditorEntry, value: string) {
+    if (field === "issue")
+      setProjects((current) => {
+        const next = { ...current };
+        delete next[id];
+        return next;
+      });
     onChange(
       day.entries.map((entry) =>
         entry.id === id ? { ...entry, [field]: value } : entry,
@@ -126,6 +142,18 @@ export function DaySection({
                   parseDuration(entry.duration) === null;
                 const label = `da linha ${index + 1} em ${description}`;
                 const key = `${day.date}:${entry.id}`;
+                const project = projects[entry.id];
+                const projectId =
+                  project?.issue === entry.issue.trim()
+                    ? project.projectId
+                    : undefined;
+                const available = activitiesForProject(activities, projectId);
+                const resolved = resolveActivity(
+                  activities,
+                  projectId,
+                  entry.activity,
+                );
+                const suggestions = `activities-${day.date}-${entry.id}`;
                 return (
                   <tr key={entry.id}>
                     <td className="row-number">
@@ -164,6 +192,15 @@ export function DaySection({
                       </div>
                       <IssueLookup
                         issue={entry.issue}
+                        onProject={(projectId) =>
+                          setProjects((current) => ({
+                            ...current,
+                            [entry.id]: {
+                              issue: entry.issue.trim(),
+                              projectId,
+                            },
+                          }))
+                        }
                         label={label}
                         disabled={disabled}
                       />
@@ -208,13 +245,34 @@ export function DaySection({
                       <input
                         aria-label={`Atividade ${label}`}
                         placeholder="Tipo de atividade"
-                        list="activity-suggestions"
+                        list={suggestions}
                         value={entry.activity}
                         disabled={disabled}
                         onChange={(event) =>
                           update(entry.id, "activity", event.target.value)
                         }
                       />
+                      <datalist id={suggestions}>
+                        {available.map((activity) => (
+                          <option
+                            key={activity.activityId}
+                            value={activity.name}
+                          />
+                        ))}
+                      </datalist>
+                      <small
+                        className={`activity-hint ${projectId && entry.activity && !resolved ? "is-unmapped" : ""}`}
+                      >
+                        {!projectId
+                          ? "Consulte a tarefa para identificar o projeto."
+                          : resolved
+                            ? `Atividade configurada · código ${resolved.activityId}`
+                            : !available.length
+                              ? "Cadastre as atividades deste projeto em Configurações. O rascunho pode ser salvo."
+                              : entry.activity
+                                ? "Atividade sem vínculo neste projeto. O rascunho pode ser salvo."
+                                : "Escolha uma atividade deste projeto."}
+                      </small>
                     </td>
                     <td>
                       <textarea

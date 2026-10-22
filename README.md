@@ -28,9 +28,9 @@ Stop the server before switching between these modes; both use port 3000.
 4. Click **Salvar rascunhos**. It saves every changed day, including dates no longer visible after changing the period. Saves are atomic: a conflict or failure prevents a partial database update.
 5. Reopen to recover saved rows. The browser remembers the period preference; **Até hoje** recalculates the end date, keeping the chosen start. A refresh of the period preserves pending edits, including invalid duration input. Closing/reloading the page warns if unsaved edits remain.
 
-The default view covers the last seven calendar dates, including today. Weekends remain available. Range preferences are stored only in that browser; drafts stay in SQLite. The current schema is unchanged, preserving previously saved days. **Modelo do dia** and **Enviar ao Redmine…** are unavailable actions marked **Em breve**. **Configurações** opens connection instructions and a read-only API access check.
+The default view covers the last seven calendar dates, including today. Weekends remain available. Range preferences are stored only in that browser; drafts stay in SQLite. The draft-day format is preserved; the activity catalog adds a separate table in the same database. **Modelo do dia** and **Enviar ao Redmine…** are unavailable actions marked **Em breve**. **Configurações** opens connection instructions and a read-only API access check.
 
-Incomplete rows can be saved as drafts. A blank duration contributes nothing to the total; malformed durations must be corrected or cleared before saving. Zero duration is allowed in a draft. No remote submission validation is implemented yet. Activity suggestions are editable examples, not a configured Redmine catalog or real IDs.
+Incomplete rows can be saved as drafts. A blank duration contributes nothing to the total; malformed durations must be corrected or cleared before saving. Zero duration is allowed in a draft. No remote submission validation is implemented yet. Activity text remains editable; project-specific suggestions come from the local catalog after looking up an issue. Incomplete or unmapped drafts can still be saved.
 
 Data stays in `data/worklog.sqlite`, outside Git and independent of browser storage. The Node process opens this file when the application starts, creating it only if missing. Restarting the application reuses saved data; there is no separate database service or automatic sample-data import. Loading a period reads the database, while **Salvar rascunhos** commits the changes to disk. Back up that file with the server stopped. Saved data remains after changing browsers on the same computer. Simultaneous edits in another tab are rejected instead of silently overwriting newer data; copy pending edits before reloading that tab.
 
@@ -42,7 +42,15 @@ Open **Configurações → Testar acesso à API**. The backend performs only `GE
 
 TLS verification is enabled by default. For a known private Redmine with an invalid certificate, an explicitly accepted local exception can be enabled with `REDMINE_ALLOW_INVALID_CERTIFICATE=true`. It accepts certificate errors only for that configured HTTPS origin, never changes global TLS settings, and never follows redirects. This includes chain, hostname and validity errors; encryption remains but certificate-based server authentication is lost. The interface shows when the exception is active. Certificate failures are reported separately from missing/invalid authentication and permission errors. Redirects are not followed with API credentials. No connection test creates hours or changes issue status. The legacy HTML/session transport remains a possible follow-up if this instance cannot use the query API; it is not implemented yet.
 
-The private server returned an expired-certificate error in strict mode on 2026-10-22. After Cristian accepted a scoped exception, the exact configured login page returned HTTP 200 and the API returned HTTP 401 without credentials. The installation subpath must be preserved. Authenticated real access remains unverified. See [connection checks](docs/redmine-access.md). Never paste credentials into chat. Use an optional `PORT` environment variable to choose another local port (default 3000).
+The private server returned an expired-certificate error in strict mode on 2026-10-22. After Cristian accepted a scoped exception, the exact configured login page returned HTTP 200 and the API returned HTTP 401 without credentials. The installation subpath must be preserved. Authenticated account and issue reads were subsequently verified using the locally configured key. A running process with an older empty key returned 401 until restarted; changing `.env` requires restarting the application. See [connection checks](docs/redmine-access.md). Never paste credentials into chat. Use an optional `PORT` environment variable to choose another local port (default 3000).
+
+## Activity catalog
+
+Open **Configurações → Atividades por projeto**. Add the project ID, Redmine activity ID and name, then use **Salvar catálogo**. Look up an issue to see its project ID. Check activity IDs against the actual Redmine project; the catalog starts empty, with no workbook import or automatic discovery. The same name can have a different ID in another project, while duplicate names/IDs inside one project are rejected.
+
+After **Consultar** on a row, its activity input offers only catalog entries for that issue’s project and shows the resolved activity code. An unconfigured name remains valid draft text and is identified as unmapped. Changing the issue code invalidates the previous project. Lookup metadata is temporary; consult again after reopening. The original activity string remains the persisted draft field, with no destructive data migration or silent rewrite after catalog changes. Submission must revalidate the issue/project/activity before a future remote write.
+
+Catalog settings live in `activity_catalog` in the same ignored SQLite database. Their save/revision is independent of day saves. Conflicting changes preserve the editor; copy pending changes, discard/reload the catalog, and reapply them deliberately. Closing Configurações keeps unsaved catalog edits in the current page; the header marks them **Não salvo**, and leaving the page warns. **Descartar alterações** resets catalog edits only. **Salvar rascunhos** does not save the catalog, and vice versa.
 
 ## Verify
 
@@ -51,15 +59,15 @@ npm test
 npm run build
 ```
 
-Vitest checks duration arithmetic, period boundaries, dynamic end dates, preservation of pending edits, database reopening and atomic multi-day saves, including conflicts. Read-only Redmine tests cover private configuration, JSON contracts, error classification, credential handling and isolation from draft saves. Interface verification is manual. BDD, Cucumber and formal scenarios are not required.
+Vitest checks duration arithmetic, period boundaries, dynamic end dates, preservation of pending edits, database reopening and atomic multi-day saves, including conflicts. Activity tests cover project isolation, duplicate mappings, catalog reopening, conflicts and opening an older draft database without rewriting its rows. Read-only Redmine tests cover private configuration, JSON contracts, error classification, credential handling and isolation from draft saves. Interface verification is manual. BDD, Cucumber and formal scenarios are not required.
 
 ## Scope and stack
 
 React + Vite + TypeScript; Node + Express + SQLite through Node's built-in `node:sqlite` module. A single repository and process, bound to the local computer. Some Node 24 versions emit an experimental SQLite warning.
 
-The period-based editor uses Lucide icons, a highlighted daily total and a separate, unavailable Redmine action. Day templates and the project activity catalog remain deferred; their controls are disabled. **Modo local** identifies this computer’s database and expands to explain storage. **Abrir demonstração** is a disabled future shortcut, not a published demo. See the plan for priorities.
+The period-based editor uses Lucide icons, a highlighted daily total and a separate, unavailable Redmine action. Day templates remain deferred; their control is disabled. The project activity catalog is available in Configurações. **Modo local** identifies this computer’s database and expands to explain storage. **Abrir demonstração** is a disabled future shortcut, not a published demo. See the plan for priorities.
 
-API access checks and explicit issue lookup are implemented with synthetic tests. Real authenticated compatibility remains pending an API credential. Project-specific activity IDs, Redmine submission and optional issue-status changes remain future slices. Saving a draft does not send anything to Redmine. This project is independent of Redmine.
+API access checks and explicit issue lookup are implemented with synthetic tests. Real account and issue reads have been verified with the local API key; no real time entry has been created. A local project-specific activity catalog is implemented; Redmine submission and optional issue-status changes remain future slices. Saving a draft does not send anything to Redmine. This project is independent of Redmine.
 
 ## Planned public demonstration
 
