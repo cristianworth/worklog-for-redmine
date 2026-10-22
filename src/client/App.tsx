@@ -1,4 +1,9 @@
-import { useEffect, useState } from "react";
+import { SubmissionReview } from "./SubmissionReview";
+import {
+  isSubmissionLocked,
+  type SubmissionRecord,
+} from "../shared/submissions";
+import { useCallback, useEffect, useState } from "react";
 import {
   AlertCircle,
   ArrowRight,
@@ -6,7 +11,6 @@ import {
   Database,
   FlaskConical,
   ChevronDown,
-  LockKeyhole,
   Check,
   FilePlus2,
   LoaderCircle,
@@ -113,6 +117,83 @@ export function App() {
   }, [catalogRetry]);
   const [retry, setRetry] = useState(0);
   const effectiveEnd = endDate(period, today);
+  const [selection, setSelection] = useState<{
+    date: string;
+    entryId: string;
+  } | null>(null);
+  const [review, setReview] = useState<{
+    date: string;
+    entryId: string;
+    revision: number;
+  } | null>(null);
+  const [receipts, setReceipts] = useState<Record<string, SubmissionRecord>>(
+    {},
+  );
+  const [receiptsLoaded, setReceiptsLoaded] = useState(false);
+  const [receiptError, setReceiptError] = useState("");
+  const [receiptRetry, setReceiptRetry] = useState(0);
+  const receiveRecord = useCallback(
+    (record: SubmissionRecord) =>
+      setReceipts((current) => ({
+        ...current,
+        [`${record.snapshot.date}:${record.snapshot.entryId}`]: record,
+      })),
+    [],
+  );
+  useEffect(() => {
+    const controller = new AbortController();
+    setReceiptsLoaded(false);
+    setReceiptError("");
+    setSelection(null);
+    const query = new URLSearchParams({ from: period.from, to: effectiveEnd });
+    fetch(`/api/submissions?${query}`, { signal: controller.signal })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok || !Array.isArray(data.submissions)) throw new Error();
+        if (controller.signal.aborted) return;
+        setReceipts((current) => {
+          const next = { ...current };
+          for (const record of data.submissions as SubmissionRecord[]) {
+            const key = `${record.snapshot.date}:${record.snapshot.entryId}`,
+              previous = next[key];
+            if (
+              !previous ||
+              (!["confirmed", "existing"].includes(previous.state) &&
+                Date.parse(record.updatedAt) >= Date.parse(previous.updatedAt))
+            )
+              next[key] = record;
+          }
+          return next;
+        });
+        setReceiptsLoaded(true);
+      })
+      .catch(() => {
+        if (!controller.signal.aborted)
+          setReceiptError(
+            "Não foi possível carregar os resultados de envio. Confira se o servidor foi reiniciado após a atualização e recarregue os resultados antes de editar ou enviar.",
+          );
+      });
+    return () => controller.abort();
+  }, [period.from, effectiveEnd, receiptRetry]);
+  const selectedDay = selection ? editor.days[selection.date] : null;
+  const selectedEntry = selectedDay?.entries.find(
+    (entry) => entry.id === selection?.entryId,
+  );
+  const selectedRecord = selection
+    ? receipts[`${selection.date}:${selection.entryId}`]
+    : null;
+  const canReview =
+    !!selection &&
+    !!selectedEntry &&
+    receiptsLoaded &&
+    !loading &&
+    !saving &&
+    !editor.dirtyDates.includes(selection.date) &&
+    !(selectedRecord && isSubmissionLocked(selectedRecord.state));
+  function openReview(date: string, entryId: string) {
+    const day = editor.days[date];
+    if (day) setReview({ date, entryId, revision: day.revision });
+  }
 
   useEffect(() => {
     if (saving) return;
@@ -352,6 +433,16 @@ export function App() {
           </div>
         </div>
       </header>
+      {review && (
+        <SubmissionReview
+          {...review}
+          onClose={() => {
+            setReview(null);
+            setSelection(null);
+          }}
+          onRecord={receiveRecord}
+        />
+      )}
       <main>
         <div className="settings-area" hidden={!settingsOpen}>
           {settingsOpen && (
@@ -503,18 +594,36 @@ export function App() {
           <div className="send-control">
             <button
               className="button send-button"
-              disabled
+              disabled={!canReview}
+              onClick={() => {
+                if (selection) openReview(selection.date, selection.entryId);
+              }}
               aria-describedby="send-status"
             >
               <Upload size={18} aria-hidden="true" />
               Enviar ao Redmine
-              <LockKeyhole size={13} aria-hidden="true" />
             </button>
             <span id="send-status">
-              <strong>Em breve</strong> · revisão antes do envio
+              Selecione uma linha salva · revisão antes do envio
             </span>
           </div>
         </div>
+        {!receiptError && !receiptsLoaded && (
+          <p className="notice" role="status">
+            Carregando resultados de envio…
+          </p>
+        )}
+        {receiptError && (
+          <div className="notice error" role="alert">
+            <span>{receiptError}</span>
+            <button
+              className="text-button"
+              onClick={() => setReceiptRetry((current) => current + 1)}
+            >
+              Recarregar resultados
+            </button>
+          </div>
+        )}
         {preferenceNotice && <p className="notice">{preferenceNotice}</p>}
         {hiddenCount > 0 && (
           <div className="notice pending-notice">
@@ -589,7 +698,13 @@ export function App() {
               day={editor.days[date] ?? emptyDay(date)}
               activities={catalog?.activities ?? []}
               dirty={editor.dirtyDates.includes(date)}
-              disabled={blocked}
+              disabled={blocked || !receiptsLoaded}
+              submissions={receipts}
+              selectedEntryId={
+                selection?.date === date ? selection.entryId : null
+              }
+              onSelect={(entryId) => setSelection({ date, entryId })}
+              onResult={(entryId) => openReview(date, entryId)}
               today={today}
               copied={copied}
               onChange={(entries) => changeEntries(date, entries)}
@@ -631,7 +746,7 @@ export function App() {
               <p>
                 {dirtyCount
                   ? "Salvar inclui todos os dias alterados, mesmo fora do período."
-                  : "Nenhum apontamento foi enviado ao Redmine."}
+                  : "Salvar rascunhos continua separado do envio ao Redmine."}
               </p>
             </div>
           </div>

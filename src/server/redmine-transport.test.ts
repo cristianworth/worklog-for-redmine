@@ -35,6 +35,39 @@ function mockHttps(
 }
 
 describe("explicit private-server certificate exception", () => {
+  it("permits a POST body only at the configured time-entry creation path", async () => {
+    const { request, end } = mockHttps();
+    const body = '{"time_entry":{"issue_id":1001,"hours":"00:30"}}';
+    const response = await certificateExceptionRequest(
+      "https://example.invalid/redmine/",
+    )("https://example.invalid/redmine/time_entries.json", {
+      method: "POST",
+      body,
+      headers: { "Content-Type": "application/json" },
+    });
+    expect(request.mock.calls[0][1]).toMatchObject({
+      method: "POST",
+      agent: false,
+      rejectUnauthorized: false,
+    });
+    expect(end).toHaveBeenCalledWith(body);
+    await response.body?.cancel();
+  });
+  it.each([
+    "https://example.invalid/time_entries.json",
+    "https://example.invalid/redmine/issues/1001.json",
+    "https://example.invalid/redmine/time_entries.json?redirect=elsewhere",
+  ])("refuses POST to any other path: %s", async (url) => {
+    const { request } = mockHttps();
+    await expect(
+      certificateExceptionRequest("https://example.invalid/redmine/")(url, {
+        method: "POST",
+        body: "{}",
+      }),
+    ).rejects.toThrow();
+    expect(request).not.toHaveBeenCalled();
+  });
+
   const env = {
     REDMINE_URL: "https://example.invalid/redmine",
     REDMINE_API_KEY: "synthetic-key",
@@ -107,7 +140,7 @@ describe("explicit private-server certificate exception", () => {
       await expect(
         certificateExceptionRequest(env.REDMINE_URL)(url, { method }),
       ).rejects.toThrow(
-        "A exceção de certificado permite somente consultas HTTPS ao Redmine configurado.",
+        "A exceção de certificado permite somente consultas e criação de horas no Redmine configurado.",
       );
       expect(request).not.toHaveBeenCalled();
     },

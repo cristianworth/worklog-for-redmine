@@ -1,3 +1,4 @@
+import { createSubmissionService, SubmissionError } from "./submissions";
 import { validateActivityCatalog } from "../shared/activities";
 import express from "express";
 import {
@@ -19,6 +20,7 @@ export function createApp(
   redmine: RedmineClient = createRedmineClient(null),
 ) {
   const app = express();
+  const submissionService = createSubmissionService(store, redmine);
   app.disable("x-powered-by");
   app.use((req, res, next) => {
     const hostname = req.hostname;
@@ -49,6 +51,45 @@ export function createApp(
   app.get("/api/redmine/issues/:id", async (req, res) => {
     res.json(await redmine.issue(req.params.id));
   });
+
+  app.get("/api/submissions", (req, res) => {
+    let period;
+    try {
+      period = validatePeriod(req.query.from, req.query.to);
+    } catch {
+      res.status(400).json({ error: "Período inválido." });
+      return;
+    }
+    res
+      .set("Cache-Control", "no-store")
+      .json({ submissions: store.submissions(period.from, period.to) });
+  });
+  app.post("/api/submissions/prepare", async (req, res) => {
+    if (
+      typeof req.body?.date !== "string" ||
+      typeof req.body?.entryId !== "string" ||
+      !Number.isSafeInteger(req.body?.revision)
+    )
+      throw new SubmissionError("Informe o dia, linha e revisão salvos.");
+    res.json(
+      await submissionService.prepare(
+        req.body.date,
+        req.body.entryId,
+        req.body.revision,
+      ),
+    );
+  });
+  app.post("/api/submissions/:id/confirm", async (req, res) => {
+    if (req.body?.confirmed !== true)
+      throw new SubmissionError(
+        "Confirme explicitamente os dados revisados para enviar.",
+      );
+    res.json(await submissionService.send(req.params.id));
+  });
+  app.post("/api/submissions/:id/reconcile", async (req, res) =>
+    res.json(await submissionService.reconcile(req.params.id)),
+  );
+
   app.get("/api/activities", (_req, res) => {
     res.set("Cache-Control", "no-store");
     res.json(store.readActivities());
@@ -137,6 +178,12 @@ export const handleErrors: express.ErrorRequestHandler = (
   res,
   _next,
 ) => {
+  if (error instanceof SubmissionError || error instanceof ConflictError) {
+    res
+      .status(error instanceof ConflictError ? 409 : error.status)
+      .json({ error: error.message });
+    return;
+  }
   if (error instanceof RedmineError) {
     res.status(error.status).json({ error: error.message, code: error.code });
     return;

@@ -1,4 +1,9 @@
 import {
+  isSubmissionLocked,
+  type SubmissionRecord,
+  type SubmissionState,
+} from "../shared/submissions";
+import {
   validateActivityCatalog,
   type ActivityCatalog,
 } from "../shared/activities";
@@ -54,6 +59,144 @@ export function openDraftStore(filename: string) {
     }
   }
 
+  db.exec(`CREATE TABLE IF NOT EXISTS submission_records (
+    id TEXT PRIMARY KEY, date TEXT NOT NULL, entry_id TEXT NOT NULL, state TEXT NOT NULL,
+    fingerprint TEXT NOT NULL, details TEXT NOT NULL, UNIQUE(date, entry_id)
+  );
+  CREATE UNIQUE INDEX IF NOT EXISTS submission_fingerprint ON submission_records(fingerprint)
+    WHERE state IN ('sending','confirmed','uncertain');`);
+  const decodeSubmission = (row: any): SubmissionRecord | null =>
+    row ? JSON.parse(row.details) : null;
+  function submission(id: string): SubmissionRecord | null {
+    return decodeSubmission(
+      db.prepare("SELECT details FROM submission_records WHERE id = ?").get(id),
+    );
+  }
+  function submissionForEntry(
+    date: string,
+    entryId: string,
+  ): SubmissionRecord | null {
+    return decodeSubmission(
+      db
+        .prepare(
+          "SELECT details FROM submission_records WHERE date = ? AND entry_id = ?",
+        )
+        .get(date, entryId),
+    );
+  }
+  function submissions(from: string, to: string): SubmissionRecord[] {
+    validatePeriod(from, to);
+    return db
+      .prepare(
+        "SELECT details FROM submission_records WHERE date BETWEEN ? AND ? ORDER BY date, entry_id",
+      )
+      .all(from, to)
+      .map((row) => decodeSubmission(row)!);
+  }
+  function assertSnapshot(record: SubmissionRecord) {
+    const day = read(record.snapshot.date),
+      s = record.snapshot;
+    const entry = day.entries.find((e) => e.id === s.entryId);
+    if (
+      day.revision !== s.dayRevision ||
+      !entry ||
+      Number(entry.issue.trim()) !== s.issueId ||
+      entry.minutes !== s.minutes ||
+      entry.comment !== s.comment ||
+      entry.activity !== s.activityName ||
+      readActivities().revision !== s.catalogRevision
+    )
+      throw new ConflictError(
+        "O rascunho ou catálogo mudou após a revisão. Prepare uma nova revisão antes de enviar.",
+      );
+  }
+  function putReview(
+    record: SubmissionRecord,
+    fingerprint: string,
+  ): SubmissionRecord {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      assertSnapshot(record);
+      const previous = submissionForEntry(
+        record.snapshot.date,
+        record.snapshot.entryId,
+      );
+      if (previous && isSubmissionLocked(previous.state))
+        throw new ConflictError(
+          "Esta linha já possui envio iniciado ou confirmado. Confira o resultado; não reenvie.",
+        );
+      db.prepare(
+        `INSERT INTO submission_records (id, date, entry_id, state, fingerprint, details) VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT(date,entry_id) DO UPDATE SET id=excluded.id,state=excluded.state,fingerprint=excluded.fingerprint,details=excluded.details`,
+      ).run(
+        record.id,
+        record.snapshot.date,
+        record.snapshot.entryId,
+        record.state,
+        fingerprint,
+        JSON.stringify(record),
+      );
+      db.exec("COMMIT");
+      return record;
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+  }
+  function beginSubmission(id: string): SubmissionRecord {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      const record = submission(id);
+      if (!record || record.state !== "prepared")
+        throw new ConflictError(
+          "Esta revisão já foi utilizada ou substituída. Confira o resultado antes de qualquer novo envio.",
+        );
+      if (Date.now() - Date.parse(record.preparedAt) > 15 * 60 * 1000)
+        throw new ConflictError("A revisão expirou. Prepare uma nova revisão.");
+      assertSnapshot(record);
+      const next = {
+        ...record,
+        state: "sending" as const,
+        updatedAt: new Date().toISOString(),
+        message:
+          "Envio iniciado. Não reenvie enquanto o resultado não for confirmado.",
+      };
+      try {
+        db.prepare(
+          "UPDATE submission_records SET state = ?, details = ? WHERE id = ?",
+        ).run(next.state, JSON.stringify(next), id);
+      } catch {
+        throw new ConflictError(
+          "Já há envio equivalente iniciado ou confirmado neste computador. Confira os resultados existentes.",
+        );
+      }
+      db.exec("COMMIT");
+      return next;
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+  }
+  function finishSubmission(
+    id: string,
+    result: {
+      state: SubmissionState;
+      remoteId: number | null;
+      message: string;
+    },
+  ): SubmissionRecord {
+    const record = submission(id);
+    if (!record)
+      throw new ConflictError("O registro do envio não foi encontrado.");
+    if (record.state === "confirmed" || record.state === "existing")
+      return record;
+    const next = { ...record, ...result, updatedAt: new Date().toISOString() };
+    db.prepare(
+      "UPDATE submission_records SET state = ?, details = ? WHERE id = ?",
+    ).run(next.state, JSON.stringify(next), id);
+    return next;
+  }
+
   type DayRow = { date: string; revision: number; entries: string };
   const decode = (row: DayRow): DraftDay =>
     validateDay({ ...row, entries: JSON.parse(row.entries) });
@@ -81,6 +224,22 @@ export function openDraftStore(filename: string) {
     db.exec("BEGIN IMMEDIATE");
     try {
       for (const day of days) {
+        const locked = submissions(day.date, day.date).filter((record) =>
+          isSubmissionLocked(record.state),
+        );
+        const stored = read(day.date);
+        for (const record of locked) {
+          const previous = stored.entries.find(
+            (e) => e.id === record.snapshot.entryId,
+          );
+          const next = day.entries.find(
+            (e) => e.id === record.snapshot.entryId,
+          );
+          if (!next || JSON.stringify(next) !== JSON.stringify(previous))
+            throw new ConflictError(
+              "Uma linha com envio iniciado, confirmado ou incerto não pode ser alterada ou removida. Confira o resultado no Redmine.",
+            );
+        }
         if (read(day.date).revision !== day.revision) {
           throw new ConflictError(
             `O dia ${day.date.split("-").reverse().join("/")} foi alterado em outra aba. Nenhum dia desta operação foi salvo. Suas edições continuam na tela; copie-as antes de recarregar.`,
@@ -111,6 +270,13 @@ export function openDraftStore(filename: string) {
     saveMany,
     readActivities,
     saveActivities,
+    submission,
+    submissionForEntry,
+    submissions,
+    putReview,
+    beginSubmission,
+    finishSubmission,
+    assertSnapshot,
     close: () => db.close(),
   };
 }

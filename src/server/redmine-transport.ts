@@ -1,8 +1,9 @@
 import https from "node:https";
 
-// This transport is opt-in and deliberately supports only GET on one configured origin.
+// This transport is opt-in; writes are restricted to creating time entries on the configured base URL.
 export function certificateExceptionRequest(baseUrl: string): typeof fetch {
   const origin = new URL(baseUrl).origin;
+  const createPath = new URL("time_entries.json", baseUrl).pathname;
   return async (input, options) => {
     const url = new URL(input instanceof Request ? input.url : String(input));
     if (
@@ -10,18 +11,23 @@ export function certificateExceptionRequest(baseUrl: string): typeof fetch {
       url.origin !== origin ||
       url.username ||
       url.password ||
-      options?.method !== "GET" ||
-      options.body
+      !(
+        (options?.method === "GET" && !options.body) ||
+        (options?.method === "POST" &&
+          url.pathname === createPath &&
+          !url.search &&
+          typeof options.body === "string")
+      )
     ) {
       throw new Error(
-        "A exceção de certificado permite somente consultas HTTPS ao Redmine configurado.",
+        "A exceção de certificado permite somente consultas e criação de horas no Redmine configurado.",
       );
     }
     return new Promise<Response>((resolve, reject) => {
       const request = https.request(
         url,
         {
-          method: "GET",
+          method: options.method,
           headers: Object.fromEntries(new Headers(options.headers)),
           signal: options.signal ?? undefined,
           // No global agent or process-wide TLS settings are changed; redirects are never followed.
@@ -80,7 +86,7 @@ export function certificateExceptionRequest(baseUrl: string): typeof fetch {
         },
       );
       request.on("error", reject);
-      request.end();
+      request.end(options.body ?? undefined);
     });
   };
 }

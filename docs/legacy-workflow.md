@@ -71,3 +71,7 @@ A documentação oficial descreve o produto Redmine. Compatibilidade com a vers�
 ## Catálogo entregue na aplicação
 
 Na P2.1, a conversão fixa do VBA foi conferida novamente: `ObtenhaEnumeradorDoTextoAtividade` usa `Select Case` e não lê a tabela por `Cells`/`Range`. O novo catálogo mantém nome e ID configuráveis por projeto, com validação de duplicidade e persistência local. Corrige a limitação já identificada sem copiar códigos privados como defaults. Os nomes existentes nos rascunhos continuam preservados; a resolução usa o projeto da tarefa consultada e não autoriza envio por si só.
+
+## Envio individual entregue
+
+Na P3 foram consultados `ApropriarIndividual`, `ApropriarTarefa`, `ObtenhaPostDataApropriacao` e `ValideApropriacaoColetiva`. A aplicação preserva os campos e a separação salvar/enviar, usando a API autenticada já validada. Exige revisão/confirmar e um recibo de criação correspondente, com estado durável antes do POST. Não usa HTTP 200 como confirmação nem mistura envio com alteração de status. Detalhes, diferenças e evidências em [individual-submission.md](individual-submission.md).

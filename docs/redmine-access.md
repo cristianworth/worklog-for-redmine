@@ -4,11 +4,11 @@
 
 Em 22/10/2026, o endereço privado configurado na planilha resolveu por DNS. Consultas sem credenciais a `/login` e `/users/current.json` falharam no Node com `CERT_HAS_EXPIRED`, tanto na configuração normal quanto com os certificados confiáveis do Windows. O Python também encontrou uma falha de confiança na cadeia. O Node é o transporte da aplicação; o certificado vencido é a barreira confirmada para ele.
 
-Cristian confirmou usar o mesmo endereço e autorizou usar esse servidor apesar do certificado inválido. Com exceção restrita e os caminhos completos configurados na planilha (incluindo o subcaminho da instalação), o formulário de login respondeu **200** e `/users/current.json` respondeu **401 em JSON**, sem credenciais. Nesse primeiro teste chegamos à autenticação sem enviar credenciais. Depois, Cristian preencheu a chave localmente: uma nova instância do cliente confirmou autenticação e leitura de assunto, status e projeto de uma tarefa. Um processo aberto antes da edição ainda indicava ausência de chave e respondeu 401; reiniciar carrega o `.env` atual. Nenhuma hora ou mudança de status foi enviada.
+Cristian confirmou usar o mesmo endereço e autorizou usar esse servidor apesar do certificado inválido. Com exceção restrita e os caminhos completos configurados na planilha (incluindo o subcaminho da instalação), o formulário de login respondeu **200** e `/users/current.json` respondeu **401 em JSON**, sem credenciais. Nesse primeiro teste chegamos à autenticação sem enviar credenciais. Depois, Cristian preencheu a chave localmente: uma nova instância do cliente confirmou autenticação e leitura de assunto, status e projeto de uma tarefa. Um processo aberto antes da edição ainda indicava ausência de chave e respondeu 401; reiniciar carrega o `.env` atual. Nessas verificações iniciais, nenhuma hora ou mudança de status foi enviada. A criação autorizada posterior está registrada abaixo.
 
 ## Exceção local autorizada
 
-`REDMINE_ALLOW_INVALID_CERTIFICATE=true` permite consultar somente a origem HTTPS configurada em `REDMINE_URL`, incluindo a porta. O padrão do projeto e do exemplo é `false`. Nenhuma variável global de TLS, agente global ou outro destino é alterado. O transporte não segue redirecionamentos e o painel de acesso informa a exceção ativa.
+`REDMINE_ALLOW_INVALID_CERTIFICATE=true` permite consultas e criação de horas somente na origem HTTPS configurada em `REDMINE_URL`, incluindo a porta. O padrão do projeto e do exemplo é `false`. Nenhuma variável global de TLS, agente global ou outro destino é alterado. POST é permitido somente no caminho de criação de horas da base configurada. O transporte não segue redirecionamentos e o painel de acesso informa a exceção ativa.
 
 A exceção aceita erros de cadeia de confiança, nome e datas do certificado; não consegue isolar apenas o vencimento. HTTPS continua criptografado, mas sem a autenticação do servidor pelo certificado há risco de interceptação. A decisão foi aceita por Cristian para o endereço privado conhecido; não é uma recomendação para outros servidores.
 
@@ -31,4 +31,6 @@ Leitura estática do VBA confirmou dois caminhos: `ConsultarIssueRedmine` faz GE
 - [Flags de certificado do WinHTTP](https://learn.microsoft.com/en-us/windows/win32/winhttp/option-flags#winhttp_option_security_flags)
 - [Consulta de tarefa](https://www.redmine.org/projects/redmine/wiki/Rest_Issues#Showing-an-issue)
 
-O padrão documentado suporta chave no cabeçalho. Autenticação e leitura de tarefa foram verificadas nesta instância; criação de horas e suas permissões ainda serão validadas na P3. Os testes usam somente respostas fictícias, inclusive redirecionamentos, falhas de certificado e autenticação.
+O padrão documentado suporta chave no cabeçalho. Autenticação e leitura de tarefa foram verificadas nesta instância; a P3 também confirmou a criação do único lançamento de teste autorizado, seguida de leitura e status mantido. Esse teste não deve ser repetido. Os testes usam somente respostas fictícias, inclusive redirecionamentos, falhas de certificado e autenticação.
+
+Envio individual e recuperação de resultados: [individual-submission.md](individual-submission.md). O teste de acesso à conta continua sendo uma operação exclusivamente de leitura.

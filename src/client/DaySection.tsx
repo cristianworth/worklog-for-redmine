@@ -1,4 +1,9 @@
 import {
+  isSubmissionLocked,
+  type SubmissionRecord,
+} from "../shared/submissions";
+import { submissionLabel } from "./SubmissionReview";
+import {
   activitiesForProject,
   resolveActivity,
   type Activity,
@@ -16,6 +21,10 @@ interface Props {
   dirty: boolean;
   disabled: boolean;
   today: string;
+  submissions: Record<string, SubmissionRecord>;
+  selectedEntryId: string | null;
+  onSelect(entryId: string): void;
+  onResult(entryId: string): void;
   copied: string | null;
   onChange(entries: EditorEntry[]): void;
   onCopy(id: string, issue: string): void;
@@ -27,6 +36,10 @@ export function DaySection({
   dirty,
   disabled,
   today,
+  submissions,
+  selectedEntryId,
+  onSelect,
+  onResult,
   copied,
   onChange,
   onCopy,
@@ -38,6 +51,15 @@ export function DaySection({
   const section = useRef<HTMLElement>(null);
   const summary = daySummary(day);
   const description = `${shortDate(day.date)}`;
+  const dayReceipts = day.entries.map(
+    (entry) => submissions[`${day.date}:${entry.id}`],
+  );
+  const hasUncertain = dayReceipts.some(
+    (record) => record?.state === "sending" || record?.state === "uncertain",
+  );
+  const hasConfirmed = dayReceipts.some(
+    (record) => record?.state === "confirmed" || record?.state === "existing",
+  );
   useEffect(() => {
     if (focusId.current) {
       const target = [
@@ -87,9 +109,13 @@ export function DaySection({
           <span className="day-status">
             {dirty
               ? "Alterações não salvas"
-              : day.entries.length
-                ? "Rascunhos salvos"
-                : "Nenhum lançamento"}
+              : hasUncertain
+                ? "Há resultado de envio a conferir"
+                : hasConfirmed
+                  ? "Rascunhos e resultados salvos"
+                  : day.entries.length
+                    ? "Rascunhos salvos"
+                    : "Nenhum lançamento"}
             {day.date === today && <span className="today-label">Hoje</span>}
           </span>
         </div>
@@ -142,6 +168,10 @@ export function DaySection({
                   parseDuration(entry.duration) === null;
                 const label = `da linha ${index + 1} em ${description}`;
                 const key = `${day.date}:${entry.id}`;
+                const receipt = submissions[key];
+                const rowLocked =
+                  !!receipt && isSubmissionLocked(receipt.state);
+                const rowDisabled = disabled || rowLocked;
                 const project = projects[entry.id];
                 const projectId =
                   project?.issue === entry.issue.trim()
@@ -155,9 +185,22 @@ export function DaySection({
                 );
                 const suggestions = `activities-${day.date}-${entry.id}`;
                 return (
-                  <tr key={entry.id}>
+                  <tr
+                    key={entry.id}
+                    className={rowLocked ? "is-submitted" : ""}
+                  >
                     <td className="row-number">
-                      {String(index + 1).padStart(2, "0")}
+                      <label className="entry-selector">
+                        <input
+                          type="radio"
+                          name="submission-entry"
+                          aria-label={`Selecionar linha ${index + 1} em ${description} para envio`}
+                          checked={selectedEntryId === entry.id}
+                          disabled={disabled || dirty || rowLocked}
+                          onChange={() => onSelect(entry.id)}
+                        />
+                        <span>{String(index + 1).padStart(2, "0")}</span>
+                      </label>
                     </td>
                     <td>
                       <div className="issue-field">
@@ -167,7 +210,7 @@ export function DaySection({
                           placeholder="Nº da tarefa"
                           inputMode="numeric"
                           value={entry.issue}
-                          disabled={disabled}
+                          disabled={rowDisabled}
                           onChange={(event) =>
                             update(entry.id, "issue", event.target.value)
                           }
@@ -190,6 +233,21 @@ export function DaySection({
                           )}
                         </button>
                       </div>
+                      {receipt && receipt.state !== "prepared" && (
+                        <div className={`row-receipt result-${receipt.state}`}>
+                          <small>
+                            {submissionLabel[receipt.state]}
+                            {receipt.remoteId ? ` · #${receipt.remoteId}` : ""}
+                          </small>
+                          <button
+                            className="text-button"
+                            disabled={disabled}
+                            onClick={() => onResult(entry.id)}
+                          >
+                            Ver resultado
+                          </button>
+                        </div>
+                      )}
                       <IssueLookup
                         issue={entry.issue}
                         onProject={(projectId) =>
@@ -215,7 +273,7 @@ export function DaySection({
                         }
                         placeholder="00:00"
                         value={entry.duration}
-                        disabled={disabled}
+                        disabled={rowDisabled}
                         onChange={(event) =>
                           update(entry.id, "duration", event.target.value)
                         }
@@ -247,7 +305,7 @@ export function DaySection({
                         placeholder="Tipo de atividade"
                         list={suggestions}
                         value={entry.activity}
-                        disabled={disabled}
+                        disabled={rowDisabled}
                         onChange={(event) =>
                           update(entry.id, "activity", event.target.value)
                         }
@@ -261,17 +319,19 @@ export function DaySection({
                         ))}
                       </datalist>
                       <small
-                        className={`activity-hint ${projectId && entry.activity && !resolved ? "is-unmapped" : ""}`}
+                        className={`activity-hint ${!rowLocked && projectId && entry.activity && !resolved ? "is-unmapped" : ""}`}
                       >
-                        {!projectId
-                          ? "Consulte a tarefa para identificar o projeto."
-                          : resolved
-                            ? `Atividade configurada · código ${resolved.activityId}`
-                            : !available.length
-                              ? "Cadastre as atividades deste projeto em Configurações. O rascunho pode ser salvo."
-                              : entry.activity
-                                ? "Atividade sem vínculo neste projeto. O rascunho pode ser salvo."
-                                : "Escolha uma atividade deste projeto."}
+                        {rowLocked
+                          ? `Atividade revisada · código ${receipt.snapshot.activityId}`
+                          : !projectId
+                            ? "Consulte a tarefa para identificar o projeto."
+                            : resolved
+                              ? `Atividade configurada · código ${resolved.activityId}`
+                              : !available.length
+                                ? "Cadastre as atividades deste projeto em Configurações. O rascunho pode ser salvo."
+                                : entry.activity
+                                  ? "Atividade sem vínculo neste projeto. O rascunho pode ser salvo."
+                                  : "Escolha uma atividade deste projeto."}
                       </small>
                     </td>
                     <td>
@@ -280,7 +340,7 @@ export function DaySection({
                         placeholder="O que foi feito?"
                         rows={2}
                         value={entry.comment}
-                        disabled={disabled}
+                        disabled={rowDisabled}
                         onChange={(event) =>
                           update(entry.id, "comment", event.target.value)
                         }
@@ -291,7 +351,7 @@ export function DaySection({
                         className="icon-button remove-button"
                         aria-label={`Remover linha ${index + 1} em ${description}`}
                         title="Remover linha"
-                        disabled={disabled}
+                        disabled={rowDisabled}
                         onClick={() =>
                           onChange(
                             day.entries.filter((item) => item.id !== entry.id),

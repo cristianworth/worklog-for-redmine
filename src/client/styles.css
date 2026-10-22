@@ -1273,3 +1273,139 @@ input[aria-invalid="true"] {
     flex-direction: column;
   }
 }
+
+.entry-selector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  font-size: 9px;
+}
+.entry-selector input {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: #527946;
+  cursor: pointer;
+}
+.is-submitted {
+  background: #f7f9f4;
+}
+.row-receipt {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 7px;
+  font-size: 10px;
+}
+.row-receipt .text-button {
+  font-size: 10px;
+  justify-content: flex-start;
+}
+.result-confirmed,
+.result-existing {
+  color: #426537;
+}
+.result-uncertain,
+.result-sending {
+  color: #926721;
+}
+.result-rejected {
+  color: #a24436;
+}
+.submission-dialog {
+  width: min(650px, calc(100vw - 28px));
+  max-height: 90vh;
+  overflow: auto;
+  border: 1px solid #cedac4;
+  border-radius: 14px;
+  padding: 25px;
+  color: #263831;
+  box-shadow: 0 15px 70px #20351a30;
+}
+.submission-dialog::backdrop {
+  background: #1d2c2560;
+}
+.submission-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+.submission-heading h2 {
+  margin: 0;
+  font-size: 24px;
+}
+.submission-heading .eyebrow {
+  margin: 0 0 5px;
+}
+.submission-issue {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 15px;
+  background: #f1f5ed;
+  border-radius: 8px;
+}
+.submission-issue small {
+  color: #697b5b;
+}
+.submission-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin: 22px 0;
+}
+.submission-details dt,
+.submission-comment > span {
+  font-size: 11px;
+  color: #71816a;
+  margin-bottom: 4px;
+}
+.submission-details dd {
+  margin: 0;
+  font-weight: 550;
+}
+.submission-details dd small {
+  display: block;
+  font-weight: 400;
+  color: #71816a;
+  margin-top: 2px;
+}
+.submission-comment p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  border: 1px solid #e0e7da;
+  border-radius: 6px;
+  padding: 12px;
+  margin: 5px 0 18px;
+}
+.submission-result {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  background: #f6f8f2;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+.submission-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+}
+.receipt-check {
+  color: #527946;
+}
+.submission-actions .primary {
+  background: #527946;
+  color: #fff;
+  border: 1px solid #527946;
+}
+.send-button:disabled {
+  cursor: default;
+}

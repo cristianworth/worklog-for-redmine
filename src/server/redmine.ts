@@ -1,3 +1,9 @@
+import { createHash } from "node:crypto";
+import { formatDuration } from "../shared/worklogs";
+import {
+  matchesTimeEntry,
+  type SubmissionSnapshot,
+} from "../shared/submissions";
 import { certificateExceptionRequest } from "./redmine-transport";
 
 export class RedmineError extends Error {
@@ -132,6 +138,55 @@ export function createRedmineClient(
     (config?.allowInvalidCertificate
       ? certificateExceptionRequest(config.baseUrl)
       : fetch);
+  async function readJson(response: Response): Promise<any> {
+    const type =
+      response.headers
+        .get("content-type")
+        ?.split(";")[0]
+        .trim()
+        .toLowerCase() ?? "";
+    if (type !== "application/json" && !type.endsWith("+json")) {
+      await response.body?.cancel();
+      throw new RedmineError(
+        "invalid_response",
+        "O servidor não devolveu JSON. Confira o endereço e se a API está habilitada.",
+      );
+    }
+    // Limit the response before parsing; raw server content must never reach an error or log.
+    const reader = response.body?.getReader();
+    const chunks: Uint8Array[] = [];
+    let length = 0;
+    try {
+      if (!reader) throw new Error();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        length += value.byteLength;
+        if (length > 1_000_000) {
+          await reader.cancel();
+          throw new RedmineError(
+            "invalid_response",
+            "A resposta do Redmine excedeu o limite desta consulta.",
+          );
+        }
+        chunks.push(value);
+      }
+      return JSON.parse(Buffer.concat(chunks).toString("utf8"));
+    } catch (error) {
+      if (error instanceof RedmineError) throw error;
+      if (
+        (error as Error)?.name === "TimeoutError" ||
+        (error as Error)?.name === "AbortError"
+      )
+        throw networkError(error);
+      throw new RedmineError(
+        "invalid_response",
+        "O Redmine devolveu uma resposta inválida para esta consulta.",
+      );
+    } finally {
+      reader?.releaseLock();
+    }
+  }
   async function get(path: string): Promise<any> {
     if (!config)
       throw new RedmineError(
@@ -196,54 +251,9 @@ export function createRedmineClient(
           "O Redmine não concluiu a consulta. Tente novamente mais tarde.",
         ),
       );
-    const type =
-      response.headers
-        .get("content-type")
-        ?.split(";")[0]
-        .trim()
-        .toLowerCase() ?? "";
-    if (type !== "application/json" && !type.endsWith("+json"))
-      return fail(
-        new RedmineError(
-          "invalid_response",
-          "O servidor não devolveu JSON. Confira o endereço e se a API está habilitada.",
-        ),
-      );
-    // Limit the response before parsing; raw server content must never reach an error or log.
-    const reader = response.body?.getReader();
-    const chunks: Uint8Array[] = [];
-    let length = 0;
-    try {
-      if (!reader) throw new Error();
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        length += value.byteLength;
-        if (length > 1_000_000) {
-          await reader.cancel();
-          throw new RedmineError(
-            "invalid_response",
-            "A resposta do Redmine excedeu o limite desta consulta.",
-          );
-        }
-        chunks.push(value);
-      }
-      return JSON.parse(Buffer.concat(chunks).toString("utf8"));
-    } catch (error) {
-      if (error instanceof RedmineError) throw error;
-      if (
-        (error as Error)?.name === "TimeoutError" ||
-        (error as Error)?.name === "AbortError"
-      )
-        throw networkError(error);
-      throw new RedmineError(
-        "invalid_response",
-        "O Redmine devolveu uma resposta inválida para esta consulta.",
-      );
-    } finally {
-      reader?.releaseLock();
-    }
+    return readJson(response);
   }
+
   return {
     status() {
       return {
@@ -260,6 +270,197 @@ export function createRedmineClient(
           "A resposta não confirmou uma conta autenticada na API.",
         );
       return { authenticated: true };
+    },
+
+    async account() {
+      const data = await get("users/current.json");
+      if (!positiveId(data?.user?.id))
+        throw new RedmineError(
+          "invalid_response",
+          "A API não confirmou a conta atual.",
+        );
+      return {
+        id: data.user.id as number,
+        scope: createHash("sha256")
+          .update(JSON.stringify([config?.baseUrl, data.user.id]))
+          .digest("hex"),
+      };
+    },
+    async projectActivities(projectId: number) {
+      const data = await get(
+        `projects/${projectId}.json?include=time_entry_activities`,
+      );
+      if (data?.project?.id !== projectId)
+        throw new RedmineError(
+          "invalid_response",
+          "A resposta não confirmou o projeto da tarefa.",
+        );
+      const activities = data.project.time_entry_activities;
+      if (activities === undefined) return null;
+      if (
+        !Array.isArray(activities) ||
+        activities.some((a) => !namedReference(a))
+      )
+        throw new RedmineError(
+          "invalid_response",
+          "O catálogo remoto do projeto é inválido.",
+        );
+      return activities
+        .filter((a) => a.active !== false)
+        .map((a) => ({ id: a.id as number, name: a.name as string }));
+    },
+    async existingTimeEntries(snapshot: SubmissionSnapshot) {
+      const ids: number[] = [];
+      for (let offset = 0; offset < 10000; offset += 100) {
+        const query = new URLSearchParams({
+          issue_id: String(snapshot.issueId),
+          user_id: String(snapshot.userId),
+          from: snapshot.date,
+          to: snapshot.date,
+          limit: "100",
+          offset: String(offset),
+        });
+        const data = await get(`time_entries.json?${query}`);
+        if (
+          !Array.isArray(data?.time_entries) ||
+          !Number.isSafeInteger(data.total_count) ||
+          data.total_count < 0
+        )
+          throw new RedmineError(
+            "invalid_response",
+            "Não foi possível conferir todos os lançamentos existentes.",
+          );
+        for (const entry of data.time_entries)
+          if (matchesTimeEntry(entry, snapshot) && !ids.includes(entry.id))
+            ids.push(entry.id);
+        if (offset + data.time_entries.length >= data.total_count) return ids;
+        if (!data.time_entries.length || data.time_entries.length < 100)
+          throw new RedmineError(
+            "invalid_response",
+            "A consulta de lançamentos foi incompleta. Nenhum envio será iniciado.",
+          );
+      }
+      throw new RedmineError(
+        "invalid_response",
+        "O volume de lançamentos excedeu a conferência automática. Nenhum envio será iniciado.",
+      );
+    },
+    async timeEntryMatches(id: number, snapshot: SubmissionSnapshot) {
+      const data = await get(`time_entries/${id}.json`);
+      return (
+        data?.time_entry?.id === id &&
+        matchesTimeEntry(data.time_entry, snapshot)
+      );
+    },
+    async createTimeEntry(
+      snapshot: SubmissionSnapshot,
+    ): Promise<{
+      state: "confirmed" | "rejected" | "uncertain";
+      remoteId: number | null;
+      message: string;
+    }> {
+      if (!config)
+        throw new RedmineError(
+          "not_configured",
+          "Configure o acesso antes de enviar.",
+          503,
+        );
+      let remoteId: number | null = null;
+      try {
+        const response = await request(
+          new URL("time_entries.json", config.baseUrl),
+          {
+            method: "POST",
+            redirect: "manual",
+            signal: AbortSignal.timeout(15000),
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+              ...(config.apiKey ? { "X-Redmine-API-Key": config.apiKey } : {}),
+            },
+            body: JSON.stringify({
+              time_entry: {
+                issue_id: snapshot.issueId,
+                spent_on: snapshot.date,
+                hours: formatDuration(snapshot.minutes),
+                comments: snapshot.comment,
+                activity_id: snapshot.activityId,
+              },
+            }),
+          },
+        );
+        if ([400, 401, 403, 404, 409, 422, 429].includes(response.status)) {
+          await response.body?.cancel();
+          return {
+            state: "rejected",
+            remoteId: null,
+            message: `O Redmine recusou o envio (HTTP ${response.status}). Confira os campos, limites de data/duração e as permissões. Nenhuma confirmação de criação foi recebida.`,
+          };
+        }
+        if (response.status !== 201) {
+          await response.body?.cancel();
+          return {
+            state: "uncertain",
+            remoteId: null,
+            message:
+              "A resposta não confirmou a criação. Não reenvie; confira o resultado no Redmine.",
+          };
+        }
+        const location = response.headers.get("location");
+        try {
+          const data = await readJson(response);
+          if (positiveId(data?.time_entry?.id)) remoteId = data.time_entry.id;
+          if (remoteId && matchesTimeEntry(data.time_entry, snapshot))
+            return {
+              state: "confirmed",
+              remoteId,
+              message:
+                "Horas confirmadas no Redmine. O status da tarefa foi mantido.",
+            };
+        } catch {
+          /* An accepted creation with an unreadable response must never be retried automatically. */
+        }
+        if (!remoteId && location) {
+          try {
+            const url = new URL(location, config.baseUrl);
+            const match = url.pathname.match(
+              /\/time_entries\/(\d+)(?:\.json)?$/,
+            );
+            if (
+              match &&
+              url.origin === new URL(config.baseUrl).origin &&
+              [
+                new URL(`time_entries/${match[1]}`, config.baseUrl).pathname,
+                new URL(`time_entries/${match[1]}.json`, config.baseUrl)
+                  .pathname,
+              ].includes(url.pathname) &&
+              positiveId(Number(match[1]))
+            )
+              remoteId = Number(match[1]);
+          } catch {}
+        }
+        if (remoteId) {
+          const data = await get(`time_entries/${remoteId}.json`);
+          if (
+            data?.time_entry?.id === remoteId &&
+            matchesTimeEntry(data.time_entry, snapshot)
+          )
+            return {
+              state: "confirmed",
+              remoteId,
+              message:
+                "Horas confirmadas no Redmine. O status da tarefa foi mantido.",
+            };
+        }
+      } catch {
+        /* Transport errors after dispatch are uncertain, even when a retry might succeed. */
+      }
+      return {
+        state: "uncertain",
+        remoteId,
+        message:
+          "O envio foi iniciado, mas não foi possível confirmar o resultado. Não reenvie; use Conferir resultado ou consulte o Redmine.",
+      };
     },
     async issue(id: string) {
       if (!/^[1-9]\d*$/.test(id) || !Number.isSafeInteger(Number(id)))
