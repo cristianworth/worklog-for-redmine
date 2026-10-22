@@ -1409,3 +1409,73 @@ input[aria-invalid="true"] {
 .send-button:disabled {
   cursor: default;
 }
+
+.day-send {
+  background: #edf3e8;
+  border: 1px solid #aac49a;
+  color: #426537;
+  white-space: nowrap;
+}
+.day-selector {
+  width: 16px;
+  height: 16px;
+  accent-color: #527946;
+}
+.batch-dialog {
+  width: min(860px, calc(100vw - 28px));
+}
+.batch-summary {
+  font-size: 13px;
+  line-height: 1.6;
+}
+.batch-day h3 {
+  font-size: 15px;
+  margin: 24px 0 10px;
+  color: #426537;
+}
+.batch-line {
+  padding: 14px;
+  border: 1px solid #dce5d5;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+.batch-line-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+.batch-line-heading span {
+  font-size: 12px;
+}
+.batch-line > small {
+  display: block;
+  color: #68785e;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.batch-line p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  margin: 10px 0 0;
+}
+.recent-batches {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 12px;
+  margin: 0 0 18px;
+  color: #68785e;
+}
+@media (max-width: 900px) {
+  .day-heading {
+    flex-wrap: wrap;
+  }
+  .day-send {
+    margin-left: auto;
+  }
+}

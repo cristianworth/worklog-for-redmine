@@ -2,7 +2,7 @@
 
 ## Fluxo entregue
 
-Salvar rascunhos continua apenas local. Para enviar, salve o dia, selecione uma linha pelo controle da primeira coluna e use **Enviar ao Redmine**. A revisão consulta a conta, tarefa, projeto, atividade e lançamentos equivalentes. Exibe data, duração, observação, atividade/código e **Manter** para o status. Só **Confirmar envio ao Redmine** solicita criação.
+Salvar rascunhos continua apenas local. Para enviar, salve o dia, selecione uma linha pelo controle da primeira coluna e use **Enviar selecionados**. A P4 reutiliza o contrato individual em uma revisão de lote, inclusive para uma única linha; veja [batch-submission.md](batch-submission.md). A revisão consulta a conta, tarefa, projeto, atividade e lançamentos equivalentes. Exibe data, duração, observação, atividade/código e **Manter** para o status. Só o botão de confirmação solicita criação.
 
 A revisão expira após 15 minutos. Uma alteração no dia, no catálogo, no projeto/atividade ou na conta/servidor exige nova revisão. Uma linha recusada pode ser corrigida e revisada novamente; não há repetição automática. A conferência de duplicidade é conservadora: mesmo usuário, servidor, tarefa, projeto, dia, atividade, minutos e observação. Lançamentos idênticos já existentes não são criados de novo.
 

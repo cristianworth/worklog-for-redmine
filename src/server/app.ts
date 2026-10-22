@@ -1,3 +1,4 @@
+import { createBatchService } from "./batches";
 import { createSubmissionService, SubmissionError } from "./submissions";
 import { validateActivityCatalog } from "../shared/activities";
 import express from "express";
@@ -21,6 +22,7 @@ export function createApp(
 ) {
   const app = express();
   const submissionService = createSubmissionService(store, redmine);
+  const batchService = createBatchService(store, submissionService);
   app.disable("x-powered-by");
   app.use((req, res, next) => {
     const hostname = req.hostname;
@@ -50,6 +52,34 @@ export function createApp(
   });
   app.get("/api/redmine/issues/:id", async (req, res) => {
     res.json(await redmine.issue(req.params.id));
+  });
+
+  app.get("/api/submission-batches", (req, res) => {
+    let period;
+    try {
+      period = validatePeriod(req.query.from, req.query.to);
+    } catch {
+      throw new SubmissionError("Período inválido.");
+    }
+    res
+      .set("Cache-Control", "no-store")
+      .json({ batches: batchService.list(period.from, period.to) });
+  });
+  app.get("/api/submission-batches/:id", (req, res) =>
+    res.set("Cache-Control", "no-store").json(batchService.get(req.params.id)),
+  );
+  app.post("/api/submission-batches/prepare", async (req, res) =>
+    res.json(await batchService.prepare(req.body?.entries)),
+  );
+  app.post("/api/submission-batches/:id/confirm", (req, res) => {
+    if (req.body?.confirmed !== true)
+      throw new SubmissionError("Confirme explicitamente o lote revisado.");
+    // Start synchronously so a repeated confirmation cannot schedule a second worker.
+    const completion = batchService.start(req.params.id);
+    void completion.catch(() => {
+      /* Durable row receipts remain available after a local failure. */
+    });
+    res.status(202).json(batchService.get(req.params.id));
   });
 
   app.get("/api/submissions", (req, res) => {

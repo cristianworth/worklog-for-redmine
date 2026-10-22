@@ -28,7 +28,7 @@ Stop the server before switching between these modes; both use port 3000.
 4. Click **Salvar rascunhos**. It saves every changed day, including dates no longer visible after changing the period. Saves are atomic: a conflict or failure prevents a partial database update.
 5. Reopen to recover saved rows. The browser remembers the period preference; **Até hoje** recalculates the end date, keeping the chosen start. A refresh of the period preserves pending edits, including invalid duration input. Closing/reloading the page warns if unsaved edits remain.
 
-The default view covers the last seven calendar dates, including today. Weekends remain available. Range preferences are stored only in that browser; drafts stay in SQLite. The draft-day format is preserved; the activity catalog adds a separate table in the same database. **Modelo do dia** is unavailable and marked **Em breve**. **Enviar ao Redmine** opens an individual review after selecting a saved row; it does not send immediately. **Configurações** opens connection instructions and a read-only API access check.
+The default view covers the last seven calendar dates, including today. Weekends remain available. Range preferences are stored only in that browser; drafts stay in SQLite. The draft-day format is preserved; the activity catalog adds a separate table in the same database. **Modelo do dia** is unavailable and marked **Em breve**. **Enviar dia** reviews the saved pending rows of one day. Check rows or day headers and use **Enviar selecionados** to review several dates together; neither action sends immediately. **Configurações** opens connection instructions and a read-only API access check.
 
 Incomplete rows can be saved as drafts. A blank duration contributes nothing to the total; malformed durations must be corrected or cleared before saving. Zero duration is allowed in a draft. Preparing submission validates required fields, resolves the activity inside the issue project and checks for equivalent existing entries; server-specific limits are enforced by Redmine. Activity text remains editable; project-specific suggestions come from the local catalog after looking up an issue. Incomplete or unmapped drafts can still be saved.
 
@@ -52,15 +52,16 @@ After **Consultar** on a row, its activity input offers only catalog entries for
 
 Catalog settings live in `activity_catalog` in the same ignored SQLite database. Their save/revision is independent of day saves. Conflicting changes preserve the editor; copy pending changes, discard/reload the catalog, and reapply them deliberately. Closing Configurações keeps unsaved catalog edits in the current page; the header marks them **Não salvo**, and leaving the page warns. **Descartar alterações** resets catalog edits only. **Salvar rascunhos** does not save the catalog, and vice versa.
 
-## Submit a saved line
+## Submit saved rows or days
 
-1. Save the day, then select a row using its first-column radio control. Unsaved days cannot be selected.
-2. Choose **Enviar ao Redmine** and review the task, project, date, duration, observation and activity/code. The issue status stays unchanged. Canceling sends nothing.
-3. Use **Confirmar envio ao Redmine** to create that single entry. Results and the remote ID are stored separately in SQLite.
-4. Use **Ver resultado** for saved receipts. Confirmed/existing/started/uncertain rows cannot be edited, deleted or sent again. Other rows remain editable.
-5. For an uncertain result, use **Conferir resultado**. It performs reads only; it never retries creation. After a server interruption, an initiated send must age one minute before reconciliation. Absence or ambiguity keeps the send blocked for manual review.
+1. Save the affected days. **Salvar rascunhos** only updates local drafts.
+2. Use **Enviar dia** to review all pending rows in one day, or select row/day checkboxes and choose **Enviar selecionados**. One selected row also works. Unsaved days and locked results cannot be selected. A batch accepts 1–100 rows and follows selection order.
+3. Review the exact dates, tasks, projects, observations, durations and activity codes. Resolve every preparation error before confirming. **Voltar sem enviar** creates no remote entries.
+4. Confirm the batch. Execution is sequential and stops at the first failure. Each result is persisted; later rows are identified as **Não enviado**. Existing equivalents are not created again. Issue statuses stay unchanged.
+5. Closing the dialog does not cancel an accepted batch. Use **Envios recentes neste período → Ver lote** after reopening the page. Refreshing results only reads local receipts; it never starts another worker. A server restart does not resume remaining rows.
+6. Use **Ver resultado → Conferir resultado** on an uncertain row to query Redmine without sending again. Confirmed/existing/started/uncertain rows remain protected. Other rows can be corrected, selected and reviewed in a new batch.
 
-Reviews expire after 15 minutes and are invalidated by saved day/catalog or remote account/project/activity changes. Exact equivalent remote entries block another creation. Preserve the database and receipts; do not restart a test from an older backup to force a retry. [Individual submission details](docs/individual-submission.md) describe states, known limits and actual verification. Batch submission is deferred.
+Reviews expire after 15 minutes and are invalidated by saved day/catalog or remote account/project/activity changes. All selected local revisions are checked before the first creation. Preserve the SQLite file and receipts. [Batch details](docs/batch-submission.md) and [individual submission contract](docs/individual-submission.md) describe the limits and recovery behavior.
 
 ## Verify
 
@@ -69,7 +70,7 @@ npm test
 npm run build
 ```
 
-Vitest checks duration arithmetic, period boundaries, dynamic end dates, preservation of pending edits, database reopening and atomic multi-day saves, including conflicts. Activity tests cover project isolation, duplicate mappings, catalog reopening, conflicts and opening an older draft database without rewriting its rows. Submission tests cover explicit confirmation, duplicate/concurrent sends, immutable receipts, rejection, uncertainty and read-only recovery across database reopening. Read-only Redmine tests cover private configuration, JSON contracts, error classification, credential handling and isolation from draft saves. Interface verification is manual. BDD, Cucumber and formal scenarios are not required.
+Vitest checks duration arithmetic, period boundaries, dynamic end dates, preservation of pending edits, database reopening and atomic multi-day saves, including conflicts. Activity tests cover project isolation, duplicate mappings, catalog reopening, conflicts and opening an older draft database without rewriting its rows. Submission tests cover explicit confirmation, duplicate/concurrent sends, immutable receipts, rejection, uncertainty and read-only recovery across database reopening. Batch tests cover one day, multiple days, preparation errors, obsolete reviews, partial failures, duplicate confirmation and interrupted execution. Read-only Redmine tests cover private configuration, JSON contracts, error classification, credential handling and isolation from draft saves. Interface verification is manual. BDD, Cucumber and formal scenarios are not required.
 
 ## Scope and stack
 
@@ -77,7 +78,7 @@ React + Vite + TypeScript; Node + Express + SQLite through Node's built-in `node
 
 The period-based editor uses Lucide icons, a highlighted daily total and separate save/review/confirm actions. Day templates remain deferred; their control is disabled. The project activity catalog is available in Configurações. **Modo local** identifies this computer’s database and expands to explain storage. **Abrir demonstração** is a disabled future shortcut, not a published demo. See the plan for priorities.
 
-API access checks and explicit issue lookup are implemented with synthetic tests. Real account and issue reads have been verified with the local API key; one specifically authorized real time-entry test was created and verified, with issue status unchanged. Its private record is excluded from Git and must never be replayed. A local project-specific activity catalog and individual submission are implemented; period batches and optional issue-status changes remain future slices. Saving a draft does not send anything to Redmine. This project is independent of Redmine.
+API access checks and explicit issue lookup are implemented with synthetic tests. Real account and issue reads have been verified with the local API key; one specifically authorized real time-entry test was created and verified, with issue status unchanged. Its private record is excluded from Git and must never be replayed. Two separately authorized batch tests were subsequently completed and verified, covering nine entries with unchanged issue statuses; those authorizations are also consumed. A local project-specific activity catalog, individual submission and period batches are implemented; optional issue-status changes remain a future slice. Saving a draft does not send anything to Redmine. This project is independent of Redmine.
 
 ## Planned public demonstration
 
@@ -91,6 +92,7 @@ The normal local mode continues to use Node and SQLite. The public code reposito
 - [Plan and decisions](docs/development-plan.md)
 - [Connection checks](docs/redmine-access.md)
 - [Individual submission](docs/individual-submission.md)
+- [Batch submission](docs/batch-submission.md)
 - [Legacy workflow](docs/legacy-workflow.md)
 - [Historical behavior examples](docs/behavior-specification.md)
 - [Contributing](CONTRIBUTING.md)

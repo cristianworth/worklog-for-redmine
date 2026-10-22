@@ -1,3 +1,4 @@
+import { canConfirmBatch, type SubmissionBatch } from "../shared/batches";
 import {
   isSubmissionLocked,
   type SubmissionRecord,
@@ -197,6 +198,72 @@ export function openDraftStore(filename: string) {
     return next;
   }
 
+  db.exec(`CREATE TABLE IF NOT EXISTS submission_batches (
+    id TEXT PRIMARY KEY, created_at TEXT NOT NULL, details TEXT NOT NULL
+  )`);
+  function batch(id: string): SubmissionBatch | null {
+    const row = db
+      .prepare("SELECT details FROM submission_batches WHERE id = ?")
+      .get(id);
+    return row ? JSON.parse(row.details as string) : null;
+  }
+  function saveBatch(value: SubmissionBatch): SubmissionBatch {
+    db.prepare(
+      `INSERT INTO submission_batches (id, created_at, details) VALUES (?, ?, ?)
+      ON CONFLICT(id) DO UPDATE SET details=excluded.details`,
+    ).run(value.id, value.createdAt, JSON.stringify(value));
+    return value;
+  }
+  function batches(from: string, to: string): SubmissionBatch[] {
+    validatePeriod(from, to);
+    return db
+      .prepare(
+        "SELECT details FROM submission_batches ORDER BY created_at DESC",
+      )
+      .all()
+      .map((row) => JSON.parse(row.details as string) as SubmissionBatch)
+      .filter((value) => value.state !== "prepared")
+      .filter((value) =>
+        value.items.some(
+          (item) => item.selection.date >= from && item.selection.date <= to,
+        ),
+      )
+      .slice(0, 20);
+  }
+  function beginBatch(id: string): SubmissionBatch {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      const value = batch(id);
+      if (!value || !canConfirmBatch(value))
+        throw new ConflictError(
+          "Este lote não pode ser confirmado. Prepare uma nova revisão das linhas pendentes.",
+        );
+      if (Date.now() - Date.parse(value.createdAt) > 15 * 60 * 1000)
+        throw new ConflictError(
+          "A revisão do lote expirou. Prepare uma nova revisão.",
+        );
+      for (const item of value.items) {
+        const current = submission(item.record!.id);
+        if (!current || current.state !== item.record!.state)
+          throw new ConflictError(
+            "Uma revisão do lote mudou. Confira os resultados e prepare uma nova revisão.",
+          );
+        if (current.state === "prepared") assertSnapshot(current);
+      }
+      const next = saveBatch({
+        ...value,
+        state: "running",
+        updatedAt: new Date().toISOString(),
+        message: "Envio iniciado. Os resultados são gravados por linha.",
+      });
+      db.exec("COMMIT");
+      return next;
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+  }
+
   type DayRow = { date: string; revision: number; entries: string };
   const decode = (row: DayRow): DraftDay =>
     validateDay({ ...row, entries: JSON.parse(row.entries) });
@@ -277,6 +344,10 @@ export function openDraftStore(filename: string) {
     beginSubmission,
     finishSubmission,
     assertSnapshot,
+    batch,
+    batches,
+    saveBatch,
+    beginBatch,
     close: () => db.close(),
   };
 }

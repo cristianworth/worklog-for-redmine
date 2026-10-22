@@ -9,7 +9,14 @@ import {
   type Activity,
 } from "../shared/activities";
 import { useEffect, useRef, useState } from "react";
-import { Check, Copy, Plus, Trash2, CalendarDays } from "lucide-react";
+import {
+  Check,
+  Copy,
+  Plus,
+  Trash2,
+  CalendarDays,
+  RefreshCw,
+} from "lucide-react";
 import { formatDuration, parseDuration } from "../shared/worklogs";
 import { IssueLookup } from "./IssueLookup";
 import { dayLabel, shortDate } from "./period";
@@ -22,7 +29,9 @@ interface Props {
   disabled: boolean;
   today: string;
   submissions: Record<string, SubmissionRecord>;
-  selectedEntryId: string | null;
+  selectedEntryIds: string[];
+  onSelectDay(): void;
+  onSendDay(): void;
   onSelect(entryId: string): void;
   onResult(entryId: string): void;
   copied: string | null;
@@ -37,7 +46,9 @@ export function DaySection({
   disabled,
   today,
   submissions,
-  selectedEntryId,
+  selectedEntryIds,
+  onSelectDay,
+  onSendDay,
   onSelect,
   onResult,
   copied,
@@ -54,6 +65,10 @@ export function DaySection({
   const dayReceipts = day.entries.map(
     (entry) => submissions[`${day.date}:${entry.id}`],
   );
+  const pending = day.entries.filter((entry) => {
+    const record = submissions[`${day.date}:${entry.id}`];
+    return !record || !isSubmissionLocked(record.state);
+  });
   const hasUncertain = dayReceipts.some(
     (record) => record?.state === "sending" || record?.state === "uncertain",
   );
@@ -127,6 +142,19 @@ export function DaySection({
           </strong>
         </div>
         <button
+          className="button day-send"
+          onClick={onSendDay}
+          disabled={disabled || dirty || !pending.length}
+          aria-label={`Enviar dia ${description}`}
+          title={
+            dirty
+              ? "Salve o dia antes de enviar"
+              : "Revisar as linhas pendentes deste dia"
+          }
+        >
+          <RefreshCw size={16} aria-hidden="true" /> Enviar dia
+        </button>
+        <button
           className="button secondary add-line"
           onClick={add}
           disabled={disabled}
@@ -150,7 +178,19 @@ export function DaySection({
             <thead>
               <tr>
                 <th scope="col" className="row-number">
-                  #
+                  <input
+                    type="checkbox"
+                    className="day-selector"
+                    aria-label={`Selecionar pendentes do dia ${description}`}
+                    disabled={disabled || dirty || !pending.length}
+                    checked={
+                      !!pending.length &&
+                      pending.every((entry) =>
+                        selectedEntryIds.includes(entry.id),
+                      )
+                    }
+                    onChange={onSelectDay}
+                  />
                 </th>
                 <th scope="col">Tarefa</th>
                 <th scope="col">Duração</th>
@@ -192,10 +232,9 @@ export function DaySection({
                     <td className="row-number">
                       <label className="entry-selector">
                         <input
-                          type="radio"
-                          name="submission-entry"
+                          type="checkbox"
                           aria-label={`Selecionar linha ${index + 1} em ${description} para envio`}
-                          checked={selectedEntryId === entry.id}
+                          checked={selectedEntryIds.includes(entry.id)}
                           disabled={disabled || dirty || rowLocked}
                           onChange={() => onSelect(entry.id)}
                         />

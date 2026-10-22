@@ -1,3 +1,5 @@
+import { BatchReview } from "./BatchReview";
+import type { BatchSelection, SubmissionBatch } from "../shared/batches";
 import { SubmissionReview } from "./SubmissionReview";
 import {
   isSubmissionLocked,
@@ -117,10 +119,14 @@ export function App() {
   }, [catalogRetry]);
   const [retry, setRetry] = useState(0);
   const effectiveEnd = endDate(period, today);
-  const [selection, setSelection] = useState<{
-    date: string;
-    entryId: string;
+  const [selection, setSelection] = useState<
+    { date: string; entryId: string }[]
+  >([]);
+  const [batchReview, setBatchReview] = useState<{
+    entries?: BatchSelection[];
+    batchId?: string;
   } | null>(null);
+  const [recentBatches, setRecentBatches] = useState<SubmissionBatch[]>([]);
   const [review, setReview] = useState<{
     date: string;
     entryId: string;
@@ -140,16 +146,49 @@ export function App() {
       })),
     [],
   );
+  const receiveBatch = useCallback((batch: SubmissionBatch) => {
+    setRecentBatches((current) =>
+      [batch, ...current.filter((value) => value.id !== batch.id)].slice(0, 20),
+    );
+    setReceipts((current) => {
+      const next = { ...current };
+      for (const item of batch.items)
+        if (item.record) {
+          const record = item.record,
+            key = `${record.snapshot.date}:${record.snapshot.entryId}`,
+            previous = next[key];
+          if (
+            !previous ||
+            (!["confirmed", "existing"].includes(previous.state) &&
+              Date.parse(record.updatedAt) >= Date.parse(previous.updatedAt))
+          )
+            next[key] = record;
+        }
+      return next;
+    });
+  }, []);
   useEffect(() => {
     const controller = new AbortController();
     setReceiptsLoaded(false);
     setReceiptError("");
-    setSelection(null);
+    setSelection([]);
     const query = new URLSearchParams({ from: period.from, to: effectiveEnd });
-    fetch(`/api/submissions?${query}`, { signal: controller.signal })
-      .then(async (response) => {
-        const data = await response.json();
-        if (!response.ok || !Array.isArray(data.submissions)) throw new Error();
+    Promise.all([
+      fetch(`/api/submissions?${query}`, { signal: controller.signal }),
+      fetch(`/api/submission-batches?${query}`, { signal: controller.signal }),
+    ])
+      .then(async ([response, batchResponse]) => {
+        const [data, batchData] = await Promise.all([
+          response.json(),
+          batchResponse.json(),
+        ]);
+        if (
+          !response.ok ||
+          !Array.isArray(data.submissions) ||
+          !batchResponse.ok ||
+          !Array.isArray(batchData.batches)
+        )
+          throw new Error();
         if (controller.signal.aborted) return;
         setReceipts((current) => {
           const next = { ...current };
@@ -165,6 +204,7 @@ export function App() {
           }
           return next;
         });
+        setRecentBatches(batchData.batches);
         setReceiptsLoaded(true);
       })
       .catch(() => {
@@ -175,21 +215,53 @@ export function App() {
       });
     return () => controller.abort();
   }, [period.from, effectiveEnd, receiptRetry]);
-  const selectedDay = selection ? editor.days[selection.date] : null;
-  const selectedEntry = selectedDay?.entries.find(
-    (entry) => entry.id === selection?.entryId,
-  );
-  const selectedRecord = selection
-    ? receipts[`${selection.date}:${selection.entryId}`]
-    : null;
+  const canSelect = (date: string, entryId: string) => {
+    const record = receipts[`${date}:${entryId}`];
+    return (
+      !!editor.days[date]?.entries.some((entry) => entry.id === entryId) &&
+      !editor.dirtyDates.includes(date) &&
+      !(record && isSubmissionLocked(record.state))
+    );
+  };
   const canReview =
-    !!selection &&
-    !!selectedEntry &&
+    !!selection.length &&
     receiptsLoaded &&
     !loading &&
     !saving &&
-    !editor.dirtyDates.includes(selection.date) &&
-    !(selectedRecord && isSubmissionLocked(selectedRecord.state));
+    selection.every((item) => canSelect(item.date, item.entryId));
+  function pendingDay(date: string) {
+    return (editor.days[date]?.entries ?? [])
+      .filter((entry) => canSelect(date, entry.id))
+      .map((entry) => ({ date, entryId: entry.id }));
+  }
+  function openBatch(entries: { date: string; entryId: string }[]) {
+    if (
+      !entries.length ||
+      !receiptsLoaded ||
+      loading ||
+      saving ||
+      entries.some((item) => !canSelect(item.date, item.entryId))
+    )
+      return;
+    setBatchReview({
+      entries: entries.map((item) => ({
+        ...item,
+        revision: editor.days[item.date].revision,
+      })),
+    });
+  }
+  function toggleDay(date: string) {
+    const pending = pendingDay(date);
+    const all =
+      pending.length > 0 &&
+      pending.every((item) =>
+        selection.some((s) => s.date === date && s.entryId === item.entryId),
+      );
+    setSelection((current) => [
+      ...current.filter((item) => item.date !== date),
+      ...(all ? [] : pending),
+    ]);
+  }
   function openReview(date: string, entryId: string) {
     const day = editor.days[date];
     if (day) setReview({ date, entryId, revision: day.revision });
@@ -438,9 +510,20 @@ export function App() {
           {...review}
           onClose={() => {
             setReview(null);
-            setSelection(null);
+            setSelection([]);
           }}
           onRecord={receiveRecord}
+        />
+      )}
+      {batchReview && (
+        <BatchReview
+          {...batchReview}
+          onClose={() => {
+            setBatchReview(null);
+            setSelection([]);
+            setReceiptRetry((value) => value + 1);
+          }}
+          onBatch={receiveBatch}
         />
       )}
       <main>
@@ -592,22 +675,48 @@ export function App() {
             </span>
           </span>
           <div className="send-control">
+            {!!selection.length && (
+              <button className="text-button" onClick={() => setSelection([])}>
+                Limpar seleção
+              </button>
+            )}
             <button
               className="button send-button"
               disabled={!canReview}
-              onClick={() => {
-                if (selection) openReview(selection.date, selection.entryId);
-              }}
+              onClick={() => openBatch(selection)}
               aria-describedby="send-status"
             >
               <Upload size={18} aria-hidden="true" />
-              Enviar ao Redmine
+              Enviar selecionados
+              {selection.length ? ` (${selection.length})` : ""}
             </button>
             <span id="send-status">
-              Selecione uma linha salva · revisão antes do envio
+              Selecione linhas ou dias salvos · revisão antes do envio
             </span>
           </div>
         </div>
+        {recentBatches.some((batch) => batch.state !== "prepared") && (
+          <div className="recent-batches">
+            <span>Envios recentes neste período</span>
+            {recentBatches
+              .filter((batch) => batch.state !== "prepared")
+              .slice(0, 5)
+              .map((batch) => (
+                <button
+                  className="text-button"
+                  key={batch.id}
+                  onClick={() => setBatchReview({ batchId: batch.id })}
+                >
+                  Ver lote · {batch.items.length} linhas ·{" "}
+                  {batch.state === "finished"
+                    ? "Concluído"
+                    : batch.state === "running"
+                      ? "Em andamento"
+                      : "Interrompido"}
+                </button>
+              ))}
+          </div>
+        )}
         {!receiptError && !receiptsLoaded && (
           <p className="notice" role="status">
             Carregando resultados de envio…
@@ -700,10 +809,23 @@ export function App() {
               dirty={editor.dirtyDates.includes(date)}
               disabled={blocked || !receiptsLoaded}
               submissions={receipts}
-              selectedEntryId={
-                selection?.date === date ? selection.entryId : null
+              selectedEntryIds={selection
+                .filter((item) => item.date === date)
+                .map((item) => item.entryId)}
+              onSelect={(entryId) =>
+                setSelection((current) =>
+                  current.some(
+                    (item) => item.date === date && item.entryId === entryId,
+                  )
+                    ? current.filter(
+                        (item) =>
+                          item.date !== date || item.entryId !== entryId,
+                      )
+                    : [...current, { date, entryId }],
+                )
               }
-              onSelect={(entryId) => setSelection({ date, entryId })}
+              onSelectDay={() => toggleDay(date)}
+              onSendDay={() => openBatch(pendingDay(date))}
               onResult={(entryId) => openReview(date, entryId)}
               today={today}
               copied={copied}

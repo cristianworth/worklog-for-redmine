@@ -11,7 +11,7 @@ Atualizado em 22/10/2026. Acompanhamento das entregas; decisões e limites no [p
 - [x] **P2 — Acesso e consulta:** configuração privada, exceção de certificado restrita e consulta explícita por linha. Autenticação e leitura real de assunto/status/projeto verificadas com a chave local; nenhuma hora enviada.
 - [x] **P2.1 — Atividades:** catálogo manual de nome/ID por projeto, persistência local e sugestões conforme a tarefa consultada. Implementado e conferido com exemplos fictícios; aguarda revisão de uso de Cristian.
 - [x] **P3 — Envio individual:** seleção de linha salva, revisão/confirmar, recibos persistidos e recuperação sem reenvio. Teste real autorizado confirmado e conferido; autorização consumida.
-- [ ] **P4 — Envio do período:** seleção/revisão de dias e linhas, resultado individual e falhas parciais. Não ampliar a autorização de teste para um lote real.
+- [x] **P4 — Envio do período:** Enviar dia, seleção múltipla, revisão, recibos e interrupção na primeira falha. Simulação/interface conferidas; um lote real de um dia e outro de dois dias confirmados com autorização específica consumida.
 - [ ] **P5 — Modelo do dia:** recorrências aplicadas uma vez, sem sobrescrever dias existentes.
 - [ ] **P5.1 — Status opcional:** operação separada das horas; manter confirmações existentes se a movimentação falhar.
 - [ ] **P6 — Consolidação local:** teclado, mensagens, testes e instruções proporcionais.
@@ -39,14 +39,25 @@ Verificação: **110 testes em 9 arquivos passaram**, com build aprovado. Revis�
 
 Verificação P3: **142 testes em 10 arquivos passaram** e build aprovado. A perda de resposta após criação foi simulada e recuperada por consulta. Campos/ID do teste real ficam somente em `private/authorized-time-entry-test.json`; nenhuma linha de teste foi adicionada ao banco de uso. [Detalhes do envio](docs/individual-submission.md).
 
-## Próxima etapa — P4 em chunks
+## P4 — chunks entregues
 
-| Chunk                     | Resultado esperado                                                                                                                                  |
-| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A — Seleção do período    | Selecionar várias linhas/dias salvos; excluir resultados confirmados, existentes ou incertos; preservar o intervalo livre                           |
-| B — Revisão do lote       | Exibir exatamente as linhas escolhidas, impedimentos e campos finais; permitir voltar sem enviar                                                    |
-| C — Execução e resultados | Reutilizar o contrato individual, preservar resultado por linha e tratar interrupção/falha parcial sem repetir confirmados ou incertos              |
-| D — Revisão integrada     | Simular lote misto e retomada; manter recibos e rascunhos existentes. O teste real individual já foi consumido e não autoriza um lote real de teste |
+| Chunk                 | Entrega                                                                                                                                                                            |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A — Seleção           | Checkboxes por linha/dia, seleção de vários dias e atalho **Enviar dia**; exigir rascunhos salvos                                                                                  |
+| B — Revisão           | Datas, campos finais e impedimentos; voltar sem enviar; revisão local antes de criar                                                                                               |
+| C — Execução          | Um trabalhador por lote, resultado por linha, parada na primeira falha, histórico e consulta após recarga; sem retomada automática                                                 |
+| D — Revisão integrada | 158 testes/11 arquivos e build aprovados; interface com dados fictícios; dois lotes reais especificamente autorizados confirmados, com nove registros conferidos e status mantidos |
+
+[Uso, resultados e limites](docs/batch-submission.md). Os dados dos testes reais ficam apenas na área privada.
+
+## Próxima etapa — P5 em chunks
+
+| Chunk             | Recorte proposto                                                                             |
+| ----------------- | -------------------------------------------------------------------------------------------- |
+| A — Comportamento | Conferir o modelo e a rotina do VBA e definir quais campos são recorrentes                   |
+| B — Configuração  | Configurar um modelo local simples, sem importar dados históricos como pendências            |
+| C — Aplicação     | Preencher um dia novo uma vez, preservando dias existentes; Adicionar linha continua avulso  |
+| D — Verificação   | Conferir persistência, uso por teclado e ausência de linhas duplicadas em exemplos fictícios |
 
 ## Limites e pendências
 
@@ -54,5 +65,5 @@ Verificação P3: **142 testes em 10 arquivos passaram** e build aprovado. A per
 - O nome digitado permanece no rascunho. O catálogo resolve nome + projeto para código; mudar/remover cadastro não reescreve rascunhos antigos. Após abrir a página, consultar a tarefa novamente para identificar seu projeto.
 - Novos tipos de campo exigem implementação própria; não há construtor genérico de validações. Modelo do dia e demo continuam indisponíveis.
 - A exceção de certificado foi aceita para o servidor privado conhecido; manter padrão estrito, escopo por origem e aviso visível. O `.env` é lido ao iniciar o processo; reiniciar após alterações.
-- Os registros históricos da planilha já foram apropriados e não devem ser reenviados. O teste específico autorizado já foi confirmado; detalhes e estado ficam fora do Git. A autorização está consumida e não permite repetir o lançamento.
+- Os registros históricos da planilha já foram apropriados e não devem ser reenviados. O teste específico autorizado já foi confirmado; detalhes e estado ficam fora do Git. A autorização individual está consumida. Os lotes P4 têm autorização própria registrada separadamente, sem liberar outros reenvios.
 - Sem total semanal, cópia de linhas para outros dias ou hospedagem compartilhada no escopo atual. A demo pública continua entre as últimas etapas.
