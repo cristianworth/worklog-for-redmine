@@ -76,7 +76,7 @@ export function DaySection({
             {day.date === today && <span className="today-label">Hoje</span>}
           </span>
         </div>
-        <div className="day-total">
+        <div className={`day-total ${summary.invalid ? "is-partial" : ""}`}>
           <span>{summary.invalid ? "Total parcial" : "Total do dia"}</span>
           <strong>
             {summary.total}

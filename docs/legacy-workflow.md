@@ -4,7 +4,7 @@
 
 Esta é uma descrição sanitizada da investigação do main em 20–21/10/2026, complementada pela conferência estática da planilha movida para a raiz do projeto em 21/10/2026. Não contém o código VBA original, dados de trabalho, endereços do servidor ou credenciais.
 
-A planilha privada é uma referência local, ignorada pelo Git. Seu VBA foi identificado como igual ao material analisado anteriormente. Não há uma correção validada da planilha nem uma aplicação web entregue.
+A planilha privada é uma referência local, ignorada pelo Git. Cristian confirmou em 22/10/2026 que ela contém dados reais já apropriados no Redmine. Esses registros são referência histórica; não devem ser importados como pendências nem reenviados para testar a aplicação. Seu VBA foi identificado como igual ao material analisado anteriormente. Não há uma correção validada da planilha nem uma aplicação web entregue.
 
 ## Fluxo identificado
 

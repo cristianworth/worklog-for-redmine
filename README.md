@@ -22,7 +22,7 @@ Stop the server before switching between these modes; both use port 3000.
 
 ## Use
 
-1. Choose **De** and **Até**, or select **Até hoje** to follow the current local date. Click **Exibir período**.
+1. Choose **De** and **Até**, or select **Até hoje** to follow the current local date. Valid dates update the view automatically after a short pause. Switching off **Até hoje** keeps the displayed end date. Incomplete or reversed dates preserve the last valid view; failed requests offer **Tentar novamente**.
 2. Scroll through the days and add rows. Enter the issue, duration (`01:30`), activity and observation.
 3. Click the copy icon next to an issue to copy only its code. Paste it into another row normally. Browsers may restrict clipboard access; a failed copy is reported.
 4. Click **Salvar rascunhos**. It saves every changed day, including dates no longer visible after changing the period. Saves are atomic: a conflict or failure prevents a partial database update.
@@ -47,9 +47,15 @@ Vitest checks duration arithmetic, period boundaries, dynamic end dates, preserv
 
 React + Vite + TypeScript; Node + Express + SQLite through Node's built-in `node:sqlite` module. A single repository and process, bound to the local computer. Some Node 24 versions emit an experimental SQLite warning.
 
-The period-based editor uses Lucide icons. Day templates and activity settings remain deferred; their buttons are disabled. See the plan for priorities.
+The period-based editor uses Lucide icons, a highlighted daily total and a separate, unavailable Redmine action. Day templates and activity settings remain deferred; their buttons are disabled. **Modo local** identifies this computer’s database and expands to explain storage. **Abrir demonstração** is a disabled future shortcut, not a published demo. See the plan for priorities.
 
 Authentication, issue lookup, project-specific activity IDs, Redmine submission and optional issue-status changes remain future slices. Saving a draft does not send anything to Redmine. This project is independent of Redmine.
+
+## Planned public demonstration
+
+A public demo is scheduled among the final project stages, after the local workflow and integration have been consolidated. It will reuse the interface with synthetic examples, isolated browser storage and explicitly simulated submission. Visitors must never access the real SQLite database, the local API or a real Redmine service. A reset action will affect only that visitor’s demo examples. No demo build, public link or deployment exists yet.
+
+The normal local mode continues to use Node and SQLite. The public code repository and an eventual hosted demo are separate deliverables; publishing code alone does not host the Node application.
 
 ## Documentation and private reference
 
@@ -58,4 +64,4 @@ Authentication, issue lookup, project-specific activity IDs, Redmine submission 
 - [Historical behavior examples](docs/behavior-specification.md)
 - [Contributing](CONTRIBUTING.md)
 
-The original spreadsheet and extracted VBA are private local references and must stay outside Git. Use synthetic examples; never commit credentials, databases or real work details. No GitHub remote exists yet. The license and publication destination still need confirmation; this private development package is not a public release.
+The original spreadsheet and extracted VBA are private local references and must stay outside Git. Cristian confirmed that the historical workbook entries have already been submitted to Redmine; inspect them only as historical examples, never seed them as pending drafts or replay them for testing. Use synthetic examples; never commit credentials, databases or real work details. No GitHub remote exists yet. The license and publication destination still need confirmation; this private development package is not a public release.

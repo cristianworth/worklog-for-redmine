@@ -27,6 +27,27 @@ export function endDate(period: PeriodPreference, today: string): string {
   return period.endMode === "today" ? today : period.to;
 }
 
+export function normalizePeriod(
+  period: PeriodPreference,
+  today: string,
+): PeriodPreference {
+  const to = endDate(period, today);
+  validatePeriod(period.from, to);
+  return { ...period, to };
+}
+
+export function changeEndMode(
+  period: PeriodPreference,
+  endMode: PeriodPreference["endMode"],
+  today: string,
+): PeriodPreference {
+  return {
+    ...period,
+    to: endMode === "today" ? today : endDate(period, today),
+    endMode,
+  };
+}
+
 export function restorePeriod(
   value: unknown,
   now = new Date(),
@@ -41,11 +62,7 @@ export function restorePeriod(
       (period.endMode === "fixed" || period.endMode === "today")
     ) {
       try {
-        validatePeriod(
-          period.from,
-          period.endMode === "today" ? today : period.to,
-        );
-        return period as PeriodPreference;
+        return normalizePeriod(period as PeriodPreference, today);
       } catch {
         /* Invalid saved preferences fall back to a recent period. */
       }

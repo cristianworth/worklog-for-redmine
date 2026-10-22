@@ -3,6 +3,10 @@ import {
   AlertCircle,
   ArrowRight,
   CalendarRange,
+  Database,
+  FlaskConical,
+  ChevronDown,
+  LockKeyhole,
   Check,
   FilePlus2,
   LoaderCircle,
@@ -11,13 +15,11 @@ import {
   Upload,
   WifiOff,
 } from "lucide-react";
-import {
-  validateDays,
-  validatePeriod,
-  type DraftDay,
-} from "../shared/worklogs";
+import { validateDays, type DraftDay } from "../shared/worklogs";
 import {
   dateRange,
+  normalizePeriod,
+  changeEndMode,
   endDate,
   localDate,
   periodStorageKey,
@@ -92,6 +94,30 @@ export function App() {
   }, [saving]);
 
   useEffect(() => {
+    let next: PeriodPreference;
+    try {
+      next = normalizePeriod(filters, today);
+      setFilterError("");
+    } catch (error) {
+      setFilterError(
+        error instanceof Error ? error.message : "Informe um período válido.",
+      );
+      return;
+    }
+    if (saving) return;
+    const timer = window.setTimeout(() => {
+      setPeriod((current) =>
+        current.from === next.from &&
+        current.to === next.to &&
+        current.endMode === next.endMode
+          ? current
+          : next,
+      );
+    }, 300);
+    return () => window.clearTimeout(timer);
+  }, [filters, today, saving]);
+
+  useEffect(() => {
     const controller = new AbortController();
     setLoading(true);
     setLoadFailed(false);
@@ -158,21 +184,6 @@ export function App() {
     const timer = setTimeout(() => setCopied(null), 2500);
     return () => clearTimeout(timer);
   }, [copied]);
-
-  function applyPeriod(next = filters) {
-    try {
-      validatePeriod(next.from, endDate(next, today));
-    } catch (error) {
-      setFilterError(
-        error instanceof Error ? error.message : "Período inválido.",
-      );
-      return;
-    }
-    setFilterError("");
-    setLoading(true);
-    setPeriod({ ...next });
-    setRetry((value) => value + 1);
-  }
 
   function changeEntries(date: string, entries: EditorEntry[]) {
     setEditor((current) => ({
@@ -256,7 +267,6 @@ export function App() {
       endMode: "fixed",
     };
     setFilters(next);
-    applyPeriod(next);
   }
 
   const dirtyCount = editor.dirtyDates.length;
@@ -290,8 +300,8 @@ export function App() {
           </a>
           <div className="header-actions">
             <span className="local-badge">
-              <span />
-              Uso local
+              <Database size={14} aria-hidden="true" />
+              Banco local
             </span>
             <span className="future-control">
               <button className="button quiet" disabled>
@@ -321,19 +331,51 @@ export function App() {
           </span>
         </div>
 
+        <section
+          className="data-context"
+          aria-label="Modo de uso e armazenamento"
+        >
+          <details className="data-details">
+            <summary>
+              <Database size={18} aria-hidden="true" />
+              <span>
+                <strong>Modo local</strong>
+                <small>Rascunhos no banco deste computador</small>
+              </span>
+              <ChevronDown size={15} aria-hidden="true" />
+            </summary>
+            <div className="data-description">
+              <p>
+                <strong>Seus dados:</strong> salvar grava os rascunhos no banco
+                local. Eles continuam disponíveis após reiniciar a aplicação.
+              </p>
+              <p>
+                <strong>Futura demo pública:</strong> usará exemplos fictícios e
+                armazenamento no navegador de cada visitante, separado deste
+                banco. Não acessará seus apontamentos nem o Redmine real.
+              </p>
+            </div>
+          </details>
+          <span className="future-control demo-control">
+            <button
+              className="button quiet"
+              disabled
+              aria-describedby="demo-status"
+            >
+              <FlaskConical size={16} aria-hidden="true" />
+              Abrir demonstração
+            </button>
+            <small id="demo-status">Em breve</small>
+          </span>
+        </section>
+
         <section className="period-panel" aria-label="Período de trabalho">
           <div className="period-title">
             <CalendarRange size={18} aria-hidden="true" />
             <h2>Período de trabalho</h2>
             <span className="period-hint">Todos os dias, em sequência</span>
           </div>
-          <form
-            className="period-controls"
-            onSubmit={(event) => {
-              event.preventDefault();
-              applyPeriod();
-            }}
-          >
+          <div className="period-controls">
             <label className="date-field" htmlFor="period-start">
               De
               <input
@@ -365,29 +407,33 @@ export function App() {
                 checked={filters.endMode === "today"}
                 disabled={saving}
                 onChange={(event) =>
-                  setFilters({
-                    ...filters,
-                    endMode: event.target.checked ? "today" : "fixed",
-                  })
+                  setFilters((current) =>
+                    changeEndMode(
+                      current,
+                      event.target.checked ? "today" : "fixed",
+                      today,
+                    ),
+                  )
                 }
               />
               <span>
                 Até hoje<small>Acompanha a data atual</small>
               </span>
             </label>
-            <button
-              className="button secondary apply-period"
-              type="submit"
-              disabled={saving || loading}
-            >
+            <span className="period-auto" role="status">
               {loading ? (
-                <LoaderCircle className="spin" size={16} aria-hidden="true" />
+                <>
+                  <LoaderCircle className="spin" size={14} aria-hidden="true" />
+                  Atualizando período…
+                </>
               ) : (
-                <CalendarRange size={16} aria-hidden="true" />
+                <>
+                  <Check size={14} aria-hidden="true" />
+                  Atualização automática
+                </>
               )}
-              Exibir período
-            </button>
-          </form>
+            </span>
+          </div>
           {filterError && (
             <p className="field-error" role="alert">
               {filterError}
@@ -403,13 +449,20 @@ export function App() {
               Salvar não envia horas ao Redmine.
             </span>
           </span>
-          <span className="future-control send-control">
-            <button className="button secondary" disabled>
-              <Upload size={16} aria-hidden="true" />
-              Enviar ao Redmine…
+          <div className="send-control">
+            <button
+              className="button send-button"
+              disabled
+              aria-describedby="send-status"
+            >
+              <Upload size={18} aria-hidden="true" />
+              Enviar ao Redmine
+              <LockKeyhole size={13} aria-hidden="true" />
             </button>
-            <small>Em breve</small>
-          </span>
+            <span id="send-status">
+              <strong>Em breve</strong> · revisão antes do envio
+            </span>
+          </div>
         </div>
         {preferenceNotice && <p className="notice">{preferenceNotice}</p>}
         {hiddenCount > 0 && (
@@ -503,7 +556,9 @@ export function App() {
           <option value="Revisão" />
           <option value="Reunião" />
         </datalist>
-        <div className="save-bar">
+        <div
+          className={`save-bar ${dirtyCount || saving ? "has-pending" : ""}`}
+        >
           <div className="save-status" aria-live="polite">
             <span className={`save-status-icon ${dirtyCount ? "pending" : ""}`}>
               {saving ? (
