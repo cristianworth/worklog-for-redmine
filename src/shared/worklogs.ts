@@ -88,3 +88,30 @@ export function validateDay(value: unknown): DraftDay {
     })),
   };
 }
+
+export function validateDays(value: unknown): DraftDay[] {
+  if (!Array.isArray(value)) throw new Error("Lista de dias inválida.");
+  const days = value.map(validateDay);
+  if (new Set(days.map((day) => day.date)).size !== days.length) {
+    throw new Error("O mesmo dia aparece mais de uma vez.");
+  }
+  return days;
+}
+
+export function validatePeriod(
+  from: unknown,
+  to: unknown,
+): { from: string; to: string } {
+  if (
+    typeof from !== "string" ||
+    typeof to !== "string" ||
+    !isWorkDate(from) ||
+    !isWorkDate(to) ||
+    from > to
+  ) {
+    throw new Error(
+      "Informe um período válido, com início anterior ou igual ao fim.",
+    );
+  }
+  return { from, to };
+}

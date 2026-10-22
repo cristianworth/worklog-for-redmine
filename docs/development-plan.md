@@ -44,7 +44,7 @@ Preservar o mecanismo de integração do VBA como ponto de partida. Avaliar a AP
 | P5 — Modelos e paridade restante | Preencher novos dias com um modelo e incorporar movimentação opcional de status | Modelo caracterizado no VBA e aplicado sem duplicar linhas; sucesso das horas não depende do sucesso posterior do status |
 | P6 — Uso e apresentação | Ajustar teclado, mensagens, documentação de execução e demonstração fictícia | Fluxo principal praticável, verificações registradas, exemplos públicos sem dados reais |
 
-P1 foi concluído e validado por Cristian. O próximo recorte recomendado é P1.1: adaptar o preenchimento ao uso de vários dias em uma mesma sessão, antes de iniciar a integração.
+P1 foi concluído e validado por Cristian. P1.1 foi autorizado em 22/10/2026 e implementado para revisão; a integração começa depois dessa conferência.
 
 ## Melhorias pequenas admitidas
 
@@ -96,7 +96,7 @@ Verificação do primeiro recorte: Vitest cobre soma, persistência e o transpor
 
 Cristian costuma reconstruir e salvar vários dias de uma vez e apropriar o período depois, frequentemente às quartas. O intervalo não é uma semana fixa de segunda a sexta. A mesma tarefa pode aparecer em dias seguidos; navegar rolando e copiar somente o código atende melhor que trocar de data a cada edição.
 
-### P1.1 — escopo da próxima implementação
+### P1.1 — escopo autorizado e implementado em 22/10/2026
 
 - Mostrar os dias de um intervalo livre, em ordem cronológica e empilhados, com total individual. Não incluir total semanal nem ação de copiar uma linha para outros dias.
 - Manter início e fim inclusivos e mostrar as datas explicitamente. Não assumir que quarta a quarta equivale sempre a cinco datas ou omitir fins de semana automaticamente.
@@ -107,7 +107,11 @@ Cristian costuma reconstruir e salvar vários dias de uma vez e apropriar o per�
 - Reservar ações claramente separadas para salvar e enviar. **Enviar ao Redmine…** é o nome recomendado, ainda sujeito a ajuste. Na fase local, deixar a ação indisponível com indicação de funcionalidade futura. Quando existir, abrir revisão do conteúdo salvo e dos dias selecionados antes da confirmação remota.
 - Mostrar **Modelo do dia** e **Configurações** como botões desabilitados, identificados como **Em breve**. Não simular telas, salvamento de configurações ou aplicação de modelos que ainda não existem.
 
-Esta atualização registra o roadmap; P1.1 e os botões acima ainda não foram implementados.
+P1.1 está implementado para revisão. Os botões de modelo, configurações e envio estão visíveis, desabilitados e marcados como **Em breve**. Não houve implementação desses fluxos futuros.
+
+Decisões da implementação: a preferência do período fica neste navegador; os rascunhos continuam no mesmo SQLite, sem mudança de esquema. A visualização inicial cobre sete datas de calendário até hoje, sem semana fixa. O filtro só é aplicado ao clicar **Exibir período**; mudar a vista não descarta edições. **Salvar rascunhos** grava todos os dias alterados em uma única transação: qualquer conflito impede a gravação de todo o conjunto. A atualização da data atual é verificada ao voltar à tela e a cada minuto, preservando dias editados e aguardando um salvamento em curso terminar.
+
+Verificação em 22/10/2026: 30 testes Vitest e build aprovados. Incluem persistência em banco existente, leitura com limites inclusivos, conflito sem gravação parcial, datas fixas/até hoje e preservação de edições ao trocar o período. Na interface foram conferidos: edição de dois dias fictícios, salvamento do dia fora da vista, recuperação após recarga, preferência **Até hoje**, bloqueio de duração inválida fora da vista e botões futuros desabilitados. O botão de cópia retornou sucesso; a colagem pelo clipboard virtual da ferramenta não foi verificável, devendo ser conferida no navegador habitual. As linhas fictícias criadas para a conferência foram removidas; os rascunhos preexistentes foram preservados. Sem acesso ao Redmine.
 
 ### Pendências funcionais posteriores
 
@@ -122,3 +126,5 @@ Esta atualização registra o roadmap; P1.1 e os botões acima ainda não foram 
 Interpretação adotada para “tipos de campos”: o catálogo de tipos de atividade, equivalente à aba de validações do Excel. Se Cristian estiver se referindo a outro cadastro ou a campos novos, ajustar essa parte do plano antes de implementá-la.
 
 Ordem recomendada: **P1.1 → P2 → P2.1 → P3 → P4 → P5 → P6**. P5 inclui o modelo recorrente, que pode ser antecipado após a revisão de P1.1 se o benefício no preenchimento justificar. Não transformar esse cadastro ou modelo em requisito para usar os rascunhos locais.
+
+A conferência também identificou uma conexão de atualização automática do Vite em porta separada. O servidor de desenvolvimento foi ajustado para compartilhar a porta local da aplicação, mantendo a atualização da interface no mesmo endereço.

@@ -73,3 +73,61 @@ describe("draft persistence through the local API", () => {
     expect((await fetch(`${base}/api/days/2026-02-30`)).status).toBe(400);
   });
 });
+
+describe("period API", () => {
+  const putDays = (days: unknown, origin = base) =>
+    fetch(`${base}/api/days`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", Origin: origin },
+      body: JSON.stringify({ days }),
+    });
+  it("persists two days and returns only the requested inclusive range", async () => {
+    const next = { ...day, date: "2026-10-22" };
+    expect((await putDays([day, next])).status).toBe(200);
+    const response = await fetch(
+      `${base}/api/days?from=2026-10-21&to=2026-10-22`,
+    );
+    expect(await response.json()).toEqual({
+      days: [
+        { ...day, revision: 1 },
+        { ...next, revision: 1 },
+      ],
+    });
+    const single = await fetch(
+      `${base}/api/days?from=2026-10-22&to=2026-10-22`,
+    );
+    expect(await single.json()).toEqual({ days: [{ ...next, revision: 1 }] });
+  });
+  it("rejects an entire stale operation and keeps the existing records", async () => {
+    await put(day);
+    expect((await putDays([{ ...day, date: "2026-10-22" }, day])).status).toBe(
+      409,
+    );
+    expect(store.read("2026-10-22").revision).toBe(0);
+    expect(store.read(day.date).entries).toEqual(day.entries);
+  });
+  it("rejects bad periods, duplicate dates, invalid payloads and foreign origins", async () => {
+    for (const query of [
+      "from=2026-10-22&to=2026-10-21",
+      "from=2026-02-30&to=2026-10-21",
+      "from=2026-10-21",
+    ]) {
+      expect((await fetch(`${base}/api/days?${query}`)).status).toBe(400);
+    }
+    expect((await putDays([day, day])).status).toBe(400);
+    expect(
+      (
+        await putDays([
+          day,
+          {
+            ...day,
+            date: "2026-10-22",
+            entries: [{ ...day.entries[0], minutes: -1 }],
+          },
+        ])
+      ).status,
+    ).toBe(400);
+    expect((await putDays([day], "https://example.com")).status).toBe(403);
+    expect(store.read(day.date).revision).toBe(0);
+  });
+});

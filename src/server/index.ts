@@ -1,3 +1,5 @@
+import { createServer as createHttpServer } from "node:http";
+import type { ViteDevServer } from "vite";
 import { mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { join } from "node:path";
@@ -9,10 +11,12 @@ const root = fileURLToPath(new URL("../../", import.meta.url));
 mkdirSync(join(root, "data"), { recursive: true });
 const store = openDraftStore(join(root, "data", "worklog.sqlite"));
 const app = createApp(store);
+const server = createHttpServer(app);
+let vite: ViteDevServer | undefined;
 if (process.argv.includes("--dev")) {
   const { createServer } = await import("vite");
-  const vite = await createServer({
-    server: { middlewareMode: true },
+  vite = await createServer({
+    server: { middlewareMode: true, ws: { server } },
     appType: "spa",
   });
   app.use(vite.middlewares);
@@ -21,10 +25,11 @@ if (process.argv.includes("--dev")) {
   app.get("/", (_req, res) => res.sendFile(join(root, "dist", "index.html")));
 }
 app.use(handleErrors);
-const server = app.listen(3000, "127.0.0.1", () => {
+server.listen(3000, "127.0.0.1", () => {
   console.log("Worklog for Redmine: http://127.0.0.1:3000");
 });
-function shutdown() {
+async function shutdown() {
+  await vite?.close();
   server.close(() => {
     store.close();
     process.exit(0);

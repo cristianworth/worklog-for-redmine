@@ -1,68 +1,127 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  formatDuration,
-  parseDuration,
-  totalMinutes,
-  validateDay,
-  type Draft,
+  AlertCircle,
+  ArrowRight,
+  CalendarRange,
+  Check,
+  FilePlus2,
+  LoaderCircle,
+  Save,
+  Settings2,
+  Upload,
+  WifiOff,
+} from "lucide-react";
+import {
+  validateDays,
+  validatePeriod,
   type DraftDay,
 } from "../shared/worklogs";
+import {
+  dateRange,
+  endDate,
+  localDate,
+  periodStorageKey,
+  restorePeriod,
+  shortDate,
+  type PeriodPreference,
+} from "./period";
+import {
+  daySummary,
+  emptyDay,
+  mergeLoadedDays,
+  toDraftDay,
+  toEditor,
+  type EditorEntry,
+  type EditorState,
+} from "./editor";
+import { DaySection } from "./DaySection";
 
-type EditorEntry = Omit<Draft, "minutes"> & { duration: string };
-const today = () => {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-};
-const toEditor = ({ minutes, ...entry }: Draft): EditorEntry => ({
-  ...entry,
-  duration: minutes === null ? "" : formatDuration(minutes),
-});
-const newEntry = (): EditorEntry => ({
-  id: crypto.randomUUID(),
-  issue: "",
-  duration: "",
-  activity: "",
-  comment: "",
-});
+function initialPeriod(): PeriodPreference {
+  try {
+    return restorePeriod(
+      JSON.parse(localStorage.getItem(periodStorageKey) ?? "null"),
+    );
+  } catch {
+    return restorePeriod(null);
+  }
+}
 
-async function readResponse(response: Response): Promise<DraftDay> {
+async function readDays(response: Response): Promise<DraftDay[]> {
   const data = await response.json();
   if (!response.ok)
     throw new Error(data.error || "Não foi possível acessar os rascunhos.");
-  return validateDay(data);
+  return validateDays(data.days);
 }
 
 export function App() {
-  const [date, setDate] = useState(today);
-  const [entries, setEntries] = useState<EditorEntry[]>([]);
-  const [revision, setRevision] = useState(0);
-  const [dirty, setDirty] = useState(false);
+  const [period, setPeriod] = useState(initialPeriod);
+  const [filters, setFilters] = useState(period);
+  const [today, setToday] = useState(localDate);
+  const [editor, setEditor] = useState<EditorState>({
+    days: {},
+    dirtyDates: [],
+  });
+  const [visibleDates, setVisibleDates] = useState<string[]>([]);
+  const [activeRange, setActiveRange] = useState<{
+    from: string;
+    to: string;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [loadFailed, setLoadFailed] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [filterError, setFilterError] = useState("");
   const [message, setMessage] = useState("");
+  const [preferenceNotice, setPreferenceNotice] = useState("");
+  const [copied, setCopied] = useState<string | null>(null);
   const [retry, setRetry] = useState(0);
-  const pendingFocus = useRef<string | null>(null);
-  const table = useRef<HTMLDivElement>(null);
+  const effectiveEnd = endDate(period, today);
+
+  useEffect(() => {
+    if (saving) return;
+    const refresh = () => setToday(localDate());
+    refresh();
+    const timer = window.setInterval(refresh, 60000);
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", refresh);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener("focus", refresh);
+      document.removeEventListener("visibilitychange", refresh);
+    };
+  }, [saving]);
 
   useEffect(() => {
     const controller = new AbortController();
     setLoading(true);
     setLoadFailed(false);
     setError("");
-    setMessage("");
-    fetch(`/api/days/${date}`, { signal: controller.signal })
-      .then(readResponse)
-      .then((day) => {
+    let dates: string[];
+    try {
+      dates = dateRange(period.from, effectiveEnd);
+    } catch (error) {
+      setLoading(false);
+      setLoadFailed(true);
+      setError(error instanceof Error ? error.message : "Período inválido.");
+      return;
+    }
+    fetch(`/api/days?from=${period.from}&to=${effectiveEnd}`, {
+      signal: controller.signal,
+    })
+      .then(readDays)
+      .then((saved) => {
         if (controller.signal.aborted) return;
-        setEntries(day.entries.map(toEditor));
-        setRevision(day.revision);
-        setDirty(false);
+        if (
+          saved.some((day) => day.date < period.from || day.date > effectiveEnd)
+        )
+          throw new Error("A resposta não corresponde ao período solicitado.");
+        setEditor((current) => mergeLoadedDays(current, dates, saved));
+        setVisibleDates(dates);
+        setActiveRange({ from: period.from, to: effectiveEnd });
       })
       .catch((error) => {
         if (!controller.signal.aborted) {
-          setError(error.message);
+          setError(error.message || "Não foi possível abrir o período.");
           setLoadFailed(true);
         }
       })
@@ -70,124 +129,114 @@ export function App() {
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, [date, retry]);
+  }, [period.from, effectiveEnd, retry]);
 
   useEffect(() => {
-    if (pendingFocus.current) {
-      table.current
-        ?.querySelector<HTMLInputElement>(
-          `[data-entry="${pendingFocus.current}"]`,
-        )
-        ?.focus();
-      pendingFocus.current = null;
+    try {
+      localStorage.setItem(periodStorageKey, JSON.stringify(period));
+      setPreferenceNotice("");
+    } catch {
+      setPreferenceNotice(
+        "Este navegador não permitiu lembrar o período. Seus rascunhos continuam no banco local.",
+      );
     }
-  }, [entries]);
+  }, [period]);
 
   useEffect(() => {
     const warn = (event: BeforeUnloadEvent) => {
-      if (dirty) {
+      if (editor.dirtyDates.length) {
         event.preventDefault();
         event.returnValue = "";
       }
     };
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
-  }, [dirty]);
+  }, [editor.dirtyDates.length]);
 
-  function changed(next: EditorEntry[]) {
-    setEntries(next);
-    setDirty(true);
-    setMessage("");
-    setError("");
-  }
-  function update(id: string, field: keyof EditorEntry, value: string) {
-    changed(
-      entries.map((entry) =>
-        entry.id === id ? { ...entry, [field]: value } : entry,
-      ),
-    );
-  }
-  function add() {
-    const entry = newEntry();
-    pendingFocus.current = entry.id;
-    changed([...entries, entry]);
-  }
-  function changeDate(value: string) {
-    if (!value || value === date) return;
-    if (
-      dirty &&
-      !window.confirm("Há alterações não salvas. Descartar e abrir outro dia?")
-    )
-      return;
-    setLoading(true);
-    setEntries([]);
-    setDirty(false);
-    setDate(value);
-  }
-  function demo() {
-    changed([
-      {
-        ...newEntry(),
-        issue: "1001",
-        duration: "01:30",
-        activity: "Desenvolvimento",
-        comment: "Exemplo fictício: preparar uma tela.",
-      },
-      {
-        ...newEntry(),
-        issue: "1002",
-        duration: "00:45",
-        activity: "Revisão",
-        comment: "Exemplo fictício: revisar uma alteração.",
-      },
-    ]);
-  }
+  useEffect(() => {
+    if (!copied) return;
+    const timer = setTimeout(() => setCopied(null), 2500);
+    return () => clearTimeout(timer);
+  }, [copied]);
 
-  const invalid = entries.some(
-    (entry) => entry.duration !== "" && parseDuration(entry.duration) === null,
-  );
-  let total = "00:00";
-  let totalError = false;
-  try {
-    total = formatDuration(
-      totalMinutes(
-        entries.map((entry) => ({ minutes: parseDuration(entry.duration) })),
-      ),
-    );
-  } catch {
-    totalError = true;
-  }
-  const blocked = loading || saving || loadFailed;
-
-  async function save() {
-    if (invalid || totalError) {
-      setError(
-        "Revise as durações antes de salvar. Use horas:minutos, por exemplo 01:30.",
+  function applyPeriod(next = filters) {
+    try {
+      validatePeriod(next.from, endDate(next, today));
+    } catch (error) {
+      setFilterError(
+        error instanceof Error ? error.message : "Período inválido.",
       );
       return;
     }
+    setFilterError("");
+    setLoading(true);
+    setPeriod({ ...next });
+    setRetry((value) => value + 1);
+  }
+
+  function changeEntries(date: string, entries: EditorEntry[]) {
+    setEditor((current) => ({
+      days: {
+        ...current.days,
+        [date]: { ...(current.days[date] ?? emptyDay(date)), entries },
+      },
+      dirtyDates: current.dirtyDates.includes(date)
+        ? current.dirtyDates
+        : [...current.dirtyDates, date],
+    }));
+    setMessage("");
+    setError("");
+  }
+
+  async function copyCode(key: string, issue: string) {
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error();
+      await navigator.clipboard.writeText(issue);
+      setCopied(key);
+      setMessage(`Código ${issue} copiado.`);
+    } catch {
+      setError(
+        "Não foi possível copiar o código. Selecione o número e copie manualmente.",
+      );
+    }
+  }
+
+  async function save() {
+    if (!editor.dirtyDates.length || saving) return;
     setSaving(true);
     setError("");
     setMessage("");
     try {
-      const day = await readResponse(
-        await fetch(`/api/days/${date}`, {
+      const pending = editor.dirtyDates.map((date) =>
+        toDraftDay(editor.days[date]),
+      );
+      const saved = await readDays(
+        await fetch("/api/days", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            date,
-            revision,
-            entries: entries.map(({ duration, ...entry }) => ({
-              ...entry,
-              minutes: duration === "" ? null : parseDuration(duration),
-            })),
-          }),
+          body: JSON.stringify({ days: pending }),
         }),
       );
-      setEntries(day.entries.map(toEditor));
-      setRevision(day.revision);
-      setDirty(false);
-      setMessage("Rascunhos salvos neste computador.");
+      const expected = new Map(
+        pending.map((day) => [day.date, day.revision + 1]),
+      );
+      if (
+        saved.length !== pending.length ||
+        saved.some((day) => expected.get(day.date) !== day.revision)
+      )
+        throw new Error(
+          "Não foi possível confirmar o salvamento de todos os dias. Suas edições continuam na tela.",
+        );
+      setEditor((current) => ({
+        days: {
+          ...current.days,
+          ...Object.fromEntries(saved.map((day) => [day.date, toEditor(day)])),
+        },
+        dirtyDates: current.dirtyDates.filter((date) => !expected.has(date)),
+      }));
+      setMessage(
+        `${saved.length === 1 ? "Rascunhos de 1 dia salvos" : `Rascunhos de ${saved.length} dias salvos`} neste computador.`,
+      );
     } catch (error) {
       setError(
         error instanceof Error
@@ -199,302 +248,311 @@ export function App() {
     }
   }
 
+  function showPending() {
+    const dates = [...editor.dirtyDates].sort();
+    const next: PeriodPreference = {
+      from: dates[0],
+      to: dates[dates.length - 1],
+      endMode: "fixed",
+    };
+    setFilters(next);
+    applyPeriod(next);
+  }
+
+  const dirtyCount = editor.dirtyDates.length;
+  const hiddenCount = editor.dirtyDates.filter(
+    (date) => !visibleDates.includes(date),
+  ).length;
+  const invalidDates = editor.dirtyDates.filter(
+    (date) => daySummary(editor.days[date]).invalid,
+  );
+  const blocked = loading || saving || loadFailed;
+  const canSave = dirtyCount > 0 && !blocked && !invalidDates.length;
+  const selectedEnd = endDate(filters, today);
+
   return (
     <div className="app-shell">
       <header className="app-header">
-        <a
-          className="brand"
-          href="/"
-          onClick={(event) => {
-            if (dirty) event.preventDefault();
-          }}
-        >
-          <span className="brand-mark" aria-hidden="true">
-            w.
-          </span>
-          <span>
-            Worklog <small>for Redmine</small>
-          </span>
-        </a>
-        <span className="local-badge">
-          <span /> Uso local
-        </span>
+        <div className="header-inner">
+          <a
+            className="brand"
+            href="/"
+            onClick={(event) => {
+              if (dirtyCount) event.preventDefault();
+            }}
+          >
+            <span className="brand-mark" aria-hidden="true">
+              w.
+            </span>
+            <span>
+              Worklog <small>for Redmine</small>
+            </span>
+          </a>
+          <div className="header-actions">
+            <span className="local-badge">
+              <span />
+              Uso local
+            </span>
+            <span className="future-control">
+              <button className="button quiet" disabled>
+                <Settings2 size={17} aria-hidden="true" />
+                Configurações
+              </button>
+              <small>Em breve</small>
+            </span>
+          </div>
+        </div>
       </header>
       <main>
         <div className="page-heading">
           <div>
-            <p className="eyebrow">SEU DIA, EM ORDEM</p>
-            <h1>Apontamentos do dia</h1>
+            <p className="eyebrow">SEUS DIAS, EM ORDEM</p>
+            <h1>Apontamentos</h1>
             <p className="intro">
-              Organize as horas, revise os detalhes e salve seus rascunhos.
+              Preencha no seu ritmo. Salve agora, envie depois.
             </p>
           </div>
-          <div className="date-field">
-            <label htmlFor="work-date">Data de trabalho</label>
-            <input
-              id="work-date"
-              type="date"
-              value={date}
-              disabled={loading || saving}
-              onChange={(event) => changeDate(event.target.value)}
-            />
-          </div>
+          <span className="future-control model-control">
+            <button className="button secondary" disabled>
+              <FilePlus2 size={16} aria-hidden="true" />
+              Modelo do dia
+            </button>
+            <small>Em breve</small>
+          </span>
         </div>
-        <section className="summary" aria-label="Resumo do dia">
-          <div>
-            <span className="summary-label">TOTAL DO DIA</span>
-            <strong>
-              {totalError ? "—" : total}
-              <small>h</small>
-            </strong>
-            <span>
-              {totalError
-                ? "Total fora do formato suportado"
-                : invalid
-                  ? "Total parcial · revise as durações"
-                  : "Soma das durações preenchidas"}
-            </span>
+
+        <section className="period-panel" aria-label="Período de trabalho">
+          <div className="period-title">
+            <CalendarRange size={18} aria-hidden="true" />
+            <h2>Período de trabalho</h2>
+            <span className="period-hint">Todos os dias, em sequência</span>
           </div>
-          <div className="summary-count">
-            <strong>{entries.length.toString().padStart(2, "0")}</strong>
-            <span>{entries.length === 1 ? "rascunho" : "rascunhos"}</span>
-          </div>
-          <div className="draft-note">
-            <span className="draft-dot" />
-            <div>
-              <strong>Tudo começa como rascunho</strong>
-              <p>
-                Salvar mantém os dados neste computador.
-                <br />O envio ao Redmine será incluído em uma próxima etapa.
-              </p>
-            </div>
-          </div>
-        </section>
-        <section className="workbench" aria-labelledby="entries-title">
-          <div className="workbench-heading">
-            <div>
-              <h2 id="entries-title">
-                Lançamentos <span>{entries.length}</span>
-              </h2>
-              <p>Uma linha para cada atividade do seu dia.</p>
-            </div>
+          <form
+            className="period-controls"
+            onSubmit={(event) => {
+              event.preventDefault();
+              applyPeriod();
+            }}
+          >
+            <label className="date-field" htmlFor="period-start">
+              De
+              <input
+                id="period-start"
+                type="date"
+                value={filters.from}
+                disabled={saving}
+                onChange={(event) =>
+                  setFilters({ ...filters, from: event.target.value })
+                }
+              />
+            </label>
+            <ArrowRight className="range-arrow" size={16} aria-hidden="true" />
+            <label className="date-field" htmlFor="period-end">
+              Até
+              <input
+                id="period-end"
+                type="date"
+                value={selectedEnd}
+                disabled={saving || filters.endMode === "today"}
+                onChange={(event) =>
+                  setFilters({ ...filters, to: event.target.value })
+                }
+              />
+            </label>
+            <label className="today-toggle">
+              <input
+                type="checkbox"
+                checked={filters.endMode === "today"}
+                disabled={saving}
+                onChange={(event) =>
+                  setFilters({
+                    ...filters,
+                    endMode: event.target.checked ? "today" : "fixed",
+                  })
+                }
+              />
+              <span>
+                Até hoje<small>Acompanha a data atual</small>
+              </span>
+            </label>
             <button
-              className="button secondary"
-              onClick={add}
-              disabled={blocked}
+              className="button secondary apply-period"
+              type="submit"
+              disabled={saving || loading}
             >
-              + Adicionar linha
+              {loading ? (
+                <LoaderCircle className="spin" size={16} aria-hidden="true" />
+              ) : (
+                <CalendarRange size={16} aria-hidden="true" />
+              )}
+              Exibir período
+            </button>
+          </form>
+          {filterError && (
+            <p className="field-error" role="alert">
+              {filterError}
+            </p>
+          )}
+        </section>
+
+        <div className="draft-toolbar">
+          <span className="draft-explanation">
+            <span className="draft-dot" />
+            Rascunhos locais
+            <span className="explanation-detail">
+              Salvar não envia horas ao Redmine.
+            </span>
+          </span>
+          <span className="future-control send-control">
+            <button className="button secondary" disabled>
+              <Upload size={16} aria-hidden="true" />
+              Enviar ao Redmine…
+            </button>
+            <small>Em breve</small>
+          </span>
+        </div>
+        {preferenceNotice && <p className="notice">{preferenceNotice}</p>}
+        {hiddenCount > 0 && (
+          <div className="notice pending-notice">
+            <span>
+              {hiddenCount === 1
+                ? "Há 1 dia alterado fora do período exibido. Ele também será salvo."
+                : `Há ${hiddenCount} dias alterados fora do período exibido. Eles também serão salvos.`}
+            </span>
+            <button
+              className="text-button"
+              disabled={saving || loading}
+              onClick={showPending}
+            >
+              Ver dias alterados
             </button>
           </div>
-          {loading ? (
-            <div className="empty-state" role="status">
-              Carregando rascunhos…
-            </div>
-          ) : loadFailed ? (
-            <div className="empty-state">
-              <p>Não foi possível abrir este dia.</p>
+        )}
+        {invalidDates.length > 0 && (
+          <div className="error-banner" role="alert">
+            <AlertCircle size={17} aria-hidden="true" />
+            <span>
+              Revise as durações em {invalidDates.map(shortDate).join(", ")}{" "}
+              antes de salvar.
+            </span>
+            {hiddenCount > 0 && (
+              <button
+                className="text-button"
+                disabled={saving || loading}
+                onClick={showPending}
+              >
+                Abrir alterações
+              </button>
+            )}
+          </div>
+        )}
+        {error && (
+          <div className="error-banner" role="alert">
+            <AlertCircle size={17} aria-hidden="true" />
+            <span>{error}</span>
+            {loadFailed && (
               <button
                 className="button secondary"
+                disabled={loading}
                 onClick={() => setRetry((value) => value + 1)}
               >
                 Tentar novamente
               </button>
-            </div>
-          ) : (
-            <>
-              <div className="table-scroll" ref={table}>
-                <table>
-                  <thead>
-                    <tr>
-                      <th className="row-number">#</th>
-                      <th>Tarefa</th>
-                      <th>Duração</th>
-                      <th>Atividade</th>
-                      <th>Observação</th>
-                      <th>
-                        <span className="sr-only">Ações</span>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {entries.map((entry, index) => {
-                      const durationInvalid =
-                        entry.duration !== "" &&
-                        parseDuration(entry.duration) === null;
-                      return (
-                        <tr key={entry.id}>
-                          <td className="row-number">
-                            {String(index + 1).padStart(2, "0")}
-                          </td>
-                          <td>
-                            <input
-                              data-entry={entry.id}
-                              aria-label={`Tarefa da linha ${index + 1}`}
-                              placeholder="Nº da tarefa"
-                              inputMode="numeric"
-                              value={entry.issue}
-                              disabled={saving}
-                              onChange={(event) =>
-                                update(entry.id, "issue", event.target.value)
-                              }
-                            />
-                          </td>
-                          <td>
-                            <input
-                              className="duration-input"
-                              aria-label={`Duração da linha ${index + 1}`}
-                              aria-invalid={durationInvalid}
-                              aria-describedby={
-                                durationInvalid
-                                  ? `duration-error-${entry.id}`
-                                  : undefined
-                              }
-                              placeholder="00:00"
-                              value={entry.duration}
-                              disabled={saving}
-                              onChange={(event) =>
-                                update(entry.id, "duration", event.target.value)
-                              }
-                              onBlur={() => {
-                                const minutes = parseDuration(entry.duration);
-                                if (
-                                  minutes !== null &&
-                                  entry.duration !== formatDuration(minutes)
-                                )
-                                  update(
-                                    entry.id,
-                                    "duration",
-                                    formatDuration(minutes),
-                                  );
-                              }}
-                            />
-                            {durationInvalid && (
-                              <small
-                                className="field-error"
-                                id={`duration-error-${entry.id}`}
-                              >
-                                Use HH:MM (minutos de 00 a 59).
-                              </small>
-                            )}
-                          </td>
-                          <td>
-                            <input
-                              aria-label={`Atividade da linha ${index + 1}`}
-                              placeholder="Tipo de atividade"
-                              list="activity-suggestions"
-                              value={entry.activity}
-                              disabled={saving}
-                              onChange={(event) =>
-                                update(entry.id, "activity", event.target.value)
-                              }
-                            />
-                          </td>
-                          <td>
-                            <textarea
-                              aria-label={`Observação da linha ${index + 1}`}
-                              placeholder="O que foi feito?"
-                              rows={2}
-                              value={entry.comment}
-                              disabled={saving}
-                              onChange={(event) =>
-                                update(entry.id, "comment", event.target.value)
-                              }
-                            />
-                          </td>
-                          <td>
-                            <button
-                              className="remove-button"
-                              aria-label={`Remover linha ${index + 1}`}
-                              title="Remover linha"
-                              disabled={saving}
-                              onClick={() =>
-                                changed(
-                                  entries.filter(
-                                    (item) => item.id !== entry.id,
-                                  ),
-                                )
-                              }
-                            >
-                              ×
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-              {entries.length === 0 && (
-                <div className="empty-state">
-                  <span className="empty-icon" aria-hidden="true">
-                    ＋
-                  </span>
-                  <h3>Um novo dia para organizar</h3>
-                  <p>
-                    Adicione a primeira linha ou experimente com dados
-                    fictícios.
-                  </p>
-                  <div>
-                    <button
-                      className="button secondary"
-                      onClick={add}
-                      disabled={saving}
-                    >
-                      Adicionar primeira linha
-                    </button>
-                    <button
-                      className="text-button"
-                      onClick={demo}
-                      disabled={saving}
-                    >
-                      Carregar exemplo
-                    </button>
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-          <datalist id="activity-suggestions">
-            <option value="Desenvolvimento" />
-            <option value="Revisão" />
-            <option value="Reunião" />
-          </datalist>
-          <div className="workbench-footer">
-            <span>Preencha com Tab · Duração em horas:minutos</span>
-            <span className="status-pill">Rascunhos locais</span>
+            )}
           </div>
-        </section>
+        )}
+        <div className="days-caption">
+          <span>
+            {activeRange
+              ? `${shortDate(activeRange.from)} — ${shortDate(activeRange.to)}`
+              : "Seus rascunhos"}
+          </span>
+          <span>
+            {loading ? (
+              <>
+                <LoaderCircle className="spin" size={14} aria-hidden="true" />
+                Carregando período…
+              </>
+            ) : (
+              "Duração em horas:minutos"
+            )}
+          </span>
+        </div>
+        <div className="days-list" aria-busy={loading}>
+          {visibleDates.map((date) => (
+            <DaySection
+              key={date}
+              day={editor.days[date] ?? emptyDay(date)}
+              dirty={editor.dirtyDates.includes(date)}
+              disabled={blocked}
+              today={today}
+              copied={copied}
+              onChange={(entries) => changeEntries(date, entries)}
+              onCopy={copyCode}
+            />
+          ))}
+        </div>
+        {!visibleDates.length && loading && (
+          <div className="initial-loading" role="status">
+            <LoaderCircle className="spin" size={22} aria-hidden="true" />
+            Abrindo seus dias…
+          </div>
+        )}
+        <datalist id="activity-suggestions">
+          <option value="Desenvolvimento" />
+          <option value="Revisão" />
+          <option value="Reunião" />
+        </datalist>
         <div className="save-bar">
-          <div aria-live="polite">
-            <strong>
-              {saving
-                ? "Salvando…"
-                : dirty
-                  ? "Alterações não salvas"
-                  : message || "Nenhuma alteração pendente"}
-            </strong>
-            <p>
-              {dirty
-                ? "Salve antes de fechar ou mudar de dia."
-                : "Você pode continuar editando quando quiser."}
-            </p>
+          <div className="save-status" aria-live="polite">
+            <span className={`save-status-icon ${dirtyCount ? "pending" : ""}`}>
+              {saving ? (
+                <LoaderCircle className="spin" size={18} aria-hidden="true" />
+              ) : dirtyCount ? (
+                <Save size={18} aria-hidden="true" />
+              ) : (
+                <Check size={18} aria-hidden="true" />
+              )}
+            </span>
+            <div>
+              <strong>
+                {saving
+                  ? "Salvando rascunhos…"
+                  : dirtyCount
+                    ? `${dirtyCount} ${dirtyCount === 1 ? "dia com alterações não salvas" : "dias com alterações não salvas"}`
+                    : loading
+                      ? "Carregando rascunhos…"
+                      : loadFailed
+                        ? "Não foi possível abrir o período"
+                        : message || "Tudo salvo neste computador"}
+              </strong>
+              <p>
+                {dirtyCount
+                  ? "Salvar inclui todos os dias alterados, mesmo fora do período."
+                  : "Nenhum apontamento foi enviado ao Redmine."}
+              </p>
+            </div>
           </div>
-          <button
-            className="button primary"
-            disabled={blocked || !dirty || invalid || totalError}
-            onClick={save}
-          >
+          <button className="button primary" disabled={!canSave} onClick={save}>
+            {saving ? (
+              <LoaderCircle className="spin" size={17} aria-hidden="true" />
+            ) : (
+              <Save size={17} aria-hidden="true" />
+            )}
             {saving ? "Salvando…" : "Salvar rascunhos"}
           </button>
         </div>
-        {error && (
-          <div className="error-banner" role="alert">
-            {error}
-          </div>
+        {message && dirtyCount > 0 && (
+          <p className="copy-feedback" role="status">
+            {message}
+          </p>
         )}
         <footer className="page-footer">
           <span>Worklog for Redmine</span>
-          <span>Primeiro recorte · organização local</span>
+          <span>
+            <WifiOff size={13} aria-hidden="true" />
+            Organização local · sem envio automático
+          </span>
         </footer>
       </main>
     </div>

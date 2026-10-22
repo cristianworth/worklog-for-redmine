@@ -1,5 +1,10 @@
 import express from "express";
-import { isWorkDate, validateDay } from "../shared/worklogs";
+import {
+  isWorkDate,
+  validateDay,
+  validateDays,
+  validatePeriod,
+} from "../shared/worklogs";
 import { ConflictError, type openDraftStore } from "./storage";
 
 export function createApp(store: ReturnType<typeof openDraftStore>) {
@@ -23,6 +28,40 @@ export function createApp(store: ReturnType<typeof openDraftStore>) {
     next();
   });
   app.use(express.json({ limit: "1mb" }));
+  app.get("/api/days", (req, res) => {
+    let period;
+    try {
+      period = validatePeriod(req.query.from, req.query.to);
+    } catch (error) {
+      res
+        .status(400)
+        .json({
+          error: error instanceof Error ? error.message : "Período inválido.",
+        });
+      return;
+    }
+    res.json({ days: store.readRange(period.from, period.to) });
+  });
+  app.put("/api/days", (req, res) => {
+    let days;
+    try {
+      days = validateDays(req.body?.days);
+    } catch (error) {
+      res
+        .status(400)
+        .json({
+          error:
+            error instanceof Error ? error.message : "Rascunhos inválidos.",
+        });
+      return;
+    }
+    try {
+      res.json({ days: store.saveMany(days) });
+    } catch (error) {
+      if (!(error instanceof ConflictError)) throw error;
+      res.status(409).json({ error: error.message });
+    }
+  });
   app.get("/api/days/:date", (req, res) => {
     if (!isWorkDate(req.params.date)) {
       res.status(400).json({ error: "Data inválida." });
@@ -37,11 +76,9 @@ export function createApp(store: ReturnType<typeof openDraftStore>) {
       if (day.date !== req.params.date)
         throw new Error("A data do rascunho não corresponde ao dia aberto.");
     } catch (error) {
-      res
-        .status(400)
-        .json({
-          error: error instanceof Error ? error.message : "Rascunho inválido.",
-        });
+      res.status(400).json({
+        error: error instanceof Error ? error.message : "Rascunho inválido.",
+      });
       return;
     }
     try {
@@ -73,10 +110,8 @@ export const handleErrors: express.ErrorRequestHandler = (
   console.error(
     "A operação local falhou. Verifique a disponibilidade do banco de dados.",
   );
-  res
-    .status(500)
-    .json({
-      error:
-        "Não foi possível acessar os rascunhos. Tente novamente sem fechar a página.",
-    });
+  res.status(500).json({
+    error:
+      "Não foi possível acessar os rascunhos. Tente novamente sem fechar a página.",
+  });
 };
