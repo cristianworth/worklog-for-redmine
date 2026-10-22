@@ -32,7 +32,7 @@ The default view covers the last seven calendar dates, including today. Weekends
 
 Incomplete rows can be saved as drafts. A blank duration contributes nothing to the total; malformed durations must be corrected or cleared before saving. Zero duration is allowed in a draft. No remote submission validation is implemented yet. Activity suggestions are editable examples, not a configured Redmine catalog or real IDs.
 
-Data stays in `data/worklog.sqlite`, outside Git and independent of browser storage. Back up that file with the server stopped. Saved data remains after changing browsers on the same computer. Simultaneous edits in another tab are rejected instead of silently overwriting newer data; copy pending edits before reloading that tab.
+Data stays in `data/worklog.sqlite`, outside Git and independent of browser storage. The Node process opens this file when the application starts, creating it only if missing. Restarting the application reuses saved data; there is no separate database service or automatic sample-data import. Loading a period reads the database, while **Salvar rascunhos** commits the changes to disk. Back up that file with the server stopped. Saved data remains after changing browsers on the same computer. Simultaneous edits in another tab are rejected instead of silently overwriting newer data; copy pending edits before reloading that tab.
 
 ## Verify
 

@@ -37,6 +37,7 @@ Preservar o mecanismo de integração do VBA como ponto de partida. Avaliar a AP
 | P0 — Contexto e exemplos | Conferir as fontes, mapear as regras e validar o primeiro recorte | Aprovado diretamente por Cristian em 21/10/2026, com simplificação dos testes |
 | P1 — Primeiro fluxo local | Preparar lançamentos de um dia, totalizar e salvar rascunhos com dados fictícios | Concluído em `dd8bd4d`; 18 testes e build aprovados. Cristian conferiu o fluxo e confirmou o funcionamento em 21/10/2026 |
 | P1.1 — Preenchimento por período | Exibir dias empilhados, copiar código, salvar o período e refinar a apresentação | Intervalo livre com fim fixo ou até hoje; dados existentes preservados; abrir/reabrir mantém rascunhos; salvar não envia ao Redmine |
+| P1.2 — Ajustes do período e destaque visual | Corrigir o fim ao sair de Até hoje, consultar automaticamente e destacar envio/total diário | Entregar os chunks A–D descritos abaixo; preservar rascunhos e manter envio indisponível até a integração |
 | P2 — Acesso e consulta | Portar autenticação e consulta de descrição/status para Node | Contrato reproduzido em simulação; consulta real somente de leitura quando houver acesso; nenhuma credencial exposta |
 | P2.1 — Atividades configuráveis | Criar o catálogo equivalente à aba de validações da planilha | Incluir/editar tipos de atividade sem mudar o código da tela; resolver IDs no projeto correto antes do envio |
 | P3 — Apropriação individual | Preparar e enviar um apontamento, distinguindo resultado confirmado e incerto | Contrato de envio, confirmação, duplo envio e resposta incerta verificados em simulação; conferência real depende de alvo e autorização específicos |
@@ -125,6 +126,32 @@ Verificação em 22/10/2026: 30 testes Vitest e build aprovados. Incluem persist
 
 Interpretação adotada para “tipos de campos”: o catálogo de tipos de atividade, equivalente à aba de validações do Excel. Se Cristian estiver se referindo a outro cadastro ou a campos novos, ajustar essa parte do plano antes de implementá-la.
 
-Ordem recomendada: **P1.1 → P2 → P2.1 → P3 → P4 → P5 → P6**. P5 inclui o modelo recorrente, que pode ser antecipado após a revisão de P1.1 se o benefício no preenchimento justificar. Não transformar esse cadastro ou modelo em requisito para usar os rascunhos locais.
+Ordem recomendada: **P1.1 → P1.2 → P2 → P2.1 → P3 → P4 → P5 → P6**. P5 inclui o modelo recorrente, que pode ser antecipado após a revisão de P1.1 se o benefício no preenchimento justificar. Não transformar esse cadastro ou modelo em requisito para usar os rascunhos locais.
 
 A conferência também identificou uma conexão de atualização automática do Vite em porta separada. O servidor de desenvolvimento foi ajustado para compartilhar a porta local da aplicação, mantendo a atualização da interface no mesmo endereço.
+
+## P1.2 — correções e refinamento após uso — 22/10/2026
+
+**Situação:** planejamento solicitado por Cristian; nenhuma correção ou alteração visual desta seção foi implementada nesta atualização. Base conferida: `ce6bbba`, branch `master`. Concluir esta etapa antes de iniciar P2.
+
+### Fatos e decisões para o recorte
+
+- Os rascunhos são persistidos em `data/worklog.sqlite`. O Node abre o mesmo arquivo ao iniciar; cria a pasta, o banco e a tabela apenas quando ausentes. Não há serviço de banco separado, carga automática de exemplos ou limpeza dos registros no startup. A tela consulta o período ao abrir; o botão de salvar grava em transação antes de confirmar sucesso.
+- O navegador guarda somente a preferência de período em `worklog.period`. O fim fixo pode continuar antigo enquanto `endMode` é `today`. Os handlers atuais alternam o modo sem atualizar esse fim; `endDate` volta a utilizá-lo ao desmarcar. Isso explica o retorno de 06/01/2000 observado por Cristian após a conferência com dados fictícios. Não é corrupção das datas do banco.
+- Cristian quer consulta automática ao alterar início/fim e mais destaque para envio e total diário. A remoção de **Exibir período** foi deixada a critério do agente. Recomendação: remover esse botão e manter **Tentar novamente** apenas quando uma consulta falhar, como recuperação explícita.
+- O total diário é um indicador, não uma ação. Dar destaque ao valor sem criar um botão sem comportamento. O envio ainda não existe: melhorar sua presença visual sem aparentar que já pode ser acionado.
+
+### Chunks de implementação
+
+| Chunk | Mudança concreta | Conferência de conclusão |
+| --- | --- | --- |
+| **A — Fim previsível ao alternar Até hoje** | Ao desmarcar, usar como fim fixo a data que estava exibida naquele instante. Normalizar a preferência antiga ao restaurar o modo hoje, sem apagar filtros fixos legítimos ou rascunhos. Concentrar essa transição no controle de período. | Teste com preferência antiga terminando em 06/01/2000: marcar/abrir em Até hoje e desmarcar mantém a data atual exibida, inclusive após reabrir e após mudança de dia. Um período fixo escolhido explicitamente continua preservado. |
+| **B — Consulta automática e recuperação de falhas** | Aplicar o período após datas completas e válidas, com pequena pausa de aproximadamente 300 ms para agrupar edições. Aplicar também a mudança do modo hoje. Cancelar consultas anteriores e ignorar respostas obsoletas. Remover **Exibir período**; manter nova tentativa contextual em caso de erro. | Alterar início/fim consulta sem clique extra. Digitação incompleta ou intervalo invertido não dispara consulta nem elimina a vista válida anterior. Trocas rápidas não mostram uma resposta antiga por cima da nova. Edições, inclusive de dias fora da vista, continuam preservadas e entram no salvamento conjunto. |
+| **C — Hierarquia visual de envio e total do dia** | Dar ao controle de envio mais presença por posição, contraste e ícone, mantendo o estado desabilitado e a indicação **Em breve**. Aumentar a legibilidade do total e colocá-lo em área visual própria no cabeçalho de cada dia; manter a indicação de total parcial quando houver erro. | Conferência manual com vários dias e com duração inválida. Envio e salvamento continuam claramente distintos; envio não reage ao clique; total diário é legível sem parecer um botão. Nenhum total semanal é adicionado. |
+| **D — Revisão integrada e documentação** | Juntar os chunks, conferir a recuperação dos rascunhos existentes e atualizar o uso documentado. Executar os testes Vitest relevantes e o build, com conferência manual da interface e do copiar/colar no navegador habitual. | Datas e modo sobrevivem à reabertura; período muda automaticamente; registros antigos e edições pendentes permanecem; conflito entre abas continua recusando o conjunto inteiro. Documentar resultados reais e registrar a entrega em commit coeso. |
+
+Ordem: **A → B → C → D**. Cada chunk é uma unidade de revisão e verificação; não obriga um commit por chunk. Os testes que protegem A e B acompanham suas mudanças; D integra a conferência final. Nenhuma atualização de banco é necessária para os problemas identificados.
+
+### Limites desta etapa
+
+Manter salvar como ação explícita. Não habilitar envio real, login, modelos ou cadastro de atividades. Não limpar o banco ou todas as preferências para ocultar a data antiga. Preservar a estrutura simples e a compatibilidade com os rascunhos já salvos. Datas incompletas e respostas atrasadas devem ser tratadas no fluxo de consulta, sem introduzir novas regras de negócio para duração ou campos obrigatórios.
