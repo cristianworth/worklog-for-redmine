@@ -2,7 +2,7 @@
 
 ## Purpose and current boundary
 
-Build a small personal web application that ports an existing spreadsheet time-logging workflow. Preserve the useful behavior first, then improve it in small reviewed increments. The context/plan and first local-drafts milestones were approved by Cristian on 2026-10-21. The first implementation is commit dd8bd4d. The period-based editing slice P1.1 was authorized by Cristian on 2026-10-22 and implemented for review. Consult the development plan for delivered behavior and deferred features; P1.2 chunks A–D were authorized and implemented on 2026-10-22 for review; submission and template actions remain disabled. P2 begins with private API-key configuration and read-only JSON lookup; HTML/session authentication is not yet implemented. Real API validation is pending the server certificate; never disable TLS to bypass it. The public demo belongs among the final stages (P7/P8); current demo labels and shortcuts must not imply a deployed or functional demo.
+Build a small personal web application that ports an existing spreadsheet time-logging workflow. Preserve the useful behavior first, then improve it in small reviewed increments. The context/plan and first local-drafts milestones were approved by Cristian on 2026-10-21. The first implementation is commit dd8bd4d. The period-based editing slice P1.1 was authorized by Cristian on 2026-10-22 and implemented for review. Consult the development plan for delivered behavior and deferred features; P1.2 chunks A–D were authorized and implemented on 2026-10-22 for review; submission and template actions remain disabled. P2 begins with private API-key configuration and read-only JSON lookup; HTML/session authentication is not yet implemented. Cristian authorized a certificate-validation exception for the known private Redmine on 2026-10-22. It is opt-in, limited to the configured HTTPS origin, visibly identified, and never a process-wide setting. Anonymous API access reached HTTP 401; authenticated validation remains pending. The public demo belongs among the final stages (P7/P8); current demo labels and shortcuts must not imply a deployed or functional demo.
 
 Read `ROADMAP.md`, `README.md`, `docs/development-plan.md`, `docs/behavior-specification.md`, `docs/legacy-workflow.md`, and the current handoff before making decisions. Distinguish user decisions, recommendations, observations and unverified hypotheses.
 
@@ -21,7 +21,7 @@ Read `ROADMAP.md`, `README.md`, `docs/development-plan.md`, `docs/behavior-speci
 - Use synthetic examples. Ignore local configuration and provide only a blank/synthetic `.env.example` when configuration is implemented.
 - Keep authentication and Redmine communication in the backend. Do not expose secrets in the frontend bundle or logs.
 - Do not treat the browser's existing login as authentication for the future Node application.
-- Do not reproduce a global TLS-verification bypass from the legacy workbook. Certificate handling is a specific integration decision to validate, not a default to disable.
+- Keep certificate validation enabled by default. The explicitly authorized private-server exception uses REDMINE_ALLOW_INVALID_CERTIFICATE=true only for requests to the configured HTTPS origin. Never change global TLS settings or follow redirects with credentials; preserve the UI warning. It accepts invalid chain/name/dates, not only expiry.
 
 ## Behavior and verification
 

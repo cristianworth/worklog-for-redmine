@@ -1,3 +1,5 @@
+import { certificateExceptionRequest } from "./redmine-transport";
+
 export class RedmineError extends Error {
   constructor(
     public readonly code: string,
@@ -11,6 +13,7 @@ export class RedmineError extends Error {
 export interface RedmineConfig {
   baseUrl: string;
   apiKey: string;
+  allowInvalidCertificate?: boolean;
 }
 
 export function readRedmineConfig(
@@ -49,7 +52,18 @@ export function readRedmineConfig(
       503,
     );
   }
-  return { baseUrl: url.href.replace(/\/+$/, "") + "/", apiKey };
+  const exception = env.REDMINE_ALLOW_INVALID_CERTIFICATE?.trim() ?? "false";
+  if (!["true", "false"].includes(exception))
+    throw new RedmineError(
+      "configuration",
+      "REDMINE_ALLOW_INVALID_CERTIFICATE deve ser true ou false.",
+      503,
+    );
+  return {
+    baseUrl: url.href.replace(/\/+$/, "") + "/",
+    apiKey,
+    ...(exception === "true" ? { allowInvalidCertificate: true } : {}),
+  };
 }
 
 export function networkError(error: unknown): RedmineError {
@@ -111,8 +125,13 @@ function namedReference(value: any): value is { id: number; name: string } {
 
 export function createRedmineClient(
   config: RedmineConfig | null,
-  request: typeof fetch = fetch,
+  injectedRequest?: typeof fetch,
 ) {
+  const request =
+    injectedRequest ??
+    (config?.allowInvalidCertificate
+      ? certificateExceptionRequest(config.baseUrl)
+      : fetch);
   async function get(path: string): Promise<any> {
     if (!config)
       throw new RedmineError(
@@ -227,7 +246,11 @@ export function createRedmineClient(
   }
   return {
     status() {
-      return { configured: !!config, hasApiKey: !!config?.apiKey };
+      return {
+        configured: !!config,
+        hasApiKey: !!config?.apiKey,
+        certificateException: !!config?.allowInvalidCertificate,
+      };
     },
     async check() {
       const data = await get("users/current.json");

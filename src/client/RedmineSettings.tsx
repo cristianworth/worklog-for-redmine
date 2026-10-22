@@ -5,6 +5,7 @@ export function RedmineSettings({ onClose }: { onClose(): void }) {
   const [status, setStatus] = useState<{
     configured: boolean;
     hasApiKey: boolean;
+    certificateException: boolean;
   } | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -70,10 +71,26 @@ export function RedmineSettings({ onClose }: { onClose(): void }) {
             : "Acesso ainda não configurado"
           : "Conferindo configuração…"}
       </p>
+      {status?.certificateException && (
+        <p className="certificate-warning" role="status">
+          Exceção de certificado ativa para este Redmine. A conexão permanece
+          criptografada, mas a identidade do servidor não é validada pelo
+          certificado.
+        </p>
+      )}
       <ol>
         <li>
-          Copie o arquivo <code>.env.example</code> para <code>.env</code> na
-          pasta da aplicação.
+          {status?.configured ? (
+            <>
+              Abra o arquivo <code>.env</code> existente na pasta da aplicação e
+              preserve o endereço já configurado.
+            </>
+          ) : (
+            <>
+              Se ainda não existir <code>.env</code>, copie{" "}
+              <code>.env.example</code> para esse nome na pasta da aplicação.
+            </>
+          )}
         </li>
         <li>
           Preencha <code>REDMINE_URL</code> com o endereço HTTPS. Se necessário,
@@ -86,8 +103,10 @@ export function RedmineSettings({ onClose }: { onClose(): void }) {
       </ol>
       <p className="settings-note">
         A configuração fica somente neste computador. Não cole senhas ou chaves
-        no chat. O login do navegador não conecta automaticamente a aplicação.
-        Um certificado vencido precisa ser corrigido antes da autenticação.
+        no chat. O login do navegador não conecta automaticamente a aplicação. A
+        validação de certificado é o padrão. Em um servidor conhecido com
+        certificado inválido, a exceção é configurada localmente e indicada
+        acima quando ativa.
       </p>
       <button
         className="button secondary"

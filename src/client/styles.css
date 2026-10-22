@@ -1204,3 +1204,13 @@ input[aria-invalid="true"] {
 .issue-result small {
   color: #747e6d;
 }
+
+.certificate-warning {
+  padding: 10px 12px;
+  border: 1px solid #e2ca92;
+  border-radius: 7px;
+  background: #fff8e8;
+  color: #806021;
+  font-size: 12px;
+  line-height: 1.6;
+}

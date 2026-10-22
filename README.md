@@ -40,9 +40,9 @@ Copy `.env.example` to `.env` in the repository root. Set `REDMINE_URL` to the H
 
 Open **Configurações → Testar acesso à API**. The backend performs only `GET /users/current.json`. Each row’s **Consultar** performs only `GET /issues/:id.json` and shows subject, status and project. These results are temporary: they do not modify the draft, its observation or its saved revision. Changing a code cancels the previous lookup; copying a code still copies only the code.
 
-TLS verification stays enabled. Certificate failures are reported separately from missing/invalid authentication and permission errors. Redirects are not followed with API credentials. No connection test creates hours or changes issue status. The legacy HTML/session transport remains a possible follow-up if this instance cannot use the query API; it is not implemented yet.
+TLS verification is enabled by default. For a known private Redmine with an invalid certificate, an explicitly accepted local exception can be enabled with `REDMINE_ALLOW_INVALID_CERTIFICATE=true`. It accepts certificate errors only for that configured HTTPS origin, never changes global TLS settings, and never follows redirects. This includes chain, hostname and validity errors; encryption remains but certificate-based server authentication is lost. The interface shows when the exception is active. Certificate failures are reported separately from missing/invalid authentication and permission errors. Redirects are not followed with API credentials. No connection test creates hours or changes issue status. The legacy HTML/session transport remains a possible follow-up if this instance cannot use the query API; it is not implemented yet.
 
-The current private server returned an expired-certificate error in Node on 2026-10-22, before authentication. Real access is unverified; simulated tests are not evidence of real authentication. See [connection checks](docs/redmine-access.md). Never paste credentials into chat. Use an optional `PORT` environment variable to choose another local port (default 3000).
+The private server returned an expired-certificate error in strict mode on 2026-10-22. After Cristian accepted a scoped exception, the exact configured login page returned HTTP 200 and the API returned HTTP 401 without credentials. The installation subpath must be preserved. Authenticated real access remains unverified. See [connection checks](docs/redmine-access.md). Never paste credentials into chat. Use an optional `PORT` environment variable to choose another local port (default 3000).
 
 ## Verify
 
@@ -59,7 +59,7 @@ React + Vite + TypeScript; Node + Express + SQLite through Node's built-in `node
 
 The period-based editor uses Lucide icons, a highlighted daily total and a separate, unavailable Redmine action. Day templates and the project activity catalog remain deferred; their controls are disabled. **Modo local** identifies this computer’s database and expands to explain storage. **Abrir demonstração** is a disabled future shortcut, not a published demo. See the plan for priorities.
 
-API access checks and explicit issue lookup are implemented with synthetic tests. Real-instance compatibility is pending a valid server certificate. Project-specific activity IDs, Redmine submission and optional issue-status changes remain future slices. Saving a draft does not send anything to Redmine. This project is independent of Redmine.
+API access checks and explicit issue lookup are implemented with synthetic tests. Real authenticated compatibility remains pending an API credential. Project-specific activity IDs, Redmine submission and optional issue-status changes remain future slices. Saving a draft does not send anything to Redmine. This project is independent of Redmine.
 
 ## Planned public demonstration
 

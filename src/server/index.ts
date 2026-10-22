@@ -25,7 +25,11 @@ try {
   // Invalid connection settings must not prevent access to local drafts.
   const configurationError = error;
   redmine = {
-    status: () => ({ configured: false, hasApiKey: false }),
+    status: () => ({
+      configured: false,
+      hasApiKey: false,
+      certificateException: false,
+    }),
     check: async () => {
       throw configurationError;
     },

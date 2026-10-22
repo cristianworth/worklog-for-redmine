@@ -29,7 +29,11 @@ describe("private connection settings", () => {
   it("keeps the local application usable with no Redmine settings", async () => {
     expect(readRedmineConfig({})).toBeNull();
     const client = createRedmineClient(null);
-    expect(client.status()).toEqual({ configured: false, hasApiKey: false });
+    expect(client.status()).toEqual({
+      configured: false,
+      hasApiKey: false,
+      certificateException: false,
+    });
     await expect(client.check()).rejects.toMatchObject({
       code: "not_configured",
       status: 503,
@@ -76,18 +80,16 @@ describe("private connection settings", () => {
 
 describe("read-only Redmine transport", () => {
   it("checks the current account without forwarding identity or secrets", async () => {
-    const request = vi
-      .fn<typeof fetch>()
-      .mockResolvedValue(
-        json({
-          user: {
-            id: 7,
-            login: "synthetic-login",
-            mail: "private@example.invalid",
-            api_key: "do-not-forward",
-          },
-        }),
-      );
+    const request = vi.fn<typeof fetch>().mockResolvedValue(
+      json({
+        user: {
+          id: 7,
+          login: "synthetic-login",
+          mail: "private@example.invalid",
+          api_key: "do-not-forward",
+        },
+      }),
+    );
     const client = createRedmineClient(config, request);
     expect(await client.check()).toEqual({ authenticated: true });
     const [url, options] = request.mock.calls[0];
@@ -100,22 +102,24 @@ describe("read-only Redmine transport", () => {
       cache: "no-store",
       headers: { "X-Redmine-API-Key": "synthetic-key" },
     });
-    expect(client.status()).toEqual({ configured: true, hasApiKey: true });
+    expect(client.status()).toEqual({
+      configured: true,
+      hasApiKey: true,
+      certificateException: false,
+    });
     expect(JSON.stringify(client.status())).not.toContain("synthetic-key");
   });
   it("returns only issue subject, status and project, preserving JSON escapes and Unicode", async () => {
-    const request = vi
-      .fn<typeof fetch>()
-      .mockResolvedValue(
-        json({
-          issue: {
-            ...issue,
-            description: "private details",
-            custom_fields: [{ value: "private" }],
-            author: { name: "private" },
-          },
-        }),
-      );
+    const request = vi.fn<typeof fetch>().mockResolvedValue(
+      json({
+        issue: {
+          ...issue,
+          description: "private details",
+          custom_fields: [{ value: "private" }],
+          author: { name: "private" },
+        },
+      }),
+    );
     const client = createRedmineClient(config, request);
     expect(await client.issue("1001")).toEqual(issue);
     expect(String(request.mock.calls[0][0])).toBe(
@@ -150,14 +154,12 @@ describe("read-only Redmine transport", () => {
   ])(
     "classifies HTTP %s without forwarding the raw response or following redirects",
     async (status, code) => {
-      const request = vi
-        .fn<typeof fetch>()
-        .mockResolvedValue(
-          new Response("private-body synthetic-key", {
-            status: status as number,
-            headers: { location: "https://elsewhere.invalid" },
-          }),
-        );
+      const request = vi.fn<typeof fetch>().mockResolvedValue(
+        new Response("private-body synthetic-key", {
+          status: status as number,
+          headers: { location: "https://elsewhere.invalid" },
+        }),
+      );
       const client = createRedmineClient(config, request);
       await expect(client.check()).rejects.toMatchObject({ code });
       expect(request).toHaveBeenCalledTimes(1);
@@ -279,7 +281,11 @@ describe("local Redmine API boundary", () => {
     const base = await start(request);
     const status = await fetch(base + "/api/redmine/status");
     expect(status.headers.get("cache-control")).toBe("no-store");
-    expect(await status.json()).toEqual({ configured: true, hasApiKey: true });
+    expect(await status.json()).toEqual({
+      configured: true,
+      hasApiKey: true,
+      certificateException: false,
+    });
     expect(
       await (
         await fetch(base + "/api/redmine/check", {

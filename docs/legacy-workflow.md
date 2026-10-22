@@ -50,7 +50,7 @@ Durante a consulta autenticada ao Redmine, foram encontrados os dois tipos pedid
 
 - A apropriação utiliza POST de formulário e sessão; alguns caminhos de consulta/movimentação usam API. Não pressupor que todas as operações já usam a mesma autenticação.
 - Há um caminho de extração de chave de API, mas sua ativação no login precisa ser conferida: a chamada aparece comentada no legado analisado.
-- O código legado contém tratamento que ignora erros de certificado. Isso não é uma decisão aprovada para o novo aplicativo.
+- O legado usa `httpReq.Option(4) = &H3300` para ignorar erros de certificado. Em 22/10, Cristian autorizou uma exceção explícita e restrita ao Redmine conhecido; o novo aplicativo mantém validação por padrão e não altera configurações globais. Ver `redmine-access.md`.
 - O primeiro acesso falhou por DNS antes da VPN; depois houve falhas de certificado por nome e validade. Em 21/10, Cristian autenticou o navegador pessoalmente e a leitura de formulários funcionou. Isso é histórico, não prova de acesso atual do backend.
 - O endpoint XML de atividades respondeu com erro de autenticação apesar da sessão web. Os IDs foram lidos das opções do formulário de horas; a falha não prova API desabilitada.
 - O legado considera HTTP 200 em alguns caminhos; na migração é necessário confirmar o contrato de sucesso do transporte real e evitar falso positivo.
