@@ -28,11 +28,21 @@ Stop the server before switching between these modes; both use port 3000.
 4. Click **Salvar rascunhos**. It saves every changed day, including dates no longer visible after changing the period. Saves are atomic: a conflict or failure prevents a partial database update.
 5. Reopen to recover saved rows. The browser remembers the period preference; **Até hoje** recalculates the end date, keeping the chosen start. A refresh of the period preserves pending edits, including invalid duration input. Closing/reloading the page warns if unsaved edits remain.
 
-The default view covers the last seven calendar dates, including today. Weekends remain available. Range preferences are stored only in that browser; drafts stay in SQLite. The current schema is unchanged, preserving previously saved days. **Modelo do dia**, **Configurações** and **Enviar ao Redmine…** are unavailable actions marked **Em breve**.
+The default view covers the last seven calendar dates, including today. Weekends remain available. Range preferences are stored only in that browser; drafts stay in SQLite. The current schema is unchanged, preserving previously saved days. **Modelo do dia** and **Enviar ao Redmine…** are unavailable actions marked **Em breve**. **Configurações** opens connection instructions and a read-only API access check.
 
 Incomplete rows can be saved as drafts. A blank duration contributes nothing to the total; malformed durations must be corrected or cleared before saving. Zero duration is allowed in a draft. No remote submission validation is implemented yet. Activity suggestions are editable examples, not a configured Redmine catalog or real IDs.
 
 Data stays in `data/worklog.sqlite`, outside Git and independent of browser storage. The Node process opens this file when the application starts, creating it only if missing. Restarting the application reuses saved data; there is no separate database service or automatic sample-data import. Loading a period reads the database, while **Salvar rascunhos** commits the changes to disk. Back up that file with the server stopped. Saved data remains after changing browsers on the same computer. Simultaneous edits in another tab are rejected instead of silently overwriting newer data; copy pending edits before reloading that tab.
+
+## Redmine access (read-only)
+
+Copy `.env.example` to `.env` in the repository root. Set `REDMINE_URL` to the HTTPS base URL, including an installation subpath if needed. Set `REDMINE_API_KEY` locally when authentication is needed. Restart the server after changing configuration; environment variables take precedence over `.env`. The backend reads these values; no `VITE_` variables, browser credentials, passwords or session cookies are used. The key remains in the ignored `.env` file and server memory; it is not returned to the browser or stored in drafts.
+
+Open **Configurações → Testar acesso à API**. The backend performs only `GET /users/current.json`. Each row’s **Consultar** performs only `GET /issues/:id.json` and shows subject, status and project. These results are temporary: they do not modify the draft, its observation or its saved revision. Changing a code cancels the previous lookup; copying a code still copies only the code.
+
+TLS verification stays enabled. Certificate failures are reported separately from missing/invalid authentication and permission errors. Redirects are not followed with API credentials. No connection test creates hours or changes issue status. The legacy HTML/session transport remains a possible follow-up if this instance cannot use the query API; it is not implemented yet.
+
+The current private server returned an expired-certificate error in Node on 2026-10-22, before authentication. Real access is unverified; simulated tests are not evidence of real authentication. See [connection checks](docs/redmine-access.md). Never paste credentials into chat. Use an optional `PORT` environment variable to choose another local port (default 3000).
 
 ## Verify
 
@@ -41,15 +51,15 @@ npm test
 npm run build
 ```
 
-Vitest checks duration arithmetic, period boundaries, dynamic end dates, preservation of pending edits, database reopening and atomic multi-day saves, including conflicts. Interface verification is manual. BDD, Cucumber and formal scenarios are not required.
+Vitest checks duration arithmetic, period boundaries, dynamic end dates, preservation of pending edits, database reopening and atomic multi-day saves, including conflicts. Read-only Redmine tests cover private configuration, JSON contracts, error classification, credential handling and isolation from draft saves. Interface verification is manual. BDD, Cucumber and formal scenarios are not required.
 
 ## Scope and stack
 
 React + Vite + TypeScript; Node + Express + SQLite through Node's built-in `node:sqlite` module. A single repository and process, bound to the local computer. Some Node 24 versions emit an experimental SQLite warning.
 
-The period-based editor uses Lucide icons, a highlighted daily total and a separate, unavailable Redmine action. Day templates and activity settings remain deferred; their buttons are disabled. **Modo local** identifies this computer’s database and expands to explain storage. **Abrir demonstração** is a disabled future shortcut, not a published demo. See the plan for priorities.
+The period-based editor uses Lucide icons, a highlighted daily total and a separate, unavailable Redmine action. Day templates and the project activity catalog remain deferred; their controls are disabled. **Modo local** identifies this computer’s database and expands to explain storage. **Abrir demonstração** is a disabled future shortcut, not a published demo. See the plan for priorities.
 
-Authentication, issue lookup, project-specific activity IDs, Redmine submission and optional issue-status changes remain future slices. Saving a draft does not send anything to Redmine. This project is independent of Redmine.
+API access checks and explicit issue lookup are implemented with synthetic tests. Real-instance compatibility is pending a valid server certificate. Project-specific activity IDs, Redmine submission and optional issue-status changes remain future slices. Saving a draft does not send anything to Redmine. This project is independent of Redmine.
 
 ## Planned public demonstration
 
@@ -59,7 +69,9 @@ The normal local mode continues to use Node and SQLite. The public code reposito
 
 ## Documentation and private reference
 
-- [Plan](docs/development-plan.md)
+- [Roadmap / checklist](ROADMAP.md)
+- [Plan and decisions](docs/development-plan.md)
+- [Connection checks](docs/redmine-access.md)
 - [Legacy workflow](docs/legacy-workflow.md)
 - [Historical behavior examples](docs/behavior-specification.md)
 - [Contributing](CONTRIBUTING.md)

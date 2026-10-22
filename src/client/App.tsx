@@ -37,6 +37,7 @@ import {
   type EditorState,
 } from "./editor";
 import { DaySection } from "./DaySection";
+import { RedmineSettings } from "./RedmineSettings";
 
 function initialPeriod(): PeriodPreference {
   try {
@@ -76,6 +77,7 @@ export function App() {
   const [message, setMessage] = useState("");
   const [preferenceNotice, setPreferenceNotice] = useState("");
   const [copied, setCopied] = useState<string | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [retry, setRetry] = useState(0);
   const effectiveEnd = endDate(period, today);
 
@@ -303,17 +305,21 @@ export function App() {
               <Database size={14} aria-hidden="true" />
               Banco local
             </span>
-            <span className="future-control">
-              <button className="button quiet" disabled>
-                <Settings2 size={17} aria-hidden="true" />
-                Configurações
-              </button>
-              <small>Em breve</small>
-            </span>
+            <button
+              className="button quiet"
+              aria-expanded={settingsOpen}
+              onClick={() => setSettingsOpen(!settingsOpen)}
+            >
+              <Settings2 size={17} aria-hidden="true" />
+              Configurações
+            </button>
           </div>
         </div>
       </header>
       <main>
+        {settingsOpen && (
+          <RedmineSettings onClose={() => setSettingsOpen(false)} />
+        )}
         <div className="page-heading">
           <div>
             <p className="eyebrow">SEUS DIAS, EM ORDEM</p>

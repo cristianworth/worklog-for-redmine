@@ -1129,3 +1129,78 @@ input[aria-invalid="true"] {
 .save-bar:not(.has-pending) {
   position: static;
 }
+
+.settings-panel {
+  background: #fff;
+  border: 1px solid #cddac4;
+  border-radius: 12px;
+  padding: 22px;
+  margin-bottom: 24px;
+  font-size: 13px;
+  line-height: 1.65;
+}
+.settings-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.settings-heading h2 {
+  margin: 0;
+  font-size: 18px;
+  color: #365a28;
+}
+.settings-panel ol {
+  padding-left: 22px;
+}
+.settings-panel code {
+  background: #f1f4ed;
+  border-radius: 4px;
+  padding: 1px 4px;
+  overflow-wrap: anywhere;
+}
+.settings-note {
+  color: #697361;
+  font-size: 12px;
+}
+.connection-status {
+  font-weight: 600;
+  color: #596b4c;
+}
+.connection-success {
+  color: #365a28;
+}
+.future-settings {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #e7ebe3;
+  color: #697361;
+}
+.issue-lookup {
+  margin-top: 6px;
+}
+.lookup-button {
+  font-size: 11px;
+}
+.issue-result {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 8px;
+  font-size: 11px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.issue-result strong {
+  font-weight: 550;
+  color: #3e5131;
+}
+.issue-result > span {
+  color: #597846;
+}
+.issue-result small {
+  color: #747e6d;
+}

@@ -7,7 +7,16 @@ import {
 } from "../shared/worklogs";
 import { ConflictError, type openDraftStore } from "./storage";
 
-export function createApp(store: ReturnType<typeof openDraftStore>) {
+import {
+  createRedmineClient,
+  RedmineError,
+  type RedmineClient,
+} from "./redmine";
+
+export function createApp(
+  store: ReturnType<typeof openDraftStore>,
+  redmine: RedmineClient = createRedmineClient(null),
+) {
   const app = express();
   app.disable("x-powered-by");
   app.use((req, res, next) => {
@@ -28,16 +37,25 @@ export function createApp(store: ReturnType<typeof openDraftStore>) {
     next();
   });
   app.use(express.json({ limit: "1mb" }));
+  app.use("/api/redmine", (_req, res, next) => {
+    res.set("Cache-Control", "no-store");
+    next();
+  });
+  app.get("/api/redmine/status", (_req, res) => res.json(redmine.status()));
+  app.post("/api/redmine/check", async (_req, res) => {
+    res.json(await redmine.check());
+  });
+  app.get("/api/redmine/issues/:id", async (req, res) => {
+    res.json(await redmine.issue(req.params.id));
+  });
   app.get("/api/days", (req, res) => {
     let period;
     try {
       period = validatePeriod(req.query.from, req.query.to);
     } catch (error) {
-      res
-        .status(400)
-        .json({
-          error: error instanceof Error ? error.message : "Período inválido.",
-        });
+      res.status(400).json({
+        error: error instanceof Error ? error.message : "Período inválido.",
+      });
       return;
     }
     res.json({ days: store.readRange(period.from, period.to) });
@@ -47,12 +65,9 @@ export function createApp(store: ReturnType<typeof openDraftStore>) {
     try {
       days = validateDays(req.body?.days);
     } catch (error) {
-      res
-        .status(400)
-        .json({
-          error:
-            error instanceof Error ? error.message : "Rascunhos inválidos.",
-        });
+      res.status(400).json({
+        error: error instanceof Error ? error.message : "Rascunhos inválidos.",
+      });
       return;
     }
     try {
@@ -100,6 +115,10 @@ export const handleErrors: express.ErrorRequestHandler = (
   res,
   _next,
 ) => {
+  if (error instanceof RedmineError) {
+    res.status(error.status).json({ error: error.message, code: error.code });
+    return;
+  }
   if (
     error?.type === "entity.parse.failed" ||
     error?.type === "entity.too.large"

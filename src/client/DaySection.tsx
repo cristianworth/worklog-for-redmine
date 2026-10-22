@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Check, Copy, Plus, Trash2, CalendarDays } from "lucide-react";
 import { formatDuration, parseDuration } from "../shared/worklogs";
+import { IssueLookup } from "./IssueLookup";
 import { dayLabel, shortDate } from "./period";
 import { daySummary, type EditorDay, type EditorEntry } from "./editor";
 
@@ -161,6 +162,11 @@ export function DaySection({
                           )}
                         </button>
                       </div>
+                      <IssueLookup
+                        issue={entry.issue}
+                        label={label}
+                        disabled={disabled}
+                      />
                     </td>
                     <td>
                       <input

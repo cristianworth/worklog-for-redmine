@@ -2,9 +2,9 @@
 
 ## Purpose and current boundary
 
-Build a small personal web application that ports an existing spreadsheet time-logging workflow. Preserve the useful behavior first, then improve it in small reviewed increments. The context/plan and first local-drafts milestones were approved by Cristian on 2026-10-21. The first implementation is commit dd8bd4d. The period-based editing slice P1.1 was authorized by Cristian on 2026-10-22 and implemented for review. Consult the development plan for delivered behavior and deferred features; P1.2 chunks A–D were authorized and implemented on 2026-10-22 for review; future action buttons are disabled, not implemented integrations. The public demo belongs among the final stages (P7/P8); current demo labels and shortcuts must not imply a deployed or functional demo.
+Build a small personal web application that ports an existing spreadsheet time-logging workflow. Preserve the useful behavior first, then improve it in small reviewed increments. The context/plan and first local-drafts milestones were approved by Cristian on 2026-10-21. The first implementation is commit dd8bd4d. The period-based editing slice P1.1 was authorized by Cristian on 2026-10-22 and implemented for review. Consult the development plan for delivered behavior and deferred features; P1.2 chunks A–D were authorized and implemented on 2026-10-22 for review; submission and template actions remain disabled. P2 begins with private API-key configuration and read-only JSON lookup; HTML/session authentication is not yet implemented. Real API validation is pending the server certificate; never disable TLS to bypass it. The public demo belongs among the final stages (P7/P8); current demo labels and shortcuts must not imply a deployed or functional demo.
 
-Read `README.md`, `docs/development-plan.md`, `docs/behavior-specification.md`, `docs/legacy-workflow.md`, and the current handoff before making decisions. Distinguish user decisions, recommendations, observations and unverified hypotheses.
+Read `ROADMAP.md`, `README.md`, `docs/development-plan.md`, `docs/behavior-specification.md`, `docs/legacy-workflow.md`, and the current handoff before making decisions. Distinguish user decisions, recommendations, observations and unverified hypotheses.
 
 ## Collaboration
 

@@ -4,7 +4,7 @@
 
 Esta é uma descrição sanitizada da investigação do main em 20–21/10/2026, complementada pela conferência estática da planilha movida para a raiz do projeto em 21/10/2026. Não contém o código VBA original, dados de trabalho, endereços do servidor ou credenciais.
 
-A planilha privada é uma referência local, ignorada pelo Git. Cristian confirmou em 22/10/2026 que ela contém dados reais já apropriados no Redmine. Esses registros são referência histórica; não devem ser importados como pendências nem reenviados para testar a aplicação. Seu VBA foi identificado como igual ao material analisado anteriormente. Não há uma correção validada da planilha nem uma aplicação web entregue.
+A planilha privada é uma referência local, ignorada pelo Git. Cristian confirmou em 22/10/2026 que ela contém dados reais já apropriados no Redmine. Esses registros são referência histórica; não devem ser importados como pendências nem reenviados para testar a aplicação. Seu VBA foi identificado como igual ao material analisado anteriormente. Não há uma correção validada da planilha. A aplicação web atual já entrega rascunhos locais; consulte o roadmap para as etapas de integração.
 
 ## Fluxo identificado
 
@@ -23,14 +23,14 @@ Os efeitos exatos de uma falha parcial na persistência local e no reenvio não 
 
 Os nomes abaixo são pontos de entrada identificados, não arquivos distribuídos neste repositório.
 
-| Módulo/classe/formulário | Responsabilidade e pontos úteis |
-| --- | --- |
-| `FuncoesDaPlanilha` | Soma de durações (`SomarAPartirAte`), atualização de células (`AtualizarApropriacao`, `AtualizarDescricaoStatus`), inclusão do modelo de dia (`ObtenhaModeloDeApropriacao`) e início do login (`IniciarLogin`) |
-| `FuncoesFormulario` | Leitura da planilha (`ObtenhaColecaoDeApropriacoesPlanAtiva`), validação coletiva (`ValideApropriacaoColetiva`), conversão de descrição para código (`ObtenhaEnumeradorDoTextoAtividade`) e status |
-| `PostService` | `Logar`, `ApropriacaoColetiva`, `ApropriarIndividual`, `ObtenhaPostDataApropriacao`, consultas e `MudarStatusIssueRedmine` |
-| `Apropriacao` / `ApropriacaoDetalhe` | Organização dos dias e dados dos apontamentos |
-| `Enumerador` | Enumerações de atividades/status com números fixos |
-| `FormLogin` / `FormApropriacao` | Interface do Excel e ações do usuário |
+| Módulo/classe/formulário             | Responsabilidade e pontos úteis                                                                                                                                                                                |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `FuncoesDaPlanilha`                  | Soma de durações (`SomarAPartirAte`), atualização de células (`AtualizarApropriacao`, `AtualizarDescricaoStatus`), inclusão do modelo de dia (`ObtenhaModeloDeApropriacao`) e início do login (`IniciarLogin`) |
+| `FuncoesFormulario`                  | Leitura da planilha (`ObtenhaColecaoDeApropriacoesPlanAtiva`), validação coletiva (`ValideApropriacaoColetiva`), conversão de descrição para código (`ObtenhaEnumeradorDoTextoAtividade`) e status             |
+| `PostService`                        | `Logar`, `ApropriacaoColetiva`, `ApropriarIndividual`, `ObtenhaPostDataApropriacao`, consultas e `MudarStatusIssueRedmine`                                                                                     |
+| `Apropriacao` / `ApropriacaoDetalhe` | Organização dos dias e dados dos apontamentos                                                                                                                                                                  |
+| `Enumerador`                         | Enumerações de atividades/status com números fixos                                                                                                                                                             |
+| `FormLogin` / `FormApropriacao`      | Interface do Excel e ações do usuário                                                                                                                                                                          |
 
 ## Dados mínimos a representar na web
 
