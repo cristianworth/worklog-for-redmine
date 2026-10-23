@@ -1,5 +1,6 @@
 import {
   formatDuration,
+  isWorkDate,
   parseDuration,
   totalMinutes,
   type Draft,
@@ -77,4 +78,24 @@ export function daySummary(day: EditorDay): {
   } catch {
     return { total: "—", invalid: true };
   }
+}
+
+export function startDayWithTemplate(
+  state: EditorState,
+  date: string,
+  entries: Draft[],
+): EditorState {
+  const day = state.days[date] ?? emptyDay(date);
+  if (
+    !isWorkDate(date) ||
+    !entries.length ||
+    day.revision !== 0 ||
+    day.entries.length ||
+    state.dirtyDates.includes(date)
+  )
+    return state;
+  return {
+    days: { ...state.days, [date]: toEditor({ ...day, entries }) },
+    dirtyDates: [...state.dirtyDates, date],
+  };
 }

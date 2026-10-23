@@ -1,3 +1,4 @@
+import { validateDayTemplate, type DayTemplate } from "../shared/day-template";
 import { submissionFingerprint } from "./submission-identity";
 import { canConfirmBatch, type SubmissionBatch } from "../shared/batches";
 import {
@@ -26,6 +27,41 @@ export function openDraftStore(filename: string) {
   db.exec(`CREATE TABLE IF NOT EXISTS draft_days (
     date TEXT PRIMARY KEY, revision INTEGER NOT NULL, entries TEXT NOT NULL
   )`);
+
+  db.exec(`CREATE TABLE IF NOT EXISTS day_template (
+    id INTEGER PRIMARY KEY CHECK (id = 1), revision INTEGER NOT NULL, entries TEXT NOT NULL
+  )`);
+  function readDayTemplate(): DayTemplate {
+    const row = db
+      .prepare("SELECT revision, entries FROM day_template WHERE id = 1")
+      .get() as { revision: number; entries: string } | undefined;
+    return row
+      ? validateDayTemplate({
+          revision: row.revision,
+          entries: JSON.parse(row.entries),
+        })
+      : { revision: 0, entries: [] };
+  }
+  function saveDayTemplate(input: unknown): DayTemplate {
+    const template = validateDayTemplate(input);
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      if (readDayTemplate().revision !== template.revision)
+        throw new ConflictError(
+          "O modelo foi alterado em outra aba. Suas edições continuam aqui; copie-as antes de descartar e recarregar o modelo.",
+        );
+      const saved = { ...template, revision: template.revision + 1 };
+      db.prepare(
+        `INSERT INTO day_template (id, revision, entries) VALUES (1, ?, ?)
+        ON CONFLICT(id) DO UPDATE SET revision = excluded.revision, entries = excluded.entries`,
+      ).run(saved.revision, JSON.stringify(saved.entries));
+      db.exec("COMMIT");
+      return saved;
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+  }
 
   db.exec(`CREATE TABLE IF NOT EXISTS activity_catalog (
     id INTEGER PRIMARY KEY CHECK (id = 1), revision INTEGER NOT NULL, activities TEXT NOT NULL
@@ -324,7 +360,8 @@ export function openDraftStore(filename: string) {
         ...value,
         state: "running",
         updatedAt: new Date().toISOString(),
-        message: "Validando todas as tarefas do lote antes de enviar. Aguarde os resultados por linha.",
+        message:
+          "Validando todas as tarefas do lote antes de enviar. Aguarde os resultados por linha.",
       });
       db.exec("COMMIT");
       return next;
@@ -553,6 +590,8 @@ export function openDraftStore(filename: string) {
     saveMany,
     readActivities,
     saveActivities,
+    readDayTemplate,
+    saveDayTemplate,
     submission,
     submissionForEntry,
     submissions,

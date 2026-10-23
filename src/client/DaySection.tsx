@@ -18,6 +18,7 @@ import {
   Trash2,
   CalendarDays,
   RefreshCw,
+  FilePlus2,
 } from "lucide-react";
 import { formatDuration, parseDuration } from "../shared/worklogs";
 import { IssueLookup } from "./IssueLookup";
@@ -39,6 +40,8 @@ interface Props {
   copied: string | null;
   onChange(entries: EditorEntry[]): void;
   onCopy(id: string, issue: string): void;
+  hasTemplate: boolean;
+  onUseTemplate(): void;
 }
 
 export function DaySection({
@@ -56,6 +59,8 @@ export function DaySection({
   copied,
   onChange,
   onCopy,
+  hasTemplate,
+  onUseTemplate,
 }: Props) {
   const [projects, setProjects] = useState<
     Record<string, { issue: string; projectId: number }>
@@ -424,6 +429,17 @@ export function DaySection({
       ) : (
         <div className="day-empty">
           <span>Seu dia começa com o primeiro rascunho.</span>
+          {hasTemplate && day.revision === 0 && !dirty && (
+            <button
+              className="button secondary"
+              disabled={disabled}
+              onClick={onUseTemplate}
+              aria-label={`Criar dia ${description} com modelo`}
+            >
+              <FilePlus2 size={16} aria-hidden="true" />
+              Criar dia com modelo
+            </button>
+          )}
           <button className="text-button" disabled={disabled} onClick={add}>
             <Plus size={14} aria-hidden="true" />
             Adicionar primeira linha

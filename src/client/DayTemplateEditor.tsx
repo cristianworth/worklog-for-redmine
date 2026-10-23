@@ -1,0 +1,345 @@
+import { useEffect, useState } from "react";
+import { LoaderCircle, Plus, RotateCcw, Save, Trash2, X } from "lucide-react";
+import { validateDayTemplate, type DayTemplate } from "../shared/day-template";
+import { formatDuration, parseDuration } from "../shared/worklogs";
+import type { EditorEntry } from "./editor";
+
+const rowsFrom = (template: DayTemplate): EditorEntry[] =>
+  template.entries.map(({ minutes, ...entry }) => ({
+    ...entry,
+    id: crypto.randomUUID(),
+    duration: minutes === null ? "" : formatDuration(minutes),
+  }));
+
+export function DayTemplateEditor({
+  onTemplate,
+  onDirtyChange,
+  onClose,
+}: {
+  onTemplate(template: DayTemplate | null): void;
+  onDirtyChange(dirty: boolean): void;
+  onClose(): void;
+}) {
+  const [template, setTemplate] = useState<DayTemplate | null>(null);
+  const [rows, setRows] = useState<EditorEntry[]>([]);
+  const [dirty, setDirty] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [retry, setRetry] = useState(0);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  useEffect(() => {
+    const controller = new AbortController();
+    setLoading(true);
+    setError("");
+    fetch("/api/day-template", { signal: controller.signal })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok)
+          throw new Error(data.error || "Não foi possível carregar o modelo.");
+        const loaded = validateDayTemplate(data);
+        if (!controller.signal.aborted) {
+          setTemplate(loaded);
+          setRows(rowsFrom(loaded));
+          onTemplate(loaded);
+        }
+      })
+      .catch((error) => {
+        if (!controller.signal.aborted) {
+          setError(
+            error instanceof Error
+              ? error.message
+              : "Não foi possível carregar o modelo.",
+          );
+          onTemplate(null);
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+    return () => controller.abort();
+  }, [retry, onTemplate]);
+  useEffect(() => onDirtyChange(dirty), [dirty, onDirtyChange]);
+  const blocked = busy || loading || !template;
+  function changed() {
+    setDirty(true);
+    setError("");
+    setMessage("");
+  }
+  function update(id: string, field: keyof EditorEntry, value: string) {
+    setRows((current) =>
+      current.map((row) => (row.id === id ? { ...row, [field]: value } : row)),
+    );
+    changed();
+  }
+  function discard() {
+    if (template) setRows(rowsFrom(template));
+    setDirty(false);
+    setError("");
+    setMessage("");
+  }
+  async function save() {
+    if (blocked || !dirty || !template) return;
+    let payload: DayTemplate;
+    try {
+      payload = validateDayTemplate({
+        revision: template.revision,
+        entries: rows.map((row) => {
+          const minutes =
+            row.duration === "" ? null : parseDuration(row.duration);
+          if (row.duration !== "" && minutes === null)
+            throw new Error(
+              "Corrija as durações do modelo usando horas:minutos, como 00:30.",
+            );
+          return {
+            issue: row.issue,
+            minutes,
+            activity: row.activity,
+            comment: row.comment,
+          };
+        }),
+      });
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Modelo inválido.");
+      return;
+    }
+    setBusy(true);
+    setError("");
+    setMessage("");
+    try {
+      const response = await fetch("/api/day-template", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json();
+      if (!response.ok)
+        throw new Error(data.error || "Não foi possível salvar o modelo.");
+      const saved = validateDayTemplate(data);
+      if (
+        saved.revision !== payload.revision + 1 ||
+        JSON.stringify(saved.entries) !== JSON.stringify(payload.entries)
+      )
+        throw new Error(
+          "Não foi possível confirmar o salvamento. Preserve suas edições e recarregue o modelo antes de tentar novamente.",
+        );
+      setTemplate(saved);
+      setRows(rowsFrom(saved));
+      setDirty(false);
+      onTemplate(saved);
+      setMessage(
+        "Modelo salvo neste computador. Seus dias existentes não mudaram.",
+      );
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : "Falha ao salvar o modelo.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <section
+      className="settings-panel template-panel"
+      aria-labelledby="day-template-title"
+    >
+      <div className="settings-heading">
+        <h2 id="day-template-title">Modelo do dia</h2>
+        <span className="catalog-state">
+          {dirty
+            ? "Alterações não salvas"
+            : loading
+              ? "Carregando modelo…"
+              : template
+                ? `${template.entries.length} ${template.entries.length === 1 ? "linha salva" : "linhas salvas"}`
+                : "Modelo indisponível"}
+        </span>
+        <button
+          className="icon-button"
+          onClick={onClose}
+          aria-label="Fechar modelo do dia"
+        >
+          <X size={18} />
+        </button>
+      </div>
+      <p>
+        Configure as linhas recorrentes, como a reunião diária. Em um dia ainda
+        não iniciado, use <strong>Criar dia com modelo</strong>. Depois, ajuste
+        as linhas e salve os rascunhos.
+      </p>
+      <p className="settings-note">
+        Você pode deixar tarefa, duração ou outros campos vazios para completar
+        no dia. A atividade usa o nome do catálogo por projeto; seus códigos
+        serão conferidos ao preparar o envio. Nenhum dado da planilha é
+        importado automaticamente.
+      </p>
+      {error && (
+        <p className="field-error" role="alert">
+          {error}
+        </p>
+      )}
+      {template && (
+        <div className="table-scroll">
+          <table className="template-table">
+            <thead>
+              <tr>
+                <th>Tarefa</th>
+                <th>Duração</th>
+                <th>Atividade</th>
+                <th>Observação</th>
+                <th>
+                  <span className="sr-only">Ações</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row, index) => (
+                <tr key={row.id}>
+                  <td>
+                    <input
+                      aria-label={`Tarefa do modelo ${index + 1}`}
+                      inputMode="numeric"
+                      placeholder="Nº ou vazio"
+                      value={row.issue}
+                      disabled={blocked}
+                      onChange={(event) =>
+                        update(row.id, "issue", event.target.value)
+                      }
+                    />
+                  </td>
+                  <td>
+                    <input
+                      aria-label={`Duração do modelo ${index + 1}`}
+                      placeholder="00:30"
+                      value={row.duration}
+                      disabled={blocked}
+                      aria-invalid={
+                        !!row.duration && parseDuration(row.duration) === null
+                      }
+                      onChange={(event) =>
+                        update(row.id, "duration", event.target.value)
+                      }
+                      onBlur={() => {
+                        const minutes = parseDuration(row.duration);
+                        if (
+                          minutes !== null &&
+                          row.duration !== formatDuration(minutes)
+                        )
+                          update(row.id, "duration", formatDuration(minutes));
+                      }}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      aria-label={`Atividade do modelo ${index + 1}`}
+                      placeholder="Nome da atividade"
+                      value={row.activity}
+                      disabled={blocked}
+                      onChange={(event) =>
+                        update(row.id, "activity", event.target.value)
+                      }
+                    />
+                  </td>
+                  <td>
+                    <textarea
+                      aria-label={`Observação do modelo ${index + 1}`}
+                      placeholder="Observação recorrente"
+                      value={row.comment}
+                      disabled={blocked}
+                      onChange={(event) =>
+                        update(row.id, "comment", event.target.value)
+                      }
+                    />
+                  </td>
+                  <td>
+                    <button
+                      className="icon-button remove-button"
+                      aria-label={`Remover linha ${index + 1} do modelo`}
+                      disabled={blocked}
+                      onClick={() => {
+                        setRows((current) =>
+                          current.filter((entry) => entry.id !== row.id),
+                        );
+                        changed();
+                      }}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {!rows.length && (
+            <p className="catalog-empty">
+              Seu modelo está vazio. Adicione as linhas que costuma repetir.
+              Salvar o modelo vazio desativa seu uso nos próximos dias.
+            </p>
+          )}
+        </div>
+      )}
+      <div className="catalog-actions">
+        <button
+          className="button secondary"
+          disabled={blocked || rows.length >= 100}
+          onClick={() => {
+            setRows((current) => [
+              ...current,
+              {
+                id: crypto.randomUUID(),
+                issue: "",
+                duration: "",
+                activity: "",
+                comment: "",
+              },
+            ]);
+            changed();
+          }}
+        >
+          <Plus size={16} />
+          Adicionar linha ao modelo
+        </button>
+        <button
+          className="button"
+          disabled={blocked || !dirty}
+          onClick={() => void save()}
+        >
+          {busy ? (
+            <LoaderCircle className="spin" size={16} />
+          ) : (
+            <Save size={16} />
+          )}
+          Salvar modelo
+        </button>
+        <button
+          className="button quiet"
+          disabled={busy || loading || !dirty}
+          onClick={discard}
+        >
+          Descartar alterações do modelo
+        </button>
+        <button
+          className="button quiet"
+          disabled={busy || loading || dirty}
+          onClick={() => {
+            setMessage("");
+            setRetry((value) => value + 1);
+          }}
+        >
+          <RotateCcw size={16} />
+          Recarregar modelo
+        </button>
+      </div>
+      {message && (
+        <p className="connection-success" role="status">
+          {message}
+        </p>
+      )}
+      <p className="settings-note">
+        Salvar modelo é separado de salvar rascunhos e enviar ao Redmine. Não
+        altera dias existentes nem preenche todo o período. Fechar este painel
+        preserva suas edições enquanto a página estiver aberta.
+      </p>
+    </section>
+  );
+}

@@ -14,7 +14,7 @@ Atualizado em 23/10/2026. Acompanhamento das entregas; decisões e limites no [p
 - [x] **P4 — Envio do período:** Enviar dia, seleção múltipla, revisão, recibos e interrupção na primeira falha. Simulação/interface conferidas; um lote real de um dia e outro de dois dias confirmados com autorização específica consumida.
 - [x] **P4.1 — Apropriações e uso real:** verde/check e data por linha, resumo completo/parcial, conferência e incorporação dos três dias confirmados com seus recibos, preservando rascunhos existentes. Entregue com os nove recibos no banco de uso, sem reenvio; dois rascunhos preservados.
 - [x] **P4.2 — Validação do lote e consulta automática:** consultar ao sair do código, cache temporário e validação integral no backend antes do primeiro envio. Preservar os dias 19, 20 e 21/10.
-- [ ] **P5 — Modelo do dia:** recorrências aplicadas uma vez, sem sobrescrever dias existentes.
+- [x] **P5 — Modelo do dia:** recorrências aplicadas uma vez, sem sobrescrever dias existentes.
 - [ ] **P5.1 — Status opcional:** operação separada das horas; manter confirmações existentes se a movimentação falhar.
 - [ ] **P6 — Consolidação local:** teclado, mensagens, testes e instruções proporcionais.
 - [ ] **P7 — Demo pública:** dados fictícios, armazenamento do visitante, envio simulado e restauração. Sem acesso ao banco/API/Redmine reais.
@@ -76,20 +76,33 @@ O cache serve ao preenchimento. Cada confirmação consulta dados atuais do Redm
 
 190 testes/13 arquivos e build aprovados; interface simulada em 22–23/10, sem alterações nos dias 19–21/10 ou novas horas reais. [Comportamento e limites](docs/batch-submission.md).
 
-## Próxima etapa — P5 em chunks
+## P5 — chunks entregues
 
-| Chunk             | Recorte proposto                                                                             |
-| ----------------- | -------------------------------------------------------------------------------------------- |
-| A — Comportamento | Conferir o modelo e a rotina do VBA e definir quais campos são recorrentes                   |
-| B — Configuração  | Configurar um modelo local simples, sem importar dados históricos como pendências            |
-| C — Aplicação     | Preencher um dia novo uma vez, preservando dias existentes; Adicionar linha continua avulso  |
-| D — Verificação   | Conferir persistência, uso por teclado e ausência de linhas duplicadas em exemplos fictícios |
+| Chunk | Entrega | Estado |
+| --- | --- | --- |
+| A — Comportamento | VBA conferido diretamente: copiar o bloco e fixar data; adaptação para iniciar um dia por ação explícita | Concluído |
+| B — Configuração | Modelo local vazio por padrão, editar/remover linhas e salvar separadamente, com conflito entre abas | Concluído |
+| C — Aplicação | Criar dia com modelo uma vez; IDs novos, sem sobrescrever dias salvos/vazios/editados; Adicionar linha continua avulso | Concluído |
+| D — Verificação | 203 testes/14 arquivos, build e interface fictícia; persistência, teclado, duplicação e dias protegidos conferidos | Concluído |
+
+[Uso e limites do modelo](docs/day-template.md). Configurar/copiar modelo não envia horas, não preenche o período automaticamente e não importa dados privados. Os dias 19–21/10 foram preservados.
+
+## Próxima etapa — P5.1 em chunks
+
+| Chunk | Proposta |
+| --- | --- |
+| A — Regras e acesso | Conferir a movimentação no VBA e as transições permitidas pela instância para cada tarefa/conta; manter Manter como padrão |
+| B — Revisão | Escolher e revisar o status desejado por card; consolidar códigos repetidos e bloquear escolhas conflitantes |
+| C — Operação separada | Movimentar somente depois das horas correspondentes confirmadas, com resultado próprio; falha de status nunca libera reenvio das horas |
+| D — Conferência | Simular permissão negada, exigências do workflow, falha de rede e recuperação; teste real somente com alvo especificamente autorizado |
+
+P5.1 ainda não implementada. A proposta é uma movimentação por card no lote, depois de confirmar as horas selecionadas daquele card; um mesmo código em vários dias não será movimentado repetidamente. A revisão deve mostrar o status atual e o destino. Por exemplo, horas confirmadas + alteração recusada resulta em **horas apropriadas / status não alterado**, com motivo e ação própria para conferir ou tentar a movimentação. Não refazer o envio das horas. Se o workflow exigir campos adicionais não suportados, explicar a recusa e orientar completar a ação no Redmine.
 
 ## Limites e pendências
 
 - Catálogo começa vazio; cadastro manual, sem importar IDs da planilha ou descobrir atividades automaticamente. A configuração local não comprova que um ID é aceito pelo servidor; o envio verifica o contexto remoto e avisa quando a API não fornece a lista do projeto; o Redmine decide a aceitação final do código na criação.
 - O nome digitado permanece no rascunho. O catálogo resolve nome + projeto para código; mudar/remover cadastro não reescreve rascunhos antigos. Após abrir a página, sair do campo de código ou usar Consultar para identificar seu projeto.
-- Novos tipos de campo exigem implementação própria; não há construtor genérico de validações. Modelo do dia e demo continuam indisponíveis.
+- Novos tipos de campo exigem implementação própria; não há construtor genérico de validações. Demo continua indisponível; o modelo do dia já é configurável.
 - A exceção de certificado foi aceita para o servidor privado conhecido; manter padrão estrito, escopo por origem e aviso visível. O `.env` é lido ao iniciar o processo; reiniciar após alterações.
 - Os registros históricos da planilha já foram apropriados e não devem ser reenviados. O teste específico autorizado já foi confirmado; detalhes e estado ficam fora do Git. A autorização individual está consumida. Os lotes P4 têm autorização própria registrada separadamente, sem liberar outros reenvios.
 - Sem total semanal, cópia de linhas para outros dias ou hospedagem compartilhada no escopo atual. A demo pública continua entre as últimas etapas.

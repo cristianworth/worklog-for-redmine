@@ -1,3 +1,8 @@
+import { DayTemplateEditor } from "./DayTemplateEditor";
+import {
+  instantiateDayTemplate,
+  type DayTemplate,
+} from "../shared/day-template";
 import { BatchReview } from "./BatchReview";
 import type { BatchSelection, SubmissionBatch } from "../shared/batches";
 import { SubmissionReview } from "./SubmissionReview";
@@ -36,6 +41,7 @@ import {
 } from "./period";
 import {
   daySummary,
+  startDayWithTemplate,
   emptyDay,
   mergeLoadedDays,
   toDraftDay,
@@ -90,6 +96,9 @@ export function App() {
   const [preferenceNotice, setPreferenceNotice] = useState("");
   const [copied, setCopied] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [templateOpen, setTemplateOpen] = useState(false);
+  const [dayTemplate, setDayTemplate] = useState<DayTemplate | null>(null);
+  const [templateDirty, setTemplateDirty] = useState(false);
   const [catalog, setCatalog] = useState<ActivityCatalog | null>(null);
   const [catalogError, setCatalogError] = useState("");
   const [catalogDirty, setCatalogDirty] = useState(false);
@@ -349,14 +358,14 @@ export function App() {
 
   useEffect(() => {
     const warn = (event: BeforeUnloadEvent) => {
-      if (editor.dirtyDates.length || catalogDirty) {
+      if (editor.dirtyDates.length || catalogDirty || templateDirty) {
         event.preventDefault();
         event.returnValue = "";
       }
     };
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
-  }, [editor.dirtyDates.length, catalogDirty]);
+  }, [editor.dirtyDates.length, catalogDirty, templateDirty]);
 
   useEffect(() => {
     if (!copied) return;
@@ -375,6 +384,18 @@ export function App() {
         : [...current.dirtyDates, date],
     }));
     setMessage("");
+    setError("");
+  }
+
+  function useDayTemplate(date: string) {
+    if (!dayTemplate || blocked) return;
+    const entries = instantiateDayTemplate(dayTemplate, () =>
+      crypto.randomUUID(),
+    );
+    setEditor((current) => startDayWithTemplate(current, date, entries));
+    setMessage(
+      `Modelo aplicado em ${shortDate(date)}. Confira as linhas e salve os rascunhos.`,
+    );
     setError("");
   }
 
@@ -467,7 +488,8 @@ export function App() {
             className="brand"
             href="/"
             onClick={(event) => {
-              if (dirtyCount) event.preventDefault();
+              if (dirtyCount || catalogDirty || templateDirty)
+                event.preventDefault();
             }}
           >
             <span className="brand-mark" aria-hidden="true">
@@ -538,13 +560,26 @@ export function App() {
               Preencha no seu ritmo. Salve agora, envie depois.
             </p>
           </div>
-          <span className="future-control model-control">
-            <button className="button secondary" disabled>
-              <FilePlus2 size={16} aria-hidden="true" />
-              Modelo do dia
-            </button>
-            <small>Em breve</small>
-          </span>
+          <button
+            className="button secondary model-control"
+            aria-expanded={templateOpen}
+            aria-controls="day-template-area"
+            onClick={() => setTemplateOpen(!templateOpen)}
+          >
+            <FilePlus2 size={16} aria-hidden="true" />
+            Modelo do dia
+            {templateDirty && (
+              <small className="catalog-pending">Não salvo</small>
+            )}
+          </button>
+        </div>
+
+        <div id="day-template-area" hidden={!templateOpen}>
+          <DayTemplateEditor
+            onTemplate={setDayTemplate}
+            onDirtyChange={setTemplateDirty}
+            onClose={() => setTemplateOpen(false)}
+          />
         </div>
 
         <section
@@ -797,6 +832,8 @@ export function App() {
               key={date}
               day={editor.days[date] ?? emptyDay(date)}
               activities={catalog?.activities ?? []}
+              hasTemplate={!!dayTemplate?.entries.length}
+              onUseTemplate={() => useDayTemplate(date)}
               dirty={editor.dirtyDates.includes(date)}
               disabled={blocked || !receiptsLoaded}
               submissions={receipts}

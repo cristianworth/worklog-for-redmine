@@ -86,7 +86,7 @@ Vitest checks duration arithmetic, period boundaries, dynamic end dates, preserv
 
 React + Vite + TypeScript; Node + Express + SQLite through Node's built-in `node:sqlite` module. A single repository and process, bound to the local computer. Some Node 24 versions emit an experimental SQLite warning.
 
-The period-based editor uses Lucide icons, a highlighted daily total and separate save/review/confirm actions. Day templates remain deferred; their control is disabled. The project activity catalog is available in Configurações. **Modo local** identifies this computer’s database and expands to explain storage. **Abrir demonstração** is a disabled future shortcut, not a published demo. See the plan for priorities.
+The period-based editor uses Lucide icons, a highlighted daily total and separate save/review/confirm actions. **Modelo do dia** configures local recurring rows. On an untouched new date, **Criar dia com modelo** copies them once into an unsaved draft. Existing/edited dates, including saved empty days, are preserved; changing the model affects only future copies. **Adicionar linha** remains a blank row. The model starts empty, accepts incomplete defaults and saves separately from drafts; closing its panel preserves unsaved edits while the page remains open. [Usage and limits](docs/day-template.md). The project activity catalog is available in Configurações. **Modo local** identifies this computer’s database and expands to explain storage. **Abrir demonstração** is a disabled future shortcut, not a published demo. See the plan for priorities.
 
 API access checks and automatic issue lookup are implemented with synthetic tests. Real account and issue reads have been verified with the local API key; one specifically authorized real time-entry test was created and verified, with issue status unchanged. Its private record is excluded from Git and must never be replayed. Two separately authorized batch tests were subsequently completed and verified, covering nine entries with unchanged issue statuses; those authorizations are also consumed. A local project-specific activity catalog, individual submission and period batches are implemented; optional issue-status changes remain a future slice. Saving a draft does not send anything to Redmine. This project is independent of Redmine.
 
@@ -99,6 +99,7 @@ The normal local mode continues to use Node and SQLite. The public code reposito
 ## Documentation and private reference
 
 - [Roadmap / checklist](ROADMAP.md)
+- [Day template](docs/day-template.md)
 - [Plan and decisions](docs/development-plan.md)
 - [Connection checks](docs/redmine-access.md)
 - [Individual submission](docs/individual-submission.md)

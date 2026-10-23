@@ -1556,3 +1556,34 @@ input[aria-invalid="true"] {
 .receipt-details dd {
   margin: 0;
 }
+
+.template-panel {
+  margin: 0 0 24px;
+}
+.template-table {
+  width: 100%;
+  min-width: 760px;
+}
+.template-table th:first-child {
+  width: 135px;
+}
+.template-table th:nth-child(2) {
+  width: 110px;
+}
+.template-table th:nth-child(3) {
+  width: 200px;
+}
+.template-table th:last-child {
+  width: 45px;
+}
+.template-table input,
+.template-table textarea {
+  width: 100%;
+}
+.template-table textarea {
+  min-height: 60px;
+  resize: vertical;
+}
+.template-panel .settings-heading h2 {
+  flex: 1;
+}

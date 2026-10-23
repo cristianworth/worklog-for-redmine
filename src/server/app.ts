@@ -1,3 +1,4 @@
+import { validateDayTemplate } from "../shared/day-template";
 import { createIssueLookup } from "./issue-lookup";
 import { createBatchService } from "./batches";
 import { createSubmissionService, SubmissionError } from "./submissions";
@@ -126,6 +127,21 @@ export function createApp(
   app.post("/api/submissions/:id/reconcile", async (req, res) =>
     res.json(await submissionService.reconcile(req.params.id)),
   );
+
+  app.get("/api/day-template", (_req, res) =>
+    res.set("Cache-Control", "no-store").json(store.readDayTemplate()),
+  );
+  app.put("/api/day-template", (req, res) => {
+    let template;
+    try {
+      template = validateDayTemplate(req.body);
+    } catch (error) {
+      throw new SubmissionError(
+        error instanceof Error ? error.message : "Modelo inválido.",
+      );
+    }
+    res.set("Cache-Control", "no-store").json(store.saveDayTemplate(template));
+  });
 
   app.get("/api/activities", (_req, res) => {
     res.set("Cache-Control", "no-store");
