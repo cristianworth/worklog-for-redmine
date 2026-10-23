@@ -1,4 +1,5 @@
-import { randomUUID, createHash } from "node:crypto";
+import { submissionFingerprint } from "./submission-identity";
+import { randomUUID } from "node:crypto";
 import { resolveActivity } from "../shared/activities";
 import {
   submissionDraft,
@@ -90,20 +91,7 @@ export function createSubmissionService(
     if (previous && isSubmissionLocked(previous.state)) return previous;
     const snapshot = await context(date, entryId, revision);
     const existing = await redmine.existingTimeEntries(snapshot);
-    const fingerprint = createHash("sha256")
-      .update(
-        JSON.stringify([
-          snapshot.scope,
-          snapshot.issueId,
-          snapshot.projectId,
-          snapshot.userId,
-          snapshot.date,
-          snapshot.minutes,
-          snapshot.comment,
-          snapshot.activityId,
-        ]),
-      )
-      .digest("hex");
+    const fingerprint = submissionFingerprint(snapshot);
     const now = new Date().toISOString();
     return store.putReview(
       {
@@ -197,20 +185,19 @@ export function createSubmissionService(
       throw new ConflictError(
         "A conta ou o servidor mudou. Confira o envio usando a configuração original.",
       );
-    if (record.remoteId) {
-      if (await redmine.timeEntryMatches(record.remoteId, record.snapshot))
+    const remoteId =
+      record.remoteId ??
+      (await (async () => {
+        const ids = await redmine.existingTimeEntries(record.snapshot);
+        return ids.length === 1 ? ids[0] : null;
+      })());
+    if (remoteId) {
+      const check = await redmine.inspectTimeEntry(remoteId, record.snapshot);
+      if (check.result === "matched")
         return store.finishSubmission(id, {
           state: "confirmed",
-          remoteId: record.remoteId,
-          message:
-            "Resultado conferido no Redmine. Horas confirmadas; status mantido.",
-        });
-    } else {
-      const ids = await redmine.existingTimeEntries(record.snapshot);
-      if (ids.length === 1)
-        return store.finishSubmission(id, {
-          state: "confirmed",
-          remoteId: ids[0],
+          remoteId,
+          remoteCreatedAt: check.createdAt,
           message:
             "Resultado conferido no Redmine. Horas confirmadas; status mantido.",
         });
@@ -222,5 +209,34 @@ export function createSubmissionService(
         "A consulta não confirmou um único lançamento correspondente. Confira manualmente no Redmine. O reenvio continua bloqueado.",
     });
   }
-  return { prepare, send, reconcile };
+  async function verify(id: string): Promise<SubmissionRecord> {
+    const record = store.submission(id);
+    if (!record) throw new SubmissionError("Envio não encontrado.", 404);
+    if (!["confirmed", "existing"].includes(record.state)) return reconcile(id);
+    const account = await redmine.account();
+    if (
+      account.scope !== record.snapshot.scope ||
+      account.id !== record.snapshot.userId
+    )
+      throw new ConflictError(
+        "A conta ou o servidor mudou. Confira usando a configuração original.",
+      );
+    try {
+      if (!record.remoteId)
+        return store.recordVerification(id, {
+          result: "unavailable",
+          createdAt: null,
+        });
+      return store.recordVerification(
+        id,
+        await redmine.inspectTimeEntry(record.remoteId, record.snapshot),
+      );
+    } catch {
+      return store.recordVerification(id, {
+        result: "unavailable",
+        createdAt: null,
+      });
+    }
+  }
+  return { prepare, send, reconcile, verify };
 }

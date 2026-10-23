@@ -145,6 +145,37 @@ function setup(filename = ":memory:") {
   };
 }
 describe("individual submission lifecycle", () => {
+  it("keeps confirmation separate from remote creation when reconciling an earlier uncertain send", async () => {
+    const t = setup();
+    const review = await t.service.prepare(date, entry.id, t.day.revision);
+    t.setPost((payload) => {
+      t.rows.push({
+        id: 904,
+        issue: { id: 1001 },
+        project: { id: 10 },
+        user: { id: 7 },
+        activity: { id: 101 },
+        spent_on: date,
+        hours: 0.5,
+        comments: payload.comments,
+        created_on: "2026-10-22T08:00:00Z",
+      });
+      return json({}, 500);
+    });
+    const uncertain = await t.service.send(review.id);
+    expect(uncertain.confirmedAt).toBeNull();
+    const result = await t.service.reconcile(review.id);
+    expect(result).toMatchObject({
+      state: "confirmed",
+      remoteCreatedAt: "2026-10-22T08:00:00.000Z",
+    });
+    expect(result.confirmedAt).toBe(result.updatedAt);
+    expect(result.confirmedAt).not.toBe(result.remoteCreatedAt);
+    expect(t.posts()).toHaveLength(1);
+    const checked = await t.service.verify(review.id);
+    expect(checked.confirmedAt).toBe(result.confirmedAt);
+  });
+
   it("commits the sending state visibly to another connection before the remote POST", async () => {
     folder = mkdtempSync(join(tmpdir(), "worklog-write-ahead-"));
     const filename = join(folder, "worklog.sqlite");

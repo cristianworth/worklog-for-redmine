@@ -3,6 +3,7 @@ import type { BatchSelection, SubmissionBatch } from "../shared/batches";
 import { SubmissionReview } from "./SubmissionReview";
 import {
   isSubmissionLocked,
+  acceptReceipt,
   type SubmissionRecord,
 } from "../shared/submissions";
 import { useCallback, useEffect, useState } from "react";
@@ -157,12 +158,7 @@ export function App() {
           const record = item.record,
             key = `${record.snapshot.date}:${record.snapshot.entryId}`,
             previous = next[key];
-          if (
-            !previous ||
-            (!["confirmed", "existing"].includes(previous.state) &&
-              Date.parse(record.updatedAt) >= Date.parse(previous.updatedAt))
-          )
-            next[key] = record;
+          if (acceptReceipt(previous, record)) next[key] = record;
         }
       return next;
     });
@@ -195,12 +191,7 @@ export function App() {
           for (const record of data.submissions as SubmissionRecord[]) {
             const key = `${record.snapshot.date}:${record.snapshot.entryId}`,
               previous = next[key];
-            if (
-              !previous ||
-              (!["confirmed", "existing"].includes(previous.state) &&
-                Date.parse(record.updatedAt) >= Date.parse(previous.updatedAt))
-            )
-              next[key] = record;
+            if (acceptReceipt(previous, record)) next[key] = record;
           }
           return next;
         });

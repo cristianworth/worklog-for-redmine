@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { formatDuration } from "../shared/worklogs";
 import {
   matchesTimeEntry,
+  receiptTimestamp,
   type SubmissionSnapshot,
 } from "../shared/submissions";
 import { certificateExceptionRequest } from "./redmine-transport";
@@ -345,6 +346,37 @@ export function createRedmineClient(
         "O volume de lançamentos excedeu a conferência automática. Nenhum envio será iniciado.",
       );
     },
+    async inspectTimeEntry(
+      id: number,
+      snapshot: SubmissionSnapshot,
+    ): Promise<{
+      result: "matched" | "missing" | "different";
+      createdAt: string | null;
+    }> {
+      if (!positiveId(id))
+        throw new RedmineError(
+          "invalid_response",
+          "Identificador remoto inválido.",
+        );
+      try {
+        const data = await get(`time_entries/${id}.json`);
+        if (!data?.time_entry || data.time_entry.id !== id)
+          throw new RedmineError(
+            "invalid_response",
+            "A resposta não confirmou o registro consultado.",
+          );
+        return {
+          result: matchesTimeEntry(data.time_entry, snapshot)
+            ? "matched"
+            : "different",
+          createdAt: receiptTimestamp(data.time_entry.created_on),
+        };
+      } catch (error) {
+        if (error instanceof RedmineError && error.code === "not_found")
+          return { result: "missing", createdAt: null };
+        throw error;
+      }
+    },
     async timeEntryMatches(id: number, snapshot: SubmissionSnapshot) {
       const data = await get(`time_entries/${id}.json`);
       return (
@@ -352,10 +384,9 @@ export function createRedmineClient(
         matchesTimeEntry(data.time_entry, snapshot)
       );
     },
-    async createTimeEntry(
-      snapshot: SubmissionSnapshot,
-    ): Promise<{
+    async createTimeEntry(snapshot: SubmissionSnapshot): Promise<{
       state: "confirmed" | "rejected" | "uncertain";
+      remoteCreatedAt?: string | null;
       remoteId: number | null;
       message: string;
     }> {
@@ -413,6 +444,7 @@ export function createRedmineClient(
           if (remoteId && matchesTimeEntry(data.time_entry, snapshot))
             return {
               state: "confirmed",
+              remoteCreatedAt: receiptTimestamp(data.time_entry.created_on),
               remoteId,
               message:
                 "Horas confirmadas no Redmine. O status da tarefa foi mantido.",
@@ -447,6 +479,7 @@ export function createRedmineClient(
           )
             return {
               state: "confirmed",
+              remoteCreatedAt: receiptTimestamp(data.time_entry.created_on),
               remoteId,
               message:
                 "Horas confirmadas no Redmine. O status da tarefa foi mantido.",

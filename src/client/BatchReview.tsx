@@ -1,3 +1,4 @@
+import { hasVerificationProblem } from "../shared/submissions";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { LoaderCircle, RefreshCw, Upload, X } from "lucide-react";
 import {
@@ -219,7 +220,9 @@ export function BatchReview({
                         ? "Aguardando envio"
                         : "Não enviado"
                       : record
-                        ? submissionLabel[record.state]
+                        ? hasVerificationProblem(record)
+                          ? "Apropriação a conferir"
+                          : submissionLabel[record.state]
                         : "Impedimento";
                   return (
                     <article
@@ -233,7 +236,7 @@ export function BatchReview({
                             : `Linha ${index + 1}`}
                         </strong>
                         <span
-                          className={`result-${record?.state ?? "rejected"}`}
+                          className={`result-${record && hasVerificationProblem(record) ? "uncertain" : (record?.state ?? "rejected")}`}
                         >
                           {label}
                           {record?.remoteId ? ` · #${record.remoteId}` : ""}

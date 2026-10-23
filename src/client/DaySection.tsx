@@ -1,8 +1,10 @@
 import {
   isSubmissionLocked,
+  isAppropriated,
+  appropriationSummary,
   type SubmissionRecord,
 } from "../shared/submissions";
-import { submissionLabel } from "./SubmissionReview";
+import { ReceiptBadge } from "./ReceiptBadge";
 import {
   activitiesForProject,
   resolveActivity,
@@ -69,11 +71,9 @@ export function DaySection({
     const record = submissions[`${day.date}:${entry.id}`];
     return !record || !isSubmissionLocked(record.state);
   });
-  const hasUncertain = dayReceipts.some(
-    (record) => record?.state === "sending" || record?.state === "uncertain",
-  );
-  const hasConfirmed = dayReceipts.some(
-    (record) => record?.state === "confirmed" || record?.state === "existing",
+  const appropriation = appropriationSummary(
+    day.entries.map((entry) => entry.id),
+    dayReceipts,
   );
   useEffect(() => {
     if (focusId.current) {
@@ -110,7 +110,7 @@ export function DaySection({
   return (
     <section
       ref={section}
-      className={`day-card ${day.date === today ? "is-today" : ""}`}
+      className={`day-card ${day.date === today ? "is-today" : ""} ${appropriation.complete ? "is-appropriated-day" : ""}`}
       aria-label={`Apontamentos de ${description}`}
     >
       <header className="day-heading">
@@ -123,14 +123,8 @@ export function DaySection({
           </h2>
           <span className="day-status">
             {dirty
-              ? "Alterações não salvas"
-              : hasUncertain
-                ? "Há resultado de envio a conferir"
-                : hasConfirmed
-                  ? "Rascunhos e resultados salvos"
-                  : day.entries.length
-                    ? "Rascunhos salvos"
-                    : "Nenhum lançamento"}
+              ? `Alterações não salvas · ${appropriation.label}`
+              : appropriation.label}
             {day.date === today && <span className="today-label">Hoje</span>}
           </span>
         </div>
@@ -227,7 +221,15 @@ export function DaySection({
                 return (
                   <tr
                     key={entry.id}
-                    className={rowLocked ? "is-submitted" : ""}
+                    className={
+                      isAppropriated(receipt)
+                        ? "is-appropriated"
+                        : rowLocked
+                          ? "needs-check"
+                          : receipt?.state === "rejected"
+                            ? "is-rejected"
+                            : ""
+                    }
                   >
                     <td className="row-number">
                       <label className="entry-selector">
@@ -272,12 +274,9 @@ export function DaySection({
                           )}
                         </button>
                       </div>
-                      {receipt && receipt.state !== "prepared" && (
-                        <div className={`row-receipt result-${receipt.state}`}>
-                          <small>
-                            {submissionLabel[receipt.state]}
-                            {receipt.remoteId ? ` · #${receipt.remoteId}` : ""}
-                          </small>
+                      <div className="row-receipt">
+                        <ReceiptBadge record={receipt} />
+                        {receipt && receipt.state !== "prepared" && (
                           <button
                             className="text-button"
                             disabled={disabled}
@@ -285,8 +284,8 @@ export function DaySection({
                           >
                             Ver resultado
                           </button>
-                        </div>
-                      )}
+                        )}
+                      </div>
                       <IssueLookup
                         issue={entry.issue}
                         onProject={(projectId) =>

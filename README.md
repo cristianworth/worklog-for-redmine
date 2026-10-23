@@ -63,6 +63,14 @@ Catalog settings live in `activity_catalog` in the same ignored SQLite database.
 
 Reviews expire after 15 minutes and are invalidated by saved day/catalog or remote account/project/activity changes. All selected local revisions are checked before the first creation. Preserve the SQLite file and receipts. [Batch details](docs/batch-submission.md) and [individual submission contract](docs/individual-submission.md) describe the limits and recovery behavior.
 
+## Appropriation status and real local data
+
+Confirmed rows show a green check, **Apropriado**, the remote ID and an original date. The day header distinguishes complete days from mixed or uncertain results. The daily total still includes pending drafts. Remote creation, first local confirmation and latest check are separate dates; unavailable creation dates are labeled as confirmation/check dates.
+
+**Ver resultado → Conferir no Redmine** performs reads only. Missing/hidden, divergent or unavailable remote records show a warning while preserving the original receipt and resend lock. The status does not silently follow external changes; request a check explicitly.
+
+The three specifically authorized P4 days have been incorporated into the normal local SQLite with nine confirmed receipts. Two preexisting drafts were preserved. A consistent backup preceded the atomic import, and every remote ID was checked without creating hours. Local history is now real usage data: keep the SQLite and receipts, and never commit the database or backups. The private import journal identifies the backup path. This controlled operation does not add a general upload/import interface or populate the manual activity catalog. [Status and import details](docs/appropriation-status-plan.md).
+
 ## Verify
 
 ```sh
@@ -93,6 +101,7 @@ The normal local mode continues to use Node and SQLite. The public code reposito
 - [Connection checks](docs/redmine-access.md)
 - [Individual submission](docs/individual-submission.md)
 - [Batch submission](docs/batch-submission.md)
+- [Appropriation status and confirmed-history incorporation](docs/appropriation-status-plan.md)
 - [Legacy workflow](docs/legacy-workflow.md)
 - [Historical behavior examples](docs/behavior-specification.md)
 - [Contributing](CONTRIBUTING.md)

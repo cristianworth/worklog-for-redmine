@@ -116,6 +116,11 @@ export function createApp(
       );
     res.json(await submissionService.send(req.params.id));
   });
+  app.post("/api/submissions/:id/verify", async (req, res) =>
+    res
+      .set("Cache-Control", "no-store")
+      .json(await submissionService.verify(req.params.id)),
+  );
   app.post("/api/submissions/:id/reconcile", async (req, res) =>
     res.json(await submissionService.reconcile(req.params.id)),
   );

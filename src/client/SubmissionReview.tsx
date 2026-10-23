@@ -1,3 +1,5 @@
+import { ReceiptBadge, formatReceiptDate } from "./ReceiptBadge";
+import { hasVerificationProblem, isAppropriated } from "../shared/submissions";
 import { useEffect, useRef, useState } from "react";
 import { CheckCircle2, LoaderCircle, Upload, X, RefreshCw } from "lucide-react";
 import { formatDuration } from "../shared/worklogs";
@@ -6,7 +8,7 @@ import { shortDate } from "./period";
 export const submissionLabel = {
   prepared: "Revisão pronta",
   sending: "Envio iniciado",
-  confirmed: "Confirmado",
+  confirmed: "Apropriado",
   rejected: "Recusado",
   uncertain: "Resultado incerto",
   existing: "Já existente no Redmine",
@@ -73,7 +75,7 @@ export function SubmissionReview({
       });
     return () => controller.abort();
   }, [date, entryId, revision, retry, onRecord]);
-  async function act(kind: "confirm" | "reconcile") {
+  async function act(kind: "confirm" | "reconcile" | "verify") {
     if (!record || busy) return;
     setBusy(true);
     setError("");
@@ -192,6 +194,27 @@ export function SubmissionReview({
             <span>Observação</span>
             <p>{s.comment}</p>
           </div>
+          {record && ["confirmed", "existing"].includes(record.state) && (
+            <div className="receipt-details">
+              <ReceiptBadge record={record} />
+              <dl>
+                <div>
+                  <dt>Última conferência</dt>
+                  <dd>{formatReceiptDate(record.lastCheckedAt)}</dd>
+                </div>
+                <div>
+                  <dt>Origem</dt>
+                  <dd>
+                    {record.origin === "imported"
+                      ? "Histórico confirmado incorporado"
+                      : record.state === "existing"
+                        ? "Lançamento encontrado no Redmine"
+                        : "Enviado por esta aplicação"}
+                  </dd>
+                </div>
+              </dl>
+            </div>
+          )}
           {!s.activityVerified && record?.state === "prepared" && (
             <p className="certificate-warning">
               Esta API não disponibiliza o catálogo do projeto. Confira o código
@@ -200,11 +223,13 @@ export function SubmissionReview({
             </p>
           )}
           <p
-            className={`submission-result result-${record?.state}`}
+            className={`submission-result result-${record && hasVerificationProblem(record) ? "uncertain" : record?.state}`}
             role="status"
           >
             <strong>
-              {submissionLabel[record!.state]}
+              {hasVerificationProblem(record!)
+                ? "Apropriação a conferir"
+                : submissionLabel[record!.state]}
               {record?.remoteId ? ` · #${record.remoteId}` : ""}
             </strong>
             <span>{record?.message}</span>
@@ -227,15 +252,18 @@ export function SubmissionReview({
         <button className="button quiet" disabled={busy} onClick={onClose}>
           {record?.state === "prepared" ? "Cancelar" : "Fechar"}
         </button>
-        {(!record || record.state === "rejected" || !!error) && !busy && (
-          <button
-            className="button secondary"
-            onClick={() => setRetry((current) => current + 1)}
-          >
-            <RefreshCw size={16} />
-            Preparar nova revisão
-          </button>
-        )}
+        {(!record ||
+          record.state === "rejected" ||
+          (!!error && record.state === "prepared")) &&
+          !busy && (
+            <button
+              className="button secondary"
+              onClick={() => setRetry((current) => current + 1)}
+            >
+              <RefreshCw size={16} />
+              Preparar nova revisão
+            </button>
+          )}
         {(record?.state === "uncertain" || record?.state === "sending") && (
           <button
             className="button secondary"
@@ -265,6 +293,15 @@ export function SubmissionReview({
           </button>
         )}
         {(record?.state === "confirmed" || record?.state === "existing") && (
+          <button
+            className="button secondary"
+            disabled={busy}
+            onClick={() => act("verify")}
+          >
+            <RefreshCw size={16} /> Conferir no Redmine
+          </button>
+        )}
+        {isAppropriated(record ?? undefined) && (
           <CheckCircle2 size={22} className="receipt-check" />
         )}
       </div>

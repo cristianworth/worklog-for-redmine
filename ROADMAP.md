@@ -1,6 +1,6 @@
 # Roadmap — Worklog for Redmine
 
-Atualizado em 22/10/2026. Acompanhamento das entregas; decisões e limites no [plano](docs/development-plan.md).
+Atualizado em 23/10/2026. Acompanhamento das entregas; decisões e limites no [plano](docs/development-plan.md).
 
 ## Entregas
 
@@ -12,7 +12,7 @@ Atualizado em 22/10/2026. Acompanhamento das entregas; decisões e limites no [p
 - [x] **P2.1 — Atividades:** catálogo manual de nome/ID por projeto, persistência local e sugestões conforme a tarefa consultada. Implementado e conferido com exemplos fictícios; aguarda revisão de uso de Cristian.
 - [x] **P3 — Envio individual:** seleção de linha salva, revisão/confirmar, recibos persistidos e recuperação sem reenvio. Teste real autorizado confirmado e conferido; autorização consumida.
 - [x] **P4 — Envio do período:** Enviar dia, seleção múltipla, revisão, recibos e interrupção na primeira falha. Simulação/interface conferidas; um lote real de um dia e outro de dois dias confirmados com autorização específica consumida.
-- [ ] **P4.1 — Apropriações e uso real:** verde/check e data por linha, resumo completo/parcial, conferência e incorporação dos três dias confirmados com seus recibos, preservando rascunhos existentes. Prioridade anterior a P5.
+- [x] **P4.1 — Apropriações e uso real:** verde/check e data por linha, resumo completo/parcial, conferência e incorporação dos três dias confirmados com seus recibos, preservando rascunhos existentes. Entregue com os nove recibos no banco de uso, sem reenvio; dois rascunhos preservados.
 - [ ] **P5 — Modelo do dia:** recorrências aplicadas uma vez, sem sobrescrever dias existentes.
 - [ ] **P5.1 — Status opcional:** operação separada das horas; manter confirmações existentes se a movimentação falhar.
 - [ ] **P6 — Consolidação local:** teclado, mensagens, testes e instruções proporcionais.
@@ -51,18 +51,18 @@ Verificação P3: **142 testes em 10 arquivos passaram** e build aprovado. A per
 
 [Uso, resultados e limites](docs/batch-submission.md). Os dados dos testes reais ficam apenas na área privada.
 
-## Próxima etapa — P4.1 em chunks
+## P4.1 — chunks entregues
 
-| Chunk              | Recorte planejado                                                                                                            |
+| Chunk              | Entrega                                                                                                                      |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
 | A — Estado e datas | Data original de confirmação, origem e última conferência; compatibilidade com recibos atuais                                |
 | B — Sinalização    | Verde/check e Apropriado/data na linha; resumo de dia completo ou parcial; incertos diferenciados                            |
 | C — Conferência    | Ler o registro remoto por ID e apontar divergências sem liberar reenvio automático                                           |
 | D — Uso real       | Backup e incorporação local dos três dias com recibos/IDs; preservar rascunhos existentes e impedir duplicatas na importação |
 
-A proteção contra reenvio já está implementada. Esta etapa completa a apresentação, as datas e a passagem dos testes privados para o banco de uso. [Análise do VBA e proposta](docs/appropriation-status-plan.md). Implementação e importação pendentes.
+175 testes/12 arquivos e build aprovados. Verde/check e datas por linha, conferência por ID e incorporação atômica conferidos. Nove recibos no banco de uso, dois rascunhos preservados e backup criado; somente consultas remotas. [Análise do VBA e proposta](docs/appropriation-status-plan.md). Implementação e incorporação concluídas em 23/10/2026.
 
-## Etapa seguinte — P5 em chunks (após P4.1)
+## Próxima etapa — P5 em chunks
 
 | Chunk             | Recorte proposto                                                                             |
 | ----------------- | -------------------------------------------------------------------------------------------- |

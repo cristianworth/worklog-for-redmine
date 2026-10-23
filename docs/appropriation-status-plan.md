@@ -1,51 +1,39 @@
 # P4.1 — Apropriações visíveis e início de uso real
 
-Planejado em 22/10/2026 por pedido de Cristian, antes do modelo do dia (P5). Este documento registra análise e proposta; não implementa a interface nem importa dados.
+Entregue em 23/10/2026, antes do modelo do dia (P5). A proteção contra reenvio da P3/P4 foi preservada e os três dias confirmados foram incorporados ao banco de uso.
 
-## O que já existe e o que falta
+## Interface e estados
 
-P3/P4 já persistem estado e ID remoto, bloqueiam edição/remoção/reenvio de linhas confirmadas, existentes, iniciadas ou incertas e procuram equivalentes antes do POST. Há texto de resultado e cor suave. A classe visual atual é aplicada a todas as linhas bloqueadas, incluindo resultados ainda incertos; a P4.1 deve reservar o verde de conclusão para confirmação ou equivalência comprovada.
+| Situação                            | Indicação                                                         | Consequência                                          |
+| ----------------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------- |
+| Confirmado                          | Verde + check, **Apropriado**, ID e data                          | Ver resultado; impedir nova seleção, edição e remoção |
+| Equivalente comprovado              | Verde e **Já apropriado no Redmine**                              | Guardar vínculo quando único e impedir nova criação   |
+| Rascunho                            | Neutro e **Pendente**                                             | Editar, salvar e selecionar                           |
+| Iniciado/incerto                    | Amarelo e **Aguardando confirmação / Conferir resultado**         | Consultar sem reenviar                                |
+| Confirmação divergente/indisponível | Amarelo e **Apropriação a conferir**, preservando a data original | Conferir manualmente; não liberar reenvio             |
+| Recusado                            | Indicador vermelho com motivo                                     | Corrigir e preparar nova revisão                      |
 
-Faltam uma indicação clara de **Apropriado**, ícone e data na linha, resumo correto do dia completo/parcial, uma data de confirmação com significado próprio e a incorporação dos recibos reais no banco de uso. Os testes reais P4 ficaram em banco privado separado, portanto sua confirmação não aparece automaticamente nos rascunhos da aplicação.
+O texto e o ícone complementam a cor. O cabeçalho distingue dia completo (**3 de 3 apropriadas**), misto (**3 apropriadas · 2 pendentes**) e resultados a conferir. O total diário continua incluindo todas as linhas, inclusive rascunhos; não há total semanal. A identidade do lançamento continua considerando conta/instalação, tarefa, projeto, data, atividade, minutos e observação: repetir o mesmo card em dias ou linhas legítimas não é proibido.
 
-## Evidência do VBA
+## Datas e conferência
 
-Leitura estática de `AtualizarApropriacao` confirmou gravação da marca local de apropriação e da data corrente em colunas distintas. `ApropriacaoDetalhe` mantém `Apropriado` e `DataApropriacao`; `ObtenhaColecaoDeApropriacoesPlanAtiva` relê esses valores e considera o dia completo somente quando suas linhas estão apropriadas. O laço coletivo ignora linhas já marcadas. A data de trabalho e a data de apropriação são conceitos separados. Preservar esse comportamento sem portar a fragilidade de aceitar qualquer HTTP 200 como sucesso.
+- Data de trabalho permanece em `snapshot.date`. `confirmedAt` guarda a primeira confirmação local; `remoteCreatedAt` armazena a criação remota quando validada. `lastCheckedAt` identifica a última conferência, sem substituir essas datas.
+- A interface mostra **Apropriado em** para criação remota conhecida, **Confirmado em** para confirmação local sem data remota e **Conferido em** quando apenas uma equivalência foi verificada. Não inventa a data original de um registro encontrado depois.
+- Recibos antigos confirmados preservam seu carimbo terminal como confirmação local. Recibos antigos de equivalência recebem data de conferência, sem uma criação presumida. A normalização é compatível e não reescreve rascunhos ao abrir o banco.
+- **Ver resultado → Conferir no Redmine** usa somente consultas. Conta/instalação devem corresponder ao recibo. Um ID ausente pode também estar oculto para a conta; divergência de campos e falha de acesso recebem avisos distintos da confirmação original. Nenhum caso libera automaticamente outra criação.
 
-## Apresentação proposta
+## Incorporação controlada
 
-| Situação               | Linha                                                            | Ação                                                    |
-| ---------------------- | ---------------------------------------------------------------- | ------------------------------------------------------- |
-| Confirmado             | Fundo verde suave, ícone de check e **Apropriado em dd/mm/aaaa** | Ver resultado; impedir nova seleção e edição            |
-| Equivalente comprovado | Verde e **Já apropriado no Redmine**                             | Exibir ID e origem da confirmação; impedir nova criação |
-| Rascunho               | Aparência neutra e **Pendente**                                  | Editar, salvar e selecionar                             |
-| Iniciado/incerto       | Amarelo e **Aguardando confirmação / Conferir resultado**        | Consultar sem reenviar                                  |
-| Recusado               | Indicador vermelho com motivo                                    | Corrigir e preparar nova revisão                        |
+`createConfirmedImportService` valida recibos, identifica uma vez a conta/instalação e confere cada ID remoto antes de gravar. `store.importConfirmed` associa uma linha local idêntica quando única ou adiciona uma nova, e grava dias/recibos em uma transação. Ambiguidade, vínculo protegido ou conflito desfazem toda a gravação. Repetir a incorporação não duplica linhas/recibos nem altera a data original. O catálogo manual não é preenchido pela importação; os recibos incorporados mantêm o código de atividade já revisado.
 
-O texto e o ícone devem transmitir o estado mesmo sem distinguir cores. No cabeçalho, mostrar **3 de 3 apropriadas** quando completo, ou **3 apropriadas · 2 pendentes** quando misto; resultados incertos devem aparecer separadamente. Contagens vêm dos recibos por linha. Manter os totais diários existentes, sem total semanal. Filtro Todos/Pendentes/Apropriados é uma melhoria opcional posterior de P6.
+Os nove registros dos lotes P4 foram incorporados em 23/10/2026: nove linhas e recibos confirmados, dois rascunhos preexistentes preservados, backup consistente feito com a API SQLite antes da importação. Houve dez consultas remotas e **zero gravações remotas**. O banco foi reaberto/conferido e os registros mantiveram IDs e datas. Os testes originais continuam com autorização consumida; importar não é reenviar.
 
-## Datas, confirmação e duplicidade
+O banco de uso é `data/worklog.sqlite`. O registro da operação e o caminho do backup estão em `private/p41-confirmed-history-import.json`; o backup fica em `backups/`. Todos permanecem ignorados pelo Git. A operação foi feita para o histórico específico autorizado, sem um importador genérico por upload ou importação ampla da planilha.
 
-- Manter data de trabalho separada de confirmação e da última conferência. Hoje há `preparedAt`/`updatedAt`, mas nenhum campo explícito para a primeira confirmação. Propor `confirmedAt` imutável e `lastCheckedAt` para consultas futuras; a conferência não deve apagar a data original.
-- Nos recibos próprios já confirmados, preservar o horário original documentado. Para lançamentos encontrados depois, usar a data de criação remota quando validada; se indisponível, informar **Conferido em…**, sem inventar quando foram apropriados.
-- Acrescentar conferência explícita de apropriações por ID, somente leitura. Um lançamento removido ou divergente deve gerar aviso; não liberar automaticamente um recibo para reenviar.
-- O número do card sozinho não identifica uma duplicata: a mesma tarefa pode receber horas em vários dias e em mais de uma linha no mesmo dia. Preservar a combinação de conta/instalação, tarefa, projeto, dia, atividade, minutos e observação. Sem recibo, equivalência exata é uma proteção conservadora; diferenças legítimas não devem ser bloqueadas só pelo card.
+## Legado e validação
 
-## Incorporação dos três dias confirmados
+A leitura estática de `AtualizarApropriacao` confirmou marca local e data corrente em colunas distintas; `ApropriacaoDetalhe` mantém `Apropriado` e `DataApropriacao`. A leitura da coleção recupera esses valores e calcula se o dia está completo. Esse comportamento foi preservado sem assumir que qualquer HTTP 200 confirma criação.
 
-O SQLite atual já serve ao uso real local. Os nove lançamentos confirmados possuem entradas, IDs remotos e resultados no registro/banco privado do P4. Na leitura do banco de uso foram encontrados rascunhos não correspondentes em um desses dias; preservar essas linhas sem marcá-las como apropriadas. O catálogo local ainda está vazio, o que também precisa ser considerado ao preparar futuros lançamentos. Todos os valores reais permanecem somente na área privada.
+175 testes em 12 arquivos passaram, com build aprovado. Os novos casos cobrem datas, recuperação de resposta perdida, verificação por ID, conta incorreta, bloqueios, resumo completo/misto e importação repetida/atômica com linhas extras, além de backup recuperável. Revisão visual em banco fictício confirmou verde/check/data, resumo misto, aviso amarelo para um registro removido e preservação da confirmação original.
 
-Planejar uma incorporação local controlada: criar backup consistente; conferir novamente os nove IDs usando a conta/instalação original; comparar os campos; associar uma linha local idêntica quando única ou adicionar uma nova quando ausente. Conflitos e correspondências ambíguas devem ser apresentados antes da gravação. Importar linhas e recibos juntos em transação, mantendo IDs, identidade da conta/servidor, proteção contra duplicidade e data original; registrar a origem da importação separadamente. Reexecutar a incorporação deve produzir zero duplicatas.
-
-Importar não solicita criação, alteração de status ou exclusão no Redmine, não apaga rascunhos locais e não restaura a autorização de teste já consumida. Os recibos importados são reconhecidos mesmo com catálogo manual ainda vazio; configurar as atividades necessárias para novos lançamentos é uma ação separada. Banco, backups, alvos e configurações continuam fora do Git; a demo continua usando somente dados fictícios isolados.
-
-## Chunks e validação
-
-| Chunk              | Entrega                                                                                                                                       |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| A — Estado e datas | Definir confirmação imutável, origem e última conferência; compatibilidade com recibos existentes; distinguir confirmação de início/incerteza |
-| B — Sinalização    | Verde + check + Apropriado/data por linha; resumo completo/parcial do dia; preservar bloqueios e leitura dos detalhes                         |
-| C — Conferência    | Consulta por ID sem POST; divergência ou ausência mantém bloqueio; datas e status não são inventados                                          |
-| D — Dados reais    | Backup e incorporação dos três dias com recibos; preservar rascunhos preexistentes; operação repetida não duplica                             |
-
-Vitest deve cobrir preservação de datas/IDs, equivalência e lançamentos legítimos no mesmo card, restauração/reabertura e importação atômica/repetida com linhas locais extras. Conferir visualmente estados e resumo misto usando dados fictícios. A etapa só fica concluída quando os nove registros reais aparecerem apropriados no banco de uso, sem novo envio. A implementação está pendente.
+Próxima etapa: P5, modelo do dia. Filtro Todos/Pendentes/Apropriados continua melhoria opcional de P6. Configurar atividades para novos envios permanece uma ação manual separada; demo pública continua isolada e posterior.

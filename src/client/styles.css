@@ -1288,8 +1288,14 @@ input[aria-invalid="true"] {
   accent-color: #527946;
   cursor: pointer;
 }
-.is-submitted {
-  background: #f7f9f4;
+.is-appropriated {
+  background: #edf6e8;
+}
+.needs-check {
+  background: #fff8e9;
+}
+.is-rejected {
+  background: #fff6f4;
 }
 .row-receipt {
   display: flex;
@@ -1478,4 +1484,75 @@ input[aria-invalid="true"] {
   .day-send {
     margin-left: auto;
   }
+}
+
+.receipt-badge {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  line-height: 1.45;
+}
+.receipt-state {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: center;
+}
+.receipt-state strong {
+  font-weight: 600;
+}
+.receipt-id {
+  opacity: 0.8;
+  font-size: 10px;
+}
+.receipt-badge small {
+  font-size: 10px;
+  font-weight: 400;
+}
+.receipt-complete {
+  color: #365f29;
+}
+.receipt-checking {
+  color: #885e15;
+}
+.receipt-rejected {
+  color: #a24436;
+}
+.receipt-pending {
+  color: #7b8277;
+}
+.is-appropriated-day {
+  border-color: #accb99;
+}
+.is-appropriated-day .day-icon {
+  background: #dfedd5;
+  color: #426537;
+}
+.receipt-details {
+  background: #f5f8f0;
+  border: 1px solid #dce5d4;
+  padding: 14px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+.receipt-details .receipt-badge {
+  font-size: 13px;
+}
+.receipt-details .receipt-badge small {
+  font-size: 12px;
+}
+.receipt-details dl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin: 15px 0 0;
+  font-size: 12px;
+}
+.receipt-details dt {
+  color: #71816a;
+  margin-bottom: 4px;
+}
+.receipt-details dd {
+  margin: 0;
 }
