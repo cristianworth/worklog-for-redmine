@@ -13,6 +13,7 @@ Atualizado em 23/10/2026. Acompanhamento das entregas; decisões e limites no [p
 - [x] **P3 — Envio individual:** seleção de linha salva, revisão/confirmar, recibos persistidos e recuperação sem reenvio. Teste real autorizado confirmado e conferido; autorização consumida.
 - [x] **P4 — Envio do período:** Enviar dia, seleção múltipla, revisão, recibos e interrupção na primeira falha. Simulação/interface conferidas; um lote real de um dia e outro de dois dias confirmados com autorização específica consumida.
 - [x] **P4.1 — Apropriações e uso real:** verde/check e data por linha, resumo completo/parcial, conferência e incorporação dos três dias confirmados com seus recibos, preservando rascunhos existentes. Entregue com os nove recibos no banco de uso, sem reenvio; dois rascunhos preservados.
+- [x] **P4.2 — Validação do lote e consulta automática:** consultar ao sair do código, cache temporário e validação integral no backend antes do primeiro envio. Preservar os dias 19, 20 e 21/10.
 - [ ] **P5 — Modelo do dia:** recorrências aplicadas uma vez, sem sobrescrever dias existentes.
 - [ ] **P5.1 — Status opcional:** operação separada das horas; manter confirmações existentes se a movimentação falhar.
 - [ ] **P6 — Consolidação local:** teclado, mensagens, testes e instruções proporcionais.
@@ -62,6 +63,19 @@ Verificação P3: **142 testes em 10 arquivos passaram** e build aprovado. A per
 
 175 testes/12 arquivos e build aprovados. Verde/check e datas por linha, conferência por ID e incorporação atômica conferidos. Nove recibos no banco de uso, dois rascunhos preservados e backup criado; somente consultas remotas. [Análise do VBA e proposta](docs/appropriation-status-plan.md). Implementação e incorporação concluídas em 23/10/2026.
 
+## P4.2 — chunks entregues
+
+| Chunk | Entrega | Estado |
+| --- | --- | --- |
+| A — Consulta automática | Consultar descrição/status/projeto ao sair do código, ignorar respostas antigas e permitir atualizar | Concluído |
+| B — Cache de leitura | Cache em memória por cliente, 10 minutos, até 500 tarefas; compartilhar consultas simultâneas e não guardar falhas | Concluído |
+| C — Validação integral | Consultar todas as tarefas da seleção no backend antes do primeiro POST; qualquer impedimento bloqueia todos os dias do lote e identifica data/tarefa | Concluído |
+| D — Verificação | Simular tarefa inválida no mesmo dia e no segundo dia, mudança após revisão, cache e falhas; conferir interface sem editar 19–21/10 | Concluído |
+
+O cache serve ao preenchimento. Cada confirmação consulta dados atuais do Redmine, reaproveitando códigos repetidos somente dentro daquela validação. A API não oferece transação remota entre horas: uma falha surgida depois do início das criações ainda pode produzir resultado parcial, que permanece registrado.
+
+190 testes/13 arquivos e build aprovados; interface simulada em 22–23/10, sem alterações nos dias 19–21/10 ou novas horas reais. [Comportamento e limites](docs/batch-submission.md).
+
 ## Próxima etapa — P5 em chunks
 
 | Chunk             | Recorte proposto                                                                             |
@@ -74,7 +88,7 @@ Verificação P3: **142 testes em 10 arquivos passaram** e build aprovado. A per
 ## Limites e pendências
 
 - Catálogo começa vazio; cadastro manual, sem importar IDs da planilha ou descobrir atividades automaticamente. A configuração local não comprova que um ID é aceito pelo servidor; o envio verifica o contexto remoto e avisa quando a API não fornece a lista do projeto; o Redmine decide a aceitação final do código na criação.
-- O nome digitado permanece no rascunho. O catálogo resolve nome + projeto para código; mudar/remover cadastro não reescreve rascunhos antigos. Após abrir a página, consultar a tarefa novamente para identificar seu projeto.
+- O nome digitado permanece no rascunho. O catálogo resolve nome + projeto para código; mudar/remover cadastro não reescreve rascunhos antigos. Após abrir a página, sair do campo de código ou usar Consultar para identificar seu projeto.
 - Novos tipos de campo exigem implementação própria; não há construtor genérico de validações. Modelo do dia e demo continuam indisponíveis.
 - A exceção de certificado foi aceita para o servidor privado conhecido; manter padrão estrito, escopo por origem e aviso visível. O `.env` é lido ao iniciar o processo; reiniciar após alterações.
 - Os registros históricos da planilha já foram apropriados e não devem ser reenviados. O teste específico autorizado já foi confirmado; detalhes e estado ficam fora do Git. A autorização individual está consumida. Os lotes P4 têm autorização própria registrada separadamente, sem liberar outros reenvios.

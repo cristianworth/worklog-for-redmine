@@ -1,3 +1,4 @@
+import { createIssueLookup } from "./issue-lookup";
 import { createBatchService } from "./batches";
 import { createSubmissionService, SubmissionError } from "./submissions";
 import { validateActivityCatalog } from "../shared/activities";
@@ -21,6 +22,7 @@ export function createApp(
   redmine: RedmineClient = createRedmineClient(null),
 ) {
   const app = express();
+  const issueLookup = createIssueLookup(redmine);
   const submissionService = createSubmissionService(store, redmine);
   const batchService = createBatchService(store, submissionService);
   app.disable("x-powered-by");
@@ -51,7 +53,7 @@ export function createApp(
     res.json(await redmine.check());
   });
   app.get("/api/redmine/issues/:id", async (req, res) => {
-    res.json(await redmine.issue(req.params.id));
+    res.json(await issueLookup(req.params.id, req.query.refresh === "1"));
   });
 
   app.get("/api/submission-batches", (req, res) => {

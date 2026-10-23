@@ -36,6 +36,12 @@ export function createBatchService(
       };
     return { ...value, items };
   }
+  function lineError(selection: { date: string; entryId: string }, reason: string) {
+    const day = store.read(selection.date);
+    const index = day.entries.findIndex((entry) => entry.id === selection.entryId);
+    const code = day.entries[index]?.issue.trim();
+    return `Dia ${selection.date.split("-").reverse().join("/")} · linha ${index + 1}${code ? ` · tarefa #${code}` : " · código vazio"}: ${reason}`;
+  }
   async function prepare(input: unknown): Promise<SubmissionBatch> {
     let entries;
     try {
@@ -70,18 +76,20 @@ export function createBatchService(
         value.items.push({
           selection,
           record: null,
-          error:
+          error: lineError(
+            selection,
             error instanceof ConflictError ||
             error instanceof SubmissionError ||
             error instanceof RedmineError
               ? error.message
               : "Não foi possível revisar esta linha. Nenhum envio foi iniciado.",
+          ),
         });
       }
     }
     if (!canConfirmBatch(value))
       value.message =
-        "Há impedimentos ou nenhuma linha pendente. Corrija os campos ou confira os resultados antes de preparar outro lote.";
+        "Nenhuma hora deste lote foi enviada. Há impedimentos ou nenhuma linha pendente; confira as linhas indicadas e prepare uma nova revisão.";
     return store.saveBatch(value);
   }
   function start(id: string): Promise<SubmissionBatch> {
@@ -92,6 +100,24 @@ export function createBatchService(
   async function run(value: SubmissionBatch): Promise<SubmissionBatch> {
     let interrupted = false;
     try {
+      const pending = value.items.filter(
+        (item) => item.record?.state === "prepared",
+      );
+      const errors = await submissions.preflight(
+        pending.map((item) => item.record!.id),
+      );
+      if (errors.size) {
+        for (const item of pending) {
+          const reason = errors.get(item.record!.id);
+          if (reason) item.error = lineError(item.selection, reason);
+        }
+        value.state = "interrupted";
+        value.message =
+          "Nenhuma hora deste lote foi enviada. A validação anterior ao envio encontrou impedimentos; confira as linhas indicadas, corrija e prepare uma nova revisão.";
+        value.updatedAt = new Date().toISOString();
+        store.saveBatch(value);
+        return get(value.id);
+      }
       for (const item of value.items) {
         if (item.record!.state !== "prepared") continue;
         try {

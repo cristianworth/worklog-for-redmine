@@ -4,7 +4,7 @@
 
 Salvar continua apenas local. **Enviar dia**, com ícone de sincronização, abre a revisão das linhas pendentes salvas daquele dia. Os checkboxes das linhas e do cabeçalho do dia permitem selecionar vários dias e usar **Enviar selecionados**. A revisão mostra exatamente a seleção, agrupada por data, e os impedimentos por linha. Nenhuma criação ocorre até a confirmação. Dias com edições não salvas exigem salvar primeiro; resultados confirmados, existentes, iniciados ou incertos não entram em uma nova seleção.
 
-O limite é de 100 linhas por lote; a ordem é a ordem da seleção. A revisão expira após 15 minutos. Impedimentos de preparação bloqueiam a confirmação de todo o lote; corrija e abra outra revisão. As revisões locais de todos os dias e do catálogo são conferidas antes da primeira criação. Conta, tarefa, atividade e equivalentes remotos continuam conferidos por linha pelo contrato individual.
+O limite é de 100 linhas por lote; a ordem é a ordem da seleção. A revisão expira após 15 minutos. Impedimentos de preparação bloqueiam a confirmação de todo o lote; corrija e abra outra revisão. As revisões locais de todos os dias e do catálogo são conferidas antes da primeira criação. Antes do primeiro POST, o backend confere conta, tarefa/projeto e atividade de **todas as linhas pendentes selecionadas**, usando consultas atuais independentes do cache de preenchimento. Códigos/projetos repetidos compartilham leituras somente nessa validação. Se uma tarefa estiver inválida/inacessível ou houver outro impedimento, **nenhuma hora de nenhum dia do lote é enviada**: o resultado identifica data, linha, código e motivo, e exige corrigir/preparar uma nova revisão. As revisões locais são conferidas novamente após as consultas. A conferência individual de contexto e equivalentes remotos continua antes de cada criação.
 
 ## Execução e recuperação
 
@@ -18,7 +18,13 @@ Um resultado incerto continua bloqueado. **Ver resultado → Conferir resultado*
 
 Status dos cards permanece **Manter**. Alteração de status, modelos do dia e demo pública continuam etapas próprias.
 
-## Verificação
+## P4.2 — consulta e validação antecipada
+
+Sair do campo de código consulta descrição/status/projeto automaticamente. Trocar o código cancela a consulta anterior e ignora sua resposta; a consulta não muda observação, duração ou revisão salva. **Atualizar tarefa** força nova leitura. O cache de preenchimento fica em memória no backend por 10 minutos, limitado às 500 tarefas mais recentes, por cliente/configuração; compartilha pedidos simultâneos, não guarda erros e desaparece ao reiniciar. Não comprova validade permanente nem permite pular a validação anterior ao envio.
+
+190 testes em 13 arquivos e build aprovados. A interface foi conferida em SQLite em memória e Redmine fictício, usando 22 e 23/10: consulta por Tab, reutilização de uma única requisição para o mesmo código em dois dias, troca rápida de código e lote bloqueado com data/tarefa identificadas. Nenhuma criação real. Os dias 19–21/10 do banco de uso e seus recibos foram preservados integralmente.
+
+## Verificação histórica P4
 
 158 testes em 11 arquivos passaram, com build aprovado. Casos novos incluem um dia completo, dois dias juntos, revisão inválida/obsoleta/expirada, catálogo alterado, duplicatas, confirmação concorrente, rejeição parcial, resposta perdida e reabertura do banco. A interface foi conferida em instância separada com dados fictícios: seleção por dia, revisão, criação, resultado incerto e linhas posteriores não enviadas.
 

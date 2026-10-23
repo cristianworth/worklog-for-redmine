@@ -60,6 +60,9 @@ export function DaySection({
   const [projects, setProjects] = useState<
     Record<string, { issue: string; projectId: number }>
   >({});
+  const [lookupRequests, setLookupRequests] = useState<
+    Record<string, { code: string }>
+  >({});
   const focusId = useRef<string | null>(null);
   const section = useRef<HTMLElement>(null);
   const summary = daySummary(day);
@@ -95,12 +98,18 @@ export function DaySection({
     ]);
   }
   function update(id: string, field: keyof EditorEntry, value: string) {
-    if (field === "issue")
+    if (field === "issue") {
+      setLookupRequests((current) => {
+        const next = { ...current };
+        delete next[id];
+        return next;
+      });
       setProjects((current) => {
         const next = { ...current };
         delete next[id];
         return next;
       });
+    }
     onChange(
       day.entries.map((entry) =>
         entry.id === id ? { ...entry, [field]: value } : entry,
@@ -252,6 +261,12 @@ export function DaySection({
                           inputMode="numeric"
                           value={entry.issue}
                           disabled={rowDisabled}
+                          onBlur={() =>
+                            setLookupRequests((current) => ({
+                              ...current,
+                              [entry.id]: { code: entry.issue.trim() },
+                            }))
+                          }
                           onChange={(event) =>
                             update(entry.id, "issue", event.target.value)
                           }
@@ -287,6 +302,7 @@ export function DaySection({
                         )}
                       </div>
                       <IssueLookup
+                        automaticRequest={lookupRequests[entry.id]}
                         issue={entry.issue}
                         onProject={(projectId) =>
                           setProjects((current) => ({

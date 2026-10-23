@@ -9,11 +9,13 @@ interface Issue {
 }
 export function IssueLookup({
   issue,
+  automaticRequest,
   label,
   disabled,
   onProject,
 }: {
   issue: string;
+  automaticRequest?: { code: string };
   label: string;
   disabled: boolean;
   onProject(projectId: number): void;
@@ -26,20 +28,39 @@ export function IssueLookup({
   } | null>(null);
   const [pending, setPending] = useState<string | null>(null);
   const request = useRef<AbortController | null>(null);
+  const latestCode = useRef(code);
+  latestCode.current = code;
+  const projectCallback = useRef(onProject);
+  projectCallback.current = onProject;
   useEffect(() => {
     setResult(null);
     setPending(null);
     return () => request.current?.abort();
   }, [code]);
-  async function lookup() {
+  useEffect(() => {
+    if (automaticRequest?.code === code) void lookup();
+  }, [automaticRequest, code]);
+  async function lookup(refresh = false) {
+    if (disabled || !code || (!refresh && pending === code)) return;
+    if (!/^[1-9]\d*$/.test(code) || !Number.isSafeInteger(Number(code))) {
+      setResult({
+        code,
+        error: "Informe um código de tarefa inteiro e positivo.",
+      });
+      return;
+    }
     request.current?.abort();
     const controller = new AbortController();
     request.current = controller;
     setPending(code);
     setResult(null);
+    const isCurrent = () =>
+      !controller.signal.aborted &&
+      latestCode.current === code &&
+      request.current === controller;
     try {
       const response = await fetch(
-        `/api/redmine/issues/${encodeURIComponent(code)}`,
+        `/api/redmine/issues/${encodeURIComponent(code)}${refresh ? "?refresh=1" : ""}`,
         { signal: controller.signal },
       );
       const data = await response.json();
@@ -54,18 +75,18 @@ export function IssueLookup({
         data.project.id <= 0
       )
         throw new Error("Resposta inválida para a tarefa consultada.");
-      if (!controller.signal.aborted) {
+      if (isCurrent()) {
         setResult({ code, data });
-        onProject(data.project.id);
+        projectCallback.current(data.project.id);
       }
     } catch (error) {
-      if (!controller.signal.aborted)
+      if (isCurrent())
         setResult({
           code,
           error: error instanceof Error ? error.message : "Falha na consulta.",
         });
     } finally {
-      if (!controller.signal.aborted) setPending(null);
+      if (isCurrent()) setPending(null);
     }
   }
   const current = result?.code === code ? result : null;
@@ -81,14 +102,14 @@ export function IssueLookup({
           !/^[1-9]\d*$/.test(code) ||
           !Number.isSafeInteger(Number(code))
         }
-        onClick={lookup}
+        onClick={() => void lookup(true)}
       >
         {busy ? (
           <LoaderCircle size={13} className="spin" />
         ) : (
           <Search size={13} />
         )}{" "}
-        {busy ? "Consultando…" : "Consultar"}
+        {busy ? "Consultando…" : current?.data ? "Atualizar tarefa" : "Consultar"}
       </button>
       {current?.error && (
         <small className="field-error" role="alert">

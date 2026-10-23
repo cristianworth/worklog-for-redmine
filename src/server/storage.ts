@@ -324,7 +324,7 @@ export function openDraftStore(filename: string) {
         ...value,
         state: "running",
         updatedAt: new Date().toISOString(),
-        message: "Envio iniciado. Os resultados são gravados por linha.",
+        message: "Validando todas as tarefas do lote antes de enviar. Aguarde os resultados por linha.",
       });
       db.exec("COMMIT");
       return next;

@@ -199,8 +199,11 @@ export function BatchReview({
             {dates.length === 1 ? "dia" : "dias"}. {batch.message}
           </p>
           <p className="settings-note">
-            Status dos cards: <strong>Manter</strong>. O lote para na primeira
-            falha. Fechar esta janela após confirmar não cancela a execução.
+            Todas as tarefas selecionadas serão validadas antes do primeiro envio.
+            Um impedimento bloqueia o lote inteiro. Depois de iniciar as criações,
+            uma falha interrompe as próximas linhas e preserva as anteriores.
+            Status dos cards: <strong>Manter</strong>. Fechar esta janela após
+            confirmar não cancela a execução.
           </p>
           {dates.map((date) => (
             <section

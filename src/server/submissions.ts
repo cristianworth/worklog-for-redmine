@@ -9,7 +9,7 @@ import {
 } from "../shared/submissions";
 import { isWorkDate } from "../shared/worklogs";
 import { ConflictError, type openDraftStore } from "./storage";
-import { type RedmineClient } from "./redmine";
+import { RedmineError, type RedmineClient } from "./redmine";
 export class SubmissionError extends Error {
   constructor(
     message: string,
@@ -26,6 +26,7 @@ export function createSubmissionService(
     date: string,
     entryId: string,
     expectedRevision: number,
+    reader: Pick<RedmineClient, "account" | "issue" | "projectActivities"> = redmine,
   ) {
     if (
       !isWorkDate(date) ||
@@ -45,8 +46,8 @@ export function createSubmissionService(
       throw new SubmissionError((error as Error).message);
     }
     const [account, issue] = await Promise.all([
-      redmine.account(),
-      redmine.issue(entry.issue.trim()),
+      reader.account(),
+      reader.issue(entry.issue.trim()),
     ]);
     const catalog = store.readActivities();
     const activity = resolveActivity(
@@ -58,7 +59,7 @@ export function createSubmissionService(
       throw new SubmissionError(
         "Cadastre esta atividade para o projeto da tarefa em Configurações antes de enviar.",
       );
-    const available = await redmine.projectActivities(issue.project.id);
+    const available = await reader.projectActivities(issue.project.id);
     if (available && !available.some((a) => a.id === activity.activityId))
       throw new SubmissionError(
         "O código da atividade não está disponível no projeto da tarefa. Confira o catálogo local.",
@@ -108,6 +109,91 @@ export function createSubmissionService(
       fingerprint,
     );
   }
+  function assertContext(record: SubmissionRecord, fresh: SubmissionSnapshot) {
+    if (
+      [
+        "scope",
+        "projectId",
+        "userId",
+        "activityId",
+        "minutes",
+        "comment",
+        "issueId",
+        "date",
+        "catalogRevision",
+      ].some(
+        (key) =>
+          fresh[key as keyof SubmissionSnapshot] !==
+          record.snapshot[key as keyof SubmissionSnapshot],
+      )
+    )
+      throw new ConflictError(
+        "O contexto remoto mudou após a revisão. Prepare uma nova revisão.",
+      );
+  }
+  async function preflight(ids: string[]): Promise<Map<string, string>> {
+    // Fresh reads for this confirmation only; the editor's lookup cache cannot authorize a send.
+    let account: ReturnType<RedmineClient["account"]> | undefined;
+    const issues = new Map<string, ReturnType<RedmineClient["issue"]>>();
+    const projects = new Map<
+      number,
+      ReturnType<RedmineClient["projectActivities"]>
+    >();
+    const reader = {
+      account: () => (account ??= redmine.account()),
+      issue: (id: string) => {
+        if (!issues.has(id)) issues.set(id, redmine.issue(id));
+        return issues.get(id)!;
+      },
+      projectActivities: (id: number) => {
+        if (!projects.has(id)) projects.set(id, redmine.projectActivities(id));
+        return projects.get(id)!;
+      },
+    };
+    const errors = new Map<string, string>();
+    for (const id of ids) {
+      try {
+        const record = store.submission(id);
+        if (!record || record.state !== "prepared")
+          throw new ConflictError("A revisão mudou. Confira os resultados e prepare uma nova revisão.");
+        const fresh = await context(
+          record.snapshot.date,
+          record.snapshot.entryId,
+          record.snapshot.dayRevision,
+          reader,
+        );
+        assertContext(record, fresh);
+        store.assertSnapshot(record);
+      } catch (error) {
+        errors.set(
+          id,
+          error instanceof ConflictError ||
+          error instanceof SubmissionError ||
+          error instanceof RedmineError
+            ? error.message
+            : "Não foi possível validar esta linha. Confira o acesso ao Redmine e tente uma nova revisão.",
+        );
+      }
+    }
+    // Drafts may have changed while the remote reads were in flight.
+    for (const id of ids) {
+      if (errors.has(id)) continue;
+      try {
+        const record = store.submission(id);
+        if (!record || record.state !== "prepared")
+          throw new ConflictError("A revisão mudou. Prepare uma nova revisão.");
+        store.assertSnapshot(record);
+      } catch (error) {
+        errors.set(
+          id,
+          error instanceof Error
+            ? error.message
+            : "A revisão mudou. Prepare uma nova revisão.",
+        );
+      }
+    }
+    return errors;
+  }
   async function send(id: string): Promise<SubmissionRecord> {
     const record = store.beginSubmission(id);
     try {
@@ -116,26 +202,7 @@ export function createSubmissionService(
         record.snapshot.entryId,
         record.snapshot.dayRevision,
       );
-      if (
-        [
-          "scope",
-          "projectId",
-          "userId",
-          "activityId",
-          "minutes",
-          "comment",
-          "issueId",
-          "date",
-          "catalogRevision",
-        ].some(
-          (key) =>
-            fresh[key as keyof SubmissionSnapshot] !==
-            record.snapshot[key as keyof SubmissionSnapshot],
-        )
-      )
-        throw new ConflictError(
-          "O contexto remoto mudou após a revisão. Prepare uma nova revisão.",
-        );
+      assertContext(record, fresh);
       const existing = await redmine.existingTimeEntries(fresh);
       if (existing.length)
         return store.finishSubmission(id, {
@@ -238,5 +305,5 @@ export function createSubmissionService(
       });
     }
   }
-  return { prepare, send, reconcile, verify };
+  return { prepare, preflight, send, reconcile, verify };
 }

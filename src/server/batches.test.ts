@@ -59,6 +59,7 @@ function setup(filename = ":memory:", dates = ["2026-10-12"]) {
     })),
   );
   const rows: any[] = [];
+  const invalidIssues = new Map<string, number>();
   let posts = 0,
     failAt = 0,
     failure = 422;
@@ -69,10 +70,12 @@ function setup(filename = ":memory:", dates = ["2026-10-12"]) {
       const url = new URL(String(input));
       if (url.pathname.endsWith("users/current.json"))
         return json({ user: { id: 7 } });
-      if (url.pathname.endsWith("issues/1001.json"))
+      const issueId = url.pathname.match(/issues\/(\d+)\.json$/)?.[1];
+      if (issueId && invalidIssues.has(issueId)) return json({}, invalidIssues.get(issueId));
+      if (issueId)
         return json({
           issue: {
-            id: 1001,
+            id: Number(issueId),
             subject: "Synthetic task",
             status: { id: 2, name: "In progress" },
             project: { id: 10, name: "Example" },
@@ -122,6 +125,7 @@ function setup(filename = ":memory:", dates = ["2026-10-12"]) {
   const individual = createSubmissionService(store, client);
   return {
     days,
+    invalidIssues,
     selections,
     rows,
     request,
@@ -139,6 +143,76 @@ function setup(filename = ":memory:", dates = ["2026-10-12"]) {
   };
 }
 describe("batch submission", () => {
+  it("identifies an invalid task during preparation and blocks the entire day", async () => {
+    const t = setup();
+    t.invalidIssues.set("1001", 404);
+    const batch = await t.service.prepare(t.selections);
+    expect(batch.items.every((item) => item.error?.includes("tarefa #1001"))).toBe(true);
+    expect(batch.items[0].error).toContain("12/10/2026 · linha 1");
+    expect(batch.message).toContain("Nenhuma hora");
+    expect(() => t.service.start(batch.id)).toThrow();
+    expect(t.posts()).toBe(0);
+  });
+  it.each([404, 403, 500])("sends nothing if the last task becomes inaccessible after review (%i)", async (status) => {
+    const t = setup();
+    const day = store.save({ ...t.days[0], entries: t.days[0].entries.map((entry, i) => ({ ...entry, issue: String(1001 + i) })) });
+    const selections = t.selections.map((item) => ({ ...item, revision: day.revision }));
+    const review = await t.service.prepare(selections);
+    t.invalidIssues.set("1003", status);
+    const result = await t.service.start(review.id);
+    expect(t.posts()).toBe(0);
+    expect(result.state).toBe("interrupted");
+    expect(result.items[2].error).toContain("12/10/2026 · linha 3 · tarefa #1003");
+    expect(result.items.every((item) => item.record?.state === "prepared")).toBe(true);
+    expect(result.message).toContain("Nenhuma hora deste lote foi enviada");
+    expect(() => t.service.start(review.id)).toThrow();
+  });
+  it("blocks both dates when a task in the second day becomes invalid", async () => {
+    const t = setup(":memory:", ["2026-10-13", "2026-10-14"]);
+    const day = store.save({ ...t.days[1], entries: t.days[1].entries.map((entry) => ({ ...entry, issue: "1002" })) });
+    const selections = t.selections.map((item) => item.date === day.date ? { ...item, revision: day.revision } : item);
+    const review = await t.service.prepare(selections);
+    t.invalidIssues.set("1002", 404);
+    const result = await t.service.start(review.id);
+    expect(t.posts()).toBe(0);
+    expect(result.items.slice(0, 3).every((item) => item.error === null)).toBe(true);
+    expect(result.items[3].error).toContain("14/10/2026");
+    expect(result.state).toBe("interrupted");
+  });
+  it("checks every task before the first POST and shares repeated context only within preflight", async () => {
+    const t = setup();
+    const day = store.save({ ...t.days[0], entries: t.days[0].entries.map((entry, i) => ({ ...entry, issue: i === 2 ? "1002" : "1001" })) });
+    const review = await t.service.prepare(t.selections.map((item) => ({ ...item, revision: day.revision })));
+    t.request.mockClear();
+    await t.service.start(review.id);
+    const calls = t.request.mock.calls;
+    const firstPost = calls.findIndex(([, options]) => options?.method === "POST");
+    const before = calls.slice(0, firstPost).map(([url]) => new URL(String(url)).pathname);
+    expect(before).toContain("/issues/1002.json");
+    // One shared preflight + the individual guard immediately preceding the first write.
+    expect(before.filter((path) => path === "/issues/1001.json")).toHaveLength(2);
+    expect(before.filter((path) => path === "/users/current.json")).toHaveLength(2);
+    expect(t.posts()).toBe(3);
+  });
+  it("detects an edit made while remote preflight is pending before any POST", async () => {
+    const t = setup();
+    const review = await t.service.prepare(t.selections);
+    const original = t.client.issue;
+    let edited = false;
+    vi.spyOn(t.client, "issue").mockImplementation(async (id) => {
+      const result = await original(id);
+      if (!edited) {
+        edited = true;
+        store.save({ ...t.days[0], entries: t.days[0].entries.map((entry) => ({ ...entry, comment: "Edited during validation" })) });
+      }
+      return result;
+    });
+    const result = await t.service.start(review.id);
+    expect(result.state).toBe("interrupted");
+    expect(t.posts()).toBe(0);
+    expect(result.items.some((item) => item.error?.includes("mudou"))).toBe(true);
+  });
+
   it("keeps submitted results in history even after many canceled preparations", async () => {
     const t = setup();
     const sent = await t.service.start(
