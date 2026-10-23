@@ -148,3 +148,5 @@ E nenhuma hora deve ser registrada por essa consulta
 ## Registro de automação
 
 Os blocos acima não são testes executáveis. Os testes reais do primeiro recorte estão nos arquivos indicados no início; o resultado atual deve ser obtido com `npm test`. Regras de envio, inclusive B03, permanecem fora do primeiro recorte. Não realizar gravações reais no Redmine em testes rotineiros.
+
+Atualização de escopo em 23/10/2026: os exemplos antigos de movimentação de status são apenas referência histórica; P5.1 foi cancelado por Cristian. Não implementar alterações de status com base nesses exemplos. Prioridades e critérios atuais no roadmap.

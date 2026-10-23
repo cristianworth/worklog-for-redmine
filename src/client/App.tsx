@@ -915,7 +915,7 @@ export function App() {
           </p>
         )}
         <footer className="page-footer">
-          <span>Worklog for Redmine</span>
+          <span>Worklog for Redmine · v{import.meta.env.VITE_APP_VERSION}</span>
           <span>
             <WifiOff size={13} aria-hidden="true" />
             Organização local · sem envio automático

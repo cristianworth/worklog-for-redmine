@@ -16,7 +16,7 @@ Fechar/recarregar a página após confirmar não cancela o trabalho no backend. 
 
 Um resultado incerto continua bloqueado. **Ver resultado → Conferir resultado** consulta o Redmine sem POST e pode confirmar a linha; isso não retoma o restante do lote. Equivalentes idênticos continuam bloqueados conservadoramente; não há chave de idempotência remota ou proteção contra outro aplicativo criando horas simultaneamente. Não restaurar um backup antigo para forçar reenvio, nem apagar recibos após excluir um lançamento remoto.
 
-Status dos cards permanece **Manter**. Alteração de status, modelos do dia e demo pública continuam etapas próprias.
+Status dos cards permanece **Manter**; a movimentação foi cancelada por Cristian em 23/10/2026. O modelo do dia foi entregue no P5 e a demo pública continua planejada para P7/P8.
 
 ## P4.2 — consulta e validação antecipada
 

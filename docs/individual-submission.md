@@ -29,7 +29,7 @@ O VBA consultado usa formulário + cookie e envia tarefa, data, horas, observaç
 
 O transporte implementado utiliza `POST time_entries.json` com chave no cabeçalho, data explícita e duração `HH:MM`, preservando minutos sem o wrap do Excel. A leitura compara o retorno em minutos, considerando o arredondamento normal das horas do servidor. Não envia `user_id`, campos de status, PUT de tarefa ou exclusões. O transporte com exceção de certificado aceita POST somente no caminho exato de criação da base configurada; não segue redirecionamentos nem altera TLS globalmente.
 
-O legado considera HTTP 200 e mistura o retorno da criação com a movimentação opcional do card. Essa fragilidade não foi portada: a confirmação requer o contrato da API e a movimentação permanece para P5.1. Rejeições e mensagens de falha não expõem respostas remotas brutas ou credenciais.
+O legado considera HTTP 200 e mistura o retorno da criação com a movimentação opcional do card. Essa fragilidade não foi portada: a confirmação requer o contrato da API e a movimentação foi retirada do escopo por Cristian em 23/10/2026; o status permanece inalterado. Rejeições e mensagens de falha não expõem respostas remotas brutas ou credenciais.
 
 - [Criação e consulta de horas — Redmine](https://www.redmine.org/projects/redmine/wiki/Rest_TimeEntries)
 - [Conversão e validação de horas — modelo oficial](https://github.com/redmine/redmine/blob/master/app/models/time_entry.rb)

@@ -28,7 +28,7 @@ Stop the server before switching between these modes; both use port 3000.
 4. Click **Salvar rascunhos**. It saves every changed day, including dates no longer visible after changing the period. Saves are atomic: a conflict or failure prevents a partial database update.
 5. Reopen to recover saved rows. The browser remembers the period preference; **Até hoje** recalculates the end date, keeping the chosen start. A refresh of the period preserves pending edits, including invalid duration input. Closing/reloading the page warns if unsaved edits remain.
 
-The default view covers the last seven calendar dates, including today. Weekends remain available. Range preferences are stored only in that browser; drafts stay in SQLite. The draft-day format is preserved; the activity catalog adds a separate table in the same database. **Modelo do dia** is unavailable and marked **Em breve**. **Enviar dia** reviews the saved pending rows of one day. Check rows or day headers and use **Enviar selecionados** to review several dates together; neither action sends immediately. **Configurações** opens connection instructions and a read-only API access check.
+The default view covers the last seven calendar dates, including today. Weekends remain available. Range preferences are stored only in that browser; drafts stay in SQLite. The draft-day format is preserved; the activity catalog adds a separate table in the same database. **Modelo do dia** configures recurring rows for untouched new days. **Enviar dia** reviews the saved pending rows of one day. Check rows or day headers and use **Enviar selecionados** to review several dates together; neither action sends immediately. **Configurações** opens connection instructions and a read-only API access check.
 
 Incomplete rows can be saved as drafts. A blank duration contributes nothing to the total; malformed durations must be corrected or cleared before saving. Zero duration is allowed in a draft. Preparing submission validates required fields, resolves the activity inside the issue project and checks for equivalent existing entries; server-specific limits are enforced by Redmine. Activity text remains editable; project-specific suggestions come from the local catalog after looking up an issue. Incomplete or unmapped drafts can still be saved.
 
@@ -88,7 +88,7 @@ React + Vite + TypeScript; Node + Express + SQLite through Node's built-in `node
 
 The period-based editor uses Lucide icons, a highlighted daily total and separate save/review/confirm actions. **Modelo do dia** configures local recurring rows. On an untouched new date, **Criar dia com modelo** copies them once into an unsaved draft. Existing/edited dates, including saved empty days, are preserved; changing the model affects only future copies. **Adicionar linha** remains a blank row. The model starts empty, accepts incomplete defaults and saves separately from drafts; closing its panel preserves unsaved edits while the page remains open. [Usage and limits](docs/day-template.md). The project activity catalog is available in Configurações. **Modo local** identifies this computer’s database and expands to explain storage. **Abrir demonstração** is a disabled future shortcut, not a published demo. See the plan for priorities.
 
-API access checks and automatic issue lookup are implemented with synthetic tests. Real account and issue reads have been verified with the local API key; one specifically authorized real time-entry test was created and verified, with issue status unchanged. Its private record is excluded from Git and must never be replayed. Two separately authorized batch tests were subsequently completed and verified, covering nine entries with unchanged issue statuses; those authorizations are also consumed. A local project-specific activity catalog, individual submission and period batches are implemented; optional issue-status changes remain a future slice. Saving a draft does not send anything to Redmine. This project is independent of Redmine.
+API access checks and automatic issue lookup are implemented with synthetic tests. Real account and issue reads have been verified with the local API key; one specifically authorized real time-entry test was created and verified, with issue status unchanged. Its private record is excluded from Git and must never be replayed. Two separately authorized batch tests were subsequently completed and verified, covering nine entries with unchanged issue statuses; those authorizations are also consumed. A local project-specific activity catalog, individual submission and period batches are implemented; issue-status changes were explicitly removed from scope; submission always preserves the card status. Saving a draft does not send anything to Redmine. This project is independent of Redmine.
 
 ## Planned public demonstration
 
@@ -96,8 +96,13 @@ A public demo is scheduled among the final project stages, after the local workf
 
 The normal local mode continues to use Node and SQLite. The public code repository and an eventual hosted demo are separate deliverables; publishing code alone does not host the Node application.
 
+## Versions
+
+Current version: **v0.1.0**, which introduces the day template (P5). The earlier P0–P4.2 implementation is documented retrospectively as **v0.0.0**; historical manifests are preserved. The footer reads the current version from `package.json` during the build. See [CHANGELOG.md](CHANGELOG.md) for delivered changes and [ROADMAP.md](ROADMAP.md) for planned work. The next proposed version, v0.2.0, prioritizes project-specific activity selection and compact duration entry; these improvements are not implemented yet. Versions/tags are local until publication is explicitly completed.
+
 ## Documentation and private reference
 
+- [Changelog / versions](CHANGELOG.md)
 - [Roadmap / checklist](ROADMAP.md)
 - [Day template](docs/day-template.md)
 - [Plan and decisions](docs/development-plan.md)
