@@ -23,7 +23,7 @@ Stop the server before switching between these modes; both use port 3000.
 ## Use
 
 1. Choose **De** and **Até**, or select **Até hoje** to follow the current local date. Valid dates update the view automatically after a short pause. Switching off **Até hoje** keeps the displayed end date. Incomplete or reversed dates preserve the last valid view; failed requests offer **Tentar novamente**.
-2. Scroll through the days and add rows. Enter the issue, duration (`01:30`), activity and observation.
+2. Scroll through the days and add rows. Enter the issue and leave its field to identify the project, select an activity by name/code, then enter the duration (`30`/`030` for 30 minutes, `130` for 1h30, or `01:30`) and observation.
 3. Click the copy icon next to an issue to copy only its code. Paste it into another row normally. Browsers may restrict clipboard access; a failed copy is reported.
 4. Click **Salvar rascunhos**. It saves every changed day, including dates no longer visible after changing the period. Saves are atomic: a conflict or failure prevents a partial database update.
 5. Reopen to recover saved rows. The browser remembers the period preference; **Até hoje** recalculates the end date, keeping the chosen start. A refresh of the period preserves pending edits, including invalid duration input. Closing/reloading the page warns if unsaved edits remain.
@@ -48,7 +48,7 @@ The private server returned an expired-certificate error in strict mode on 2026-
 
 Open **Configurações → Atividades por projeto**. Add the project ID, Redmine activity ID and name, then use **Salvar catálogo**. Look up an issue to see its project ID. Check activity IDs against the actual Redmine project; the catalog starts empty, with no workbook import or automatic discovery. The same name can have a different ID in another project, while duplicate names/IDs inside one project are rejected.
 
-After looking up a row (automatically on blur or explicitly), its activity input offers only catalog entries for that issue’s project and shows the resolved activity code. An unconfigured name remains valid draft text and is identified as unmapped. Changing the issue code invalidates the previous project. Lookup metadata is temporary; leave the code field or use Consultar after reopening. The original activity string remains the persisted draft field, with no destructive data migration or silent rewrite after catalog changes. Submission must revalidate the issue/project/activity before a future remote write.
+After looking up a row (automatically on blur or explicitly), its closed activity selector offers only catalog entries for that issue’s project, showing each name and code. Historical unconfigured names remain visible as preserved, unavailable choices until corrected. The draft can still be saved incomplete; submission requires a valid mapping. Changing the issue code invalidates the previous project. Lookup metadata is temporary; leave the code field or use Consultar after reopening. The original activity string remains the persisted draft field, with no destructive data migration or silent rewrite after catalog changes. Submission must revalidate the issue/project/activity before a future remote write.
 
 Catalog settings live in `activity_catalog` in the same ignored SQLite database. Their save/revision is independent of day saves. Conflicting changes preserve the editor; copy pending changes, discard/reload the catalog, and reapply them deliberately. Closing Configurações keeps unsaved catalog edits in the current page; the header marks them **Não salvo**, and leaving the page warns. **Descartar alterações** resets catalog edits only. **Salvar rascunhos** does not save the catalog, and vice versa.
 
@@ -72,6 +72,10 @@ Confirmed rows show a green check, **Apropriado**, the remote ID and an original
 The three specifically authorized P4 days have been incorporated into the normal local SQLite with nine confirmed receipts. Two preexisting drafts were preserved. A consistent backup preceded the atomic import, and every remote ID was checked without creating hours. Local history is now real usage data: keep the SQLite and receipts, and never commit the database or backups. The private import journal identifies the backup path. This controlled operation does not add a general upload/import interface or populate the manual activity catalog. [Status and import details](docs/appropriation-status-plan.md).
 
 Before any batch creation, the backend validates every selected pending row with current Redmine data, independently of the editor cache. An invalid/inaccessible task or other validation failure blocks all dates in that selection, with date, row and code in the error. Repeated tasks share reads only within that preflight. Each row retains its final individual guard. Redmine has no transaction across creations: failures after writes begin may still produce a preserved partial result.
+
+## Duration input
+
+`30` or `030` means `00:30`; `130` means `01:30`; `800` means `08:00`. Compact input uses its last two digits as minutes. `HH:MM` remains valid, and fields normalize on blur. Totals and saves use the same conversion even before blur; storage remains integer minutes. Invalid minutes (`90`, `160`, `1:60`), decimals, signs and seconds are rejected rather than silently repaired. Empty durations stay incomplete. The same rules apply in the day template.
 
 ## Verify
 
@@ -98,7 +102,7 @@ The normal local mode continues to use Node and SQLite. The public code reposito
 
 ## Versions
 
-Current version: **v0.1.0**, which introduces the day template (P5). The earlier P0–P4.2 implementation is documented retrospectively as **v0.0.0**; historical manifests are preserved. The footer reads the current version from `package.json` during the build. See [CHANGELOG.md](CHANGELOG.md) for delivered changes and [ROADMAP.md](ROADMAP.md) for planned work. The next proposed version, v0.2.0, prioritizes project-specific activity selection and compact duration entry; these improvements are not implemented yet. Versions/tags are local until publication is explicitly completed.
+Current version: **v0.2.0**, with closed project-specific activity selection and compact duration input in days and templates. The day template (P5) was delivered in **v0.1.0**. The earlier P0–P4.2 implementation is documented retrospectively as **v0.0.0**; historical manifests are preserved. The footer reads the current version from `package.json` during the build. See [CHANGELOG.md](CHANGELOG.md) for delivered changes and [ROADMAP.md](ROADMAP.md) for planned work. The next stages prepare an isolated public demo and then publication (P7/P8). Versions/tags are local until publication is explicitly completed.
 
 ## Documentation and private reference
 

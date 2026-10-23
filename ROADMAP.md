@@ -1,6 +1,6 @@
 # Roadmap — Worklog for Redmine
 
-Atualizado em 23/10/2026. Este arquivo descreve o que falta fazer; o [CHANGELOG.md](CHANGELOG.md) registra o que cada versão já entregou. Versão atual: **v0.1.0 — modelo do dia**.
+Atualizado em 23/10/2026. Este arquivo descreve o que falta fazer; o [CHANGELOG.md](CHANGELOG.md) registra o que cada versão já entregou. Versão atual: **v0.2.0 — atividades por opções e duração abreviada**.
 
 ## Versões e prioridade
 
@@ -8,10 +8,10 @@ Atualizado em 23/10/2026. Este arquivo descreve o que falta fazer; o [CHANGELOG.
 | --- | --- | --- |
 | v0.0.0 | Base anterior ao modelo: rascunhos, períodos, catálogo por projeto, consultas, envios e proteção contra duplicação | Marco histórico concluído, P0–P4.2 |
 | v0.1.0 | Modelo configurável, cópia independente para dias novos e salvamento separado | Entregue, P5 |
-| v0.2.0 | Escolha de atividades por opções e duração abreviada; revisão integrada do preenchimento | Próxima versão proposta, P6.1–P6.3 |
+| v0.2.0 | Escolha de atividades por opções e duração abreviada; revisão integrada do preenchimento | Entregue, P6.1–P6.3 |
 | A definir | Demo isolada e publicação do código/demo | Depois do fluxo local validado, P7–P8 |
 
-**Ordem de trabalho:** P6.1 (atividade) → P6.2 (duração) → P6.3 (revisão integrada) → P7 (preparar demo) → P8 (publicar). As duas melhorias de preenchimento têm prioridade sobre demo e publicação. Não foram implementadas nesta atualização de planejamento.
+**Próxima etapa:** P7 (preparar demo) → P8 (publicar). P6.1, P6.2 e P6.3 foram concluídas na v0.2.0. Não iniciar publicação antes da definição de destino e licença.
 
 ## Entregas já concluídas
 
@@ -31,54 +31,39 @@ Atualizado em 23/10/2026. Este arquivo descreve o que falta fazer; o [CHANGELOG.
 
 O P5 teve quatro chunks concluídos: conferir o VBA; configurar/persistir o modelo; aplicar em dia novo; verificar persistência, teclado e ausência de duplicação. Entregue com 203 testes/14 arquivos e compilação aprovada. [Uso do modelo](docs/day-template.md).
 
-## P6.1 — Escolher atividade por opções — prioridade máxima
+## P6.1 — Escolher atividade por opções — concluído
 
-**Problema:** a P2.1 entregou o catálogo e a conversão nome + projeto → código, mas o campo ainda é um texto livre com `datalist`. Isso ajuda a sugerir, mas não restringe a escolha como a lista da planilha.
+A P2.1 já resolvia nome + projeto → código, mas a interface aceitava texto livre. Na v0.2.0, dias e modelo usam uma seleção fechada com nome e ID das atividades cadastradas para o projeto da tarefa.
 
-**O que faremos:** substituir a digitação livre por uma seleção das atividades do projeto da tarefa, mostrando nome e código. Primeiro identificar o projeto pela consulta da tarefa; depois disponibilizar suas atividades cadastradas. O modelo do dia deve seguir a mesma regra quando tiver uma tarefa definida; campos ainda não definidos podem continuar incompletos para completar no dia.
+| Chunk | Resultado |
+| --- | --- |
+| A — Opções por projeto | Consulta identifica o projeto; a lista oferece somente suas atividades, sem seleção inicial automática |
+| B — Rascunhos e modelo | Integração nos dois editores; valores antigos sem cadastro preservados e identificados; recibos apropriados continuam bloqueados com seu código original |
+| C — Envio e conferência | Backend mantém resolução/validação por projeto; testes conferem código correto em dois projetos e zero envio de atividade sem vínculo |
 
-| Chunk | Entrega | Como conferir |
-| --- | --- | --- |
-| A — Opções por projeto | Seleção fechada baseada no catálogo existente, com nome e ID; orientar consultar a tarefa/cadastrar atividades quando necessário | Mesmo nome em dois projetos oferece o código correspondente a cada projeto |
-| B — Rascunhos e modelo | Integrar a seleção ao dia e ao modelo, preservar textos históricos sem vínculo e pedir correção sem apagar valores | Trocar tarefa/projeto não conserva um código incompatível nem reescreve horas apropriadas |
-| C — Envio e conferência | Manter resolução e validação de código no backend, explicar opções ausentes e conferir o fluxo completo com serviço simulado | Nenhum envio sem vínculo válido; seleção correta leva o ID esperado no payload |
+**Uso:** saia do código da tarefa ou use Consultar; depois escolha nome/código na lista. Se o projeto não tiver atividades cadastradas, o campo explica como usar Configurações. O rascunho pode continuar incompleto; o envio permanece bloqueado sem vínculo válido.
 
-**Critério de conclusão:** o usuário escolhe uma opção válida, entende a falta de configuração e consegue revisar o código antes de enviar. O rascunho continua podendo ficar incompleto; o envio continua bloqueado sem vínculo válido. A origem inicial das opções é o catálogo manual por projeto já implementado, não uma enumeração fixa/global.
+**Limite:** o catálogo continua manual por projeto. A instância nem sempre fornece a lista remota; descoberta automática não foi incluída, e nenhum ID é inventado, buscado em outro projeto ou escolhido como padrão.
 
-**Limite conhecido:** a instância consultada nem sempre fornece a lista de atividades por projeto. Descoberta automática não será presumida: não inventar IDs, reutilizar códigos de outro projeto ou escolher a primeira atividade automaticamente. Cadastro do catálogo permanece explícito; descoberta automática é uma melhoria separada se houver uma fonte confiável.
-
-## P6.2 — Digitar duração abreviada — prioridade alta
-
-**Problema:** hoje a aplicação aceita apenas `HH:MM`. Queremos digitar menos e manter minutos inteiros como unidade de armazenamento e envio.
+## P6.2 — Digitar duração abreviada — concluído
 
 | Entrada | Resultado ao sair do campo |
 | --- | --- |
 | `30` ou `030` | `00:30` |
 | `130` ou `0130` | `01:30` |
 | `800` | `08:00` |
-| `01:30` | `01:30`, formato atual preservado |
-| Vazio | Continua incompleto, sem inventar duração |
-| `160` ou `1:60` | Erro claro; não converter silenciosamente minutos inválidos |
+| `01:30` | Formato atual preservado |
+| Vazio | Continua incompleto |
+| `90`, `160` ou `1:60` | Erro de minutos inválidos, sem correção silenciosa |
 
-Na forma compacta, os dois últimos dígitos representam minutos e os anteriores representam horas; um ou dois dígitos representam minutos. Não incluir segundos nessa entrada, nos totais ou no envio. Essa regra foi solicitada por Cristian; a implementação atual ainda não a oferece.
+Os dois últimos dígitos são minutos; os anteriores são horas. Um ou dois dígitos representam minutos. O conversor é o mesmo no total, salvamento e blur dos dias/modelo; salvar antes do blur produz o mesmo resultado. Segundos não entram nessa digitação; não são arredondados nem enviados. Minutos persistidos, recibos e parser do transporte `HH:MM` foram preservados, sem migração.
 
-| Chunk | Entrega | Como conferir |
-| --- | --- | --- |
-| A — Regra única | Conversor de entrada abreviada para minutos, preservando `HH:MM`, vazio e erros | Vitest dos exemplos, limites de minutos e valores inválidos |
-| B — Dia e modelo | Normalizar ao sair do campo; total e salvamento usam a mesma interpretação mesmo antes do blur | Preencher por teclado, salvar e reabrir mantendo o mesmo total |
-| C — Compatibilidade | Preservar valores salvos e recibos existentes; nenhuma mudança no payload de minutos/horas | Dados anteriores permanecem iguais e os dias protegidos não são usados como massa de teste |
+## P6.3 — Revisão integrada da v0.2.0 — concluído
 
-## P6.3 — Revisão integrada da v0.2.0
-
-Esta etapa fecha a versão de preenchimento; não é uma refatoração ampla.
-
-- Conferir por teclado: código → consulta → atividade → duração abreviada → observação → salvar → revisar envio.
-- Conferir modelo, cópia de tarefa entre dias, troca de período com edições pendentes, catálogo vazio e tarefa inválida.
-- Verificar mensagens de erro, estados de carregamento, conflitos entre abas, foco e uso em telas menores; corrigir problemas observados.
-- Atualizar instruções e changelog somente com o que foi entregue. Fechar versão/manifest/rodapé e tag juntos.
-- Usar Vitest para regras, persistência e payload, com interface e Redmine simulados. Testes reais exigem alvos especificamente autorizados; não repetir autorizações consumidas.
-
-**Critério de conclusão:** preencher e revisar vários dias sem digitação livre de atividade, sem inserir dois-pontos a cada duração e sem perder edições ou duplicar apropriações.
+- 242 testes/17 arquivos e compilação aprovados. Cobertura nova de atalhos, minutos inválidos, seleção restrita por projeto, histórico preservado, payload e reabertura do banco.
+- Interface conferida em instância isolada com SQLite em memória: código por Tab, opções por projeto, edição de duração, mensagem de erro, correção de atividade antiga, salvar/reabrir modelo e lote simulado de dois dias.
+- Estilos/foco de teclado dos seletores integrados aos campos existentes; rolagem horizontal e tamanho de fonte em telas menores preservados. A conferência visual ocorreu no navegador integrado; teste adicional em telefone real fica para a revisão da demo/publicação.
+- Changelog, manifests, rodapé e tag da v0.2.0 fechados juntos. Dias 19, 20 e 21/10 de uso e seus recibos intactos. Nenhuma criação remota real nessa entrega.
 
 ## P7 — Preparar uma demonstração segura para visitantes
 

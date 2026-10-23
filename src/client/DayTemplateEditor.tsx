@@ -1,27 +1,43 @@
+import { ActivitySelect } from "./ActivitySelect";
+import { IssueLookup } from "./IssueLookup";
+import type { Activity } from "../shared/activities";
 import { useEffect, useState } from "react";
 import { LoaderCircle, Plus, RotateCcw, Save, Trash2, X } from "lucide-react";
 import { validateDayTemplate, type DayTemplate } from "../shared/day-template";
-import { formatDuration, parseDuration } from "../shared/worklogs";
+import { formatDuration, parseDurationInput } from "../shared/worklogs";
 import type { EditorEntry } from "./editor";
 
-const rowsFrom = (template: DayTemplate): EditorEntry[] =>
-  template.entries.map(({ minutes, ...entry }) => ({
+const rowsFrom = (template: DayTemplate, ids: string[] = []): EditorEntry[] =>
+  template.entries.map(({ minutes, ...entry }, index) => ({
     ...entry,
-    id: crypto.randomUUID(),
+    id: ids[index] ?? crypto.randomUUID(),
     duration: minutes === null ? "" : formatDuration(minutes),
   }));
 
 export function DayTemplateEditor({
   onTemplate,
+  activities,
   onDirtyChange,
   onClose,
 }: {
   onTemplate(template: DayTemplate | null): void;
+  activities: Activity[];
   onDirtyChange(dirty: boolean): void;
   onClose(): void;
 }) {
   const [template, setTemplate] = useState<DayTemplate | null>(null);
   const [rows, setRows] = useState<EditorEntry[]>([]);
+  const [projects, setProjects] = useState<
+    Record<string, { issue: string; projectId: number }>
+  >({});
+  const [lookupRequests, setLookupRequests] = useState<
+    Record<string, { code: string }>
+  >({});
+  function resetRows(loaded: DayTemplate) {
+    setRows(rowsFrom(loaded));
+    setProjects({});
+    setLookupRequests({});
+  }
   const [dirty, setDirty] = useState(false);
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -40,7 +56,7 @@ export function DayTemplateEditor({
         const loaded = validateDayTemplate(data);
         if (!controller.signal.aborted) {
           setTemplate(loaded);
-          setRows(rowsFrom(loaded));
+          resetRows(loaded);
           onTemplate(loaded);
         }
       })
@@ -67,13 +83,25 @@ export function DayTemplateEditor({
     setMessage("");
   }
   function update(id: string, field: keyof EditorEntry, value: string) {
+    if (field === "issue") {
+      setProjects((current) => {
+        const next = { ...current };
+        delete next[id];
+        return next;
+      });
+      setLookupRequests((current) => {
+        const next = { ...current };
+        delete next[id];
+        return next;
+      });
+    }
     setRows((current) =>
       current.map((row) => (row.id === id ? { ...row, [field]: value } : row)),
     );
     changed();
   }
   function discard() {
-    if (template) setRows(rowsFrom(template));
+    if (template) resetRows(template);
     setDirty(false);
     setError("");
     setMessage("");
@@ -86,10 +114,10 @@ export function DayTemplateEditor({
         revision: template.revision,
         entries: rows.map((row) => {
           const minutes =
-            row.duration === "" ? null : parseDuration(row.duration);
+            row.duration === "" ? null : parseDurationInput(row.duration);
           if (row.duration !== "" && minutes === null)
             throw new Error(
-              "Corrija as durações do modelo usando horas:minutos, como 00:30.",
+              "Corrija as durações do modelo: use 30, 130 ou HH:MM; minutos de 00 a 59.",
             );
           return {
             issue: row.issue,
@@ -124,7 +152,12 @@ export function DayTemplateEditor({
           "Não foi possível confirmar o salvamento. Preserve suas edições e recarregue o modelo antes de tentar novamente.",
         );
       setTemplate(saved);
-      setRows(rowsFrom(saved));
+      setRows(
+        rowsFrom(
+          saved,
+          rows.map((row) => row.id),
+        ),
+      );
       setDirty(false);
       onTemplate(saved);
       setMessage(
@@ -169,9 +202,9 @@ export function DayTemplateEditor({
       </p>
       <p className="settings-note">
         Você pode deixar tarefa, duração ou outros campos vazios para completar
-        no dia. A atividade usa o nome do catálogo por projeto; seus códigos
-        serão conferidos ao preparar o envio. Nenhum dado da planilha é
-        importado automaticamente.
+        no dia. Saia do código da tarefa para carregar as atividades do projeto.
+        Escolha nome e código na lista; o envio confere o vínculo novamente.
+        Nenhum dado da planilha é importado automaticamente.
       </p>
       {error && (
         <p className="field-error" role="alert">
@@ -202,25 +235,51 @@ export function DayTemplateEditor({
                       placeholder="Nº ou vazio"
                       value={row.issue}
                       disabled={blocked}
+                      onBlur={() =>
+                        setLookupRequests((current) => ({
+                          ...current,
+                          [row.id]: { code: row.issue.trim() },
+                        }))
+                      }
                       onChange={(event) =>
                         update(row.id, "issue", event.target.value)
+                      }
+                    />
+                    <IssueLookup
+                      issue={row.issue}
+                      label={`do modelo ${index + 1}`}
+                      disabled={blocked}
+                      automaticRequest={lookupRequests[row.id]}
+                      onProject={(projectId) =>
+                        setProjects((current) => {
+                          const next = { ...current };
+                          if (projectId === undefined) delete next[row.id];
+                          else
+                            next[row.id] = {
+                              issue: row.issue.trim(),
+                              projectId,
+                            };
+                          return next;
+                        })
                       }
                     />
                   </td>
                   <td>
                     <input
                       aria-label={`Duração do modelo ${index + 1}`}
-                      placeholder="00:30"
+                      placeholder="30 ou 1:30"
+                      inputMode="numeric"
                       value={row.duration}
                       disabled={blocked}
                       aria-invalid={
-                        !!row.duration && parseDuration(row.duration) === null
+                        !!row.duration &&
+                        parseDurationInput(row.duration) === null
                       }
                       onChange={(event) =>
                         update(row.id, "duration", event.target.value)
                       }
                       onBlur={() => {
-                        const minutes = parseDuration(row.duration);
+                        const minutes = parseDurationInput(row.duration);
                         if (
                           minutes !== null &&
                           row.duration !== formatDuration(minutes)
@@ -228,16 +287,31 @@ export function DayTemplateEditor({
                           update(row.id, "duration", formatDuration(minutes));
                       }}
                     />
+                    <small
+                      className={
+                        row.duration &&
+                        parseDurationInput(row.duration) === null
+                          ? "field-error"
+                          : "duration-hint"
+                      }
+                    >
+                      {row.duration && parseDurationInput(row.duration) === null
+                        ? "Minutos de 00 a 59; sem segundos."
+                        : "30 → 00:30 · 130 → 01:30"}
+                    </small>
                   </td>
                   <td>
-                    <input
-                      aria-label={`Atividade do modelo ${index + 1}`}
-                      placeholder="Nome da atividade"
-                      value={row.activity}
-                      disabled={blocked}
-                      onChange={(event) =>
-                        update(row.id, "activity", event.target.value)
+                    <ActivitySelect
+                      activities={activities}
+                      projectId={
+                        projects[row.id]?.issue === row.issue.trim()
+                          ? projects[row.id].projectId
+                          : undefined
                       }
+                      value={row.activity}
+                      label={`Atividade do modelo ${index + 1}`}
+                      disabled={blocked}
+                      onChange={(value) => update(row.id, "activity", value)}
                     />
                   </td>
                   <td>

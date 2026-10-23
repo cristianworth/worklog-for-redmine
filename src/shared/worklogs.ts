@@ -19,6 +19,15 @@ export function parseDuration(value: string): number | null {
   return minutes < 60 && Number.isSafeInteger(total) ? total : null;
 }
 
+// Compact input is HHMM, not decimal hours; the stored/API duration remains integer minutes.
+export function parseDurationInput(value: string): number | null {
+  const input = value.trim();
+  if (!/^\d+$/.test(input)) return parseDuration(input);
+  const hours = input.length > 2 ? input.slice(0, -2) : "0";
+  const minutes = input.slice(-2).padStart(2, "0");
+  return parseDuration(`${hours}:${minutes}`);
+}
+
 export function formatDuration(minutes: number): string {
   return `${Math.floor(minutes / 60)
     .toString()

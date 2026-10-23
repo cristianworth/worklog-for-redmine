@@ -15,7 +15,8 @@ body {
 }
 button,
 input,
-textarea {
+textarea,
+select {
   font: inherit;
 }
 button {
@@ -28,12 +29,14 @@ button:disabled {
 button,
 input,
 textarea,
+select,
 a {
   outline-offset: 4px;
 }
 button:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
+select:focus-visible,
 a:focus-visible {
   outline: 2px solid #438269;
 }
@@ -52,7 +55,8 @@ button {
   gap: 8px;
 }
 input,
-textarea {
+textarea,
+select {
   min-width: 0;
 }
 .app-header {
@@ -441,7 +445,8 @@ td.row-number {
   padding-top: 21px;
 }
 td input,
-td textarea {
+td textarea,
+td select {
   border: 1px solid #dee5d7;
   border-radius: 6px;
   width: 100%;
@@ -452,7 +457,8 @@ td textarea {
   transition: border-color 0.15s;
 }
 td input:hover,
-td textarea:hover {
+td textarea:hover,
+td select:hover {
   border-color: #bbcbb0;
 }
 td input::placeholder,
@@ -601,7 +607,8 @@ td textarea {
   font-size: 10px;
   margin-top: 5px;
 }
-input[aria-invalid="true"] {
+input[aria-invalid="true"],
+select[aria-invalid="true"] {
   border-color: #b95540;
   background: #fff8f5;
 }
@@ -891,7 +898,8 @@ input[aria-invalid="true"] {
     min-height: 40px;
   }
   td input,
-  td textarea {
+  td textarea,
+  td select {
     font-size: 16px;
   }
 }
@@ -1586,4 +1594,16 @@ input[aria-invalid="true"] {
 }
 .template-panel .settings-heading h2 {
   flex: 1;
+}
+
+.duration-hint {
+  display: block;
+  font-size: 10px;
+  color: #6b7b60;
+  line-height: 1.5;
+  margin-top: 6px;
+}
+td select {
+  min-width: 0;
+  text-overflow: ellipsis;
 }

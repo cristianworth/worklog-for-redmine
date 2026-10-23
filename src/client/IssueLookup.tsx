@@ -18,7 +18,7 @@ export function IssueLookup({
   automaticRequest?: { code: string };
   label: string;
   disabled: boolean;
-  onProject(projectId: number): void;
+  onProject(projectId: number | undefined): void;
 }) {
   const code = issue.trim();
   const [result, setResult] = useState<{
@@ -50,6 +50,7 @@ export function IssueLookup({
       return;
     }
     request.current?.abort();
+    projectCallback.current(undefined);
     const controller = new AbortController();
     request.current = controller;
     setPending(code);
@@ -109,7 +110,11 @@ export function IssueLookup({
         ) : (
           <Search size={13} />
         )}{" "}
-        {busy ? "Consultando…" : current?.data ? "Atualizar tarefa" : "Consultar"}
+        {busy
+          ? "Consultando…"
+          : current?.data
+            ? "Atualizar tarefa"
+            : "Consultar"}
       </button>
       {current?.error && (
         <small className="field-error" role="alert">

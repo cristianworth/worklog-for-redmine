@@ -576,6 +576,7 @@ export function App() {
 
         <div id="day-template-area" hidden={!templateOpen}>
           <DayTemplateEditor
+            activities={catalog?.activities ?? []}
             onTemplate={setDayTemplate}
             onDirtyChange={setTemplateDirty}
             onClose={() => setTemplateOpen(false)}

@@ -12,7 +12,7 @@ Cristian costuma reconstruir vários dias em uma mesma sessão e enviar o perío
 - Node.js, React, Vite, TypeScript, Express e SQLite aprovados. Manter um repositório e uma estrutura simples. shadcn/ui permanece adiado.
 - Vitest para regras e persistência; interface conferida manualmente. BDD, Cucumber e formalização obrigatória de cenários dispensados. Playwright pode ser adotado depois se trouxer benefício.
 - Salvar é explícito. O navegador lembra apenas preferências; os rascunhos locais ficam no SQLite. O banco é aberto junto com o Node e persiste entre execuções.
-- Commits coesos e pushes ordinários autorizados. Permanecer na `master`. Antes de qualquer commit/merge, conferir regras de changelog/versionamento. O histórico está em `CHANGELOG.md`: v0.0.0 identifica a base P0–P4.2 e v0.1.0 entrega o P5. Manifests e rodapé seguem a versão atual; não há publicação pública.
+- Commits coesos e pushes ordinários autorizados. Permanecer na `master`. Antes de qualquer commit/merge, conferir regras de changelog/versionamento. O histórico está em `CHANGELOG.md`: v0.0.0 identifica a base P0–P4.2 e v0.1.0 entrega o P5 e v0.2.0 entrega seleção de atividades/duração abreviada. Manifests e rodapé seguem a versão atual; não há publicação pública.
 - Criar o GitHub segue autorizado, mas confirmar conta e visibilidade e resolver licença/proveniência antes da primeira publicação. Não publicar a planilha, VBA, bancos locais, credenciais, hostnames ou dados reais.
 - **Demo pública deve ficar entre as últimas etapas**, conforme decisão de Cristian em 22/10/2026. Preparar identificação/atalho agora não significa implementar ou publicar a demo.
 
@@ -22,14 +22,14 @@ O checklist e os critérios de conclusão estão em [ROADMAP.md](../ROADMAP.md);
 
 - **v0.0.0 — entregue:** base P0–P4.2, com rascunhos, período, catálogo manual por projeto, consulta e envio protegido por recibos/validações.
 - **v0.1.0 — entregue:** modelo do dia P5, configurável e aplicado uma vez em dias novos.
-- **v0.2.0 — próxima proposta:** P6.1 seleção fechada de atividades por projeto; P6.2 duração abreviada (`30`/`030` → `00:30`, `130` → `01:30`); P6.3 revisão integrada do preenchimento e fechamento da versão.
+- **v0.2.0 — entregue:** P6.1 seleção fechada de atividades por projeto; P6.2 duração abreviada (`30`/`030` → `00:30`, `130` → `01:30`); P6.3 revisão integrada do preenchimento e fechamento da versão.
 - **P7 — depois:** preparar demo com dados fictícios, armazenamento do visitante e envio simulado, sem acesso a serviços/dados reais.
 - **P8 — por último:** definir destino/licença, revisar conteúdo e publicar código/demo, conferindo o uso por um visitante novo.
 - **P5.1 — cancelado:** Cristian retirou a movimentação de status do escopo. Consultar status continua informativo; envio mantém o card inalterado.
 
-A P2.1 implementou o catálogo e a resolução nome + projeto → código, mas deixou texto livre com sugestões na interface. A seleção fechada é a lacuna priorizada em P6.1; o backend já bloqueia envio sem mapeamento. A duração atual exige `HH:MM`; abreviações serão implementadas em P6.2, sem segundos e sem alterar minutos já persistidos.
+A P2.1 implementou o catálogo e a resolução nome + projeto → código, mas deixou texto livre com sugestões na interface. A seleção fechada foi entregue em P6.1 (v0.2.0); o backend já bloqueia envio sem mapeamento. A duração abreviada foi entregue em P6.2, sem segundos e sem alterar minutos já persistidos; `HH:MM` continua aceito.
 
-Importação ampla do histórico, empacotamento e descoberta automática de atividades permanecem fora do escopo fechado da próxima versão. A incorporação P4.1 foi específica e não autoriza reenvios.
+Importação ampla do histórico, empacotamento e descoberta automática de atividades permanecem fora do escopo entregue na v0.2.0. A incorporação P4.1 foi específica e não autoriza reenvios.
 
 ## P1.2 — chunks A–D
 
@@ -90,3 +90,5 @@ Em 22/10/2026, Cristian priorizou P4.1 antes do modelo do dia. A trava contra re
 P4.2 priorizada e entregue antes de P5 em 23/10/2026: descrição ao sair do código, cache temporário de leitura e validação integral no backend antes do primeiro envio do lote. Erro em uma tarefa bloqueia todas as datas selecionadas e identifica a linha; falhas surgidas depois das primeiras criações ainda preservam resultados parciais. 190 testes/13 arquivos e build aprovados; interface simulada, sem editar os dias 19–21/10 nem criar horas reais. Ver [batch-submission.md](batch-submission.md).
 
 P5 entregue em 23/10/2026: modelo local configurável, cópia independente por ação explícita em dias novos, salvamento separado e proteção de dias existentes. Adicionar linha continua avulso; abrir períodos não cria rascunhos. 203 testes/14 arquivos, build e interface fictícia aprovados. [Uso](day-template.md). A proposta posterior de P5.1 foi cancelada por Cristian em 23/10/2026. As próximas prioridades são seleção de atividade e duração abreviada, descritas no roadmap.
+
+v0.2.0 concluída em 23/10/2026 com P6.1–P6.3, 242 testes/17 arquivos e build aprovado. Conferência integrada exclusivamente fictícia, sem alterar dias protegidos ou criar horas reais. Demo e publicação são as próximas etapas.

@@ -1,7 +1,7 @@
 import {
   formatDuration,
   isWorkDate,
-  parseDuration,
+  parseDurationInput,
   totalMinutes,
   type Draft,
   type DraftDay,
@@ -49,7 +49,7 @@ export function toDraftDay(day: EditorDay): DraftDay {
   return {
     ...day,
     entries: day.entries.map(({ duration, ...entry }) => {
-      const minutes = duration === "" ? null : parseDuration(duration);
+      const minutes = duration === "" ? null : parseDurationInput(duration);
       if (duration !== "" && minutes === null)
         throw new Error("Corrija as durações inválidas antes de salvar.");
       return { ...entry, minutes };
@@ -62,14 +62,15 @@ export function daySummary(day: EditorDay): {
   invalid: boolean;
 } {
   const invalid = day.entries.some(
-    (entry) => entry.duration !== "" && parseDuration(entry.duration) === null,
+    (entry) =>
+      entry.duration !== "" && parseDurationInput(entry.duration) === null,
   );
   try {
     return {
       total: formatDuration(
         totalMinutes(
           day.entries.map((entry) => ({
-            minutes: parseDuration(entry.duration),
+            minutes: parseDurationInput(entry.duration),
           })),
         ),
       ),

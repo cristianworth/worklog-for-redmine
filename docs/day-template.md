@@ -2,7 +2,7 @@
 
 ## Uso
 
-1. Abra **Modelo do dia** e cadastre linhas recorrentes: tarefa, duração, nome da atividade e observação. Campos podem ficar vazios para completar no dia; duração usa horas:minutos.
+1. Abra **Modelo do dia** e cadastre linhas recorrentes: tarefa, duração, atividade e observação. Saia do código da tarefa para consultar seu projeto e escolher a atividade por nome/código. Campos podem ficar vazios para completar no dia; duração aceita `30`/`030` → `00:30`, `130` → `01:30` ou `HH:MM`.
 2. **Salvar modelo** grava somente a configuração local. O modelo começa vazio e não importa valores da planilha. Até 100 linhas; salvar sem linhas desativa o preenchimento.
 3. Em um dia ainda não iniciado, use **Criar dia com modelo**. As linhas recebem identificadores novos e ficam com alterações não salvas. Ajuste os dados e use **Salvar rascunhos** normalmente.
 4. **Adicionar linha / Adicionar primeira linha** continua avulso. Alterar o período não cria lançamentos nem aplica modelos em todos os dias. Salvar rascunhos continua separado de enviar ao Redmine.
@@ -20,3 +20,7 @@ Fechar o painel preserva edições locais enquanto a página estiver aberta; a s
 ## Verificação
 
 203 testes em 14 arquivos e build aprovados. Casos novos: validação, campos incompletos, IDs novos, aplicação única, dia salvo vazio, edição manual, mudança de período sem preenchimento, persistência após reabrir, banco antigo, revisão concorrente e API local sem requisições remotas. Interface conferida com dados fictícios nos dias 22–24/10; os dias 19–21/10 do banco de uso e os recibos foram preservados.
+
+## v0.2.0 — preenchimento atualizado
+
+Modelo e dias usam a mesma seleção de atividades por projeto, preservando textos antigos sem correspondência e explicando a ausência de cadastro. A consulta no modelo usa o mesmo cache e descarte de respostas antigas; salvar mantém o contexto consultado. A duração abreviada é interpretada também no salvamento antes do blur, sem alterar o armazenamento em minutos. 242 testes/17 arquivos e compilação aprovados; ver [changelog](../CHANGELOG.md).

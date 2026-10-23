@@ -4,12 +4,9 @@ import {
   appropriationSummary,
   type SubmissionRecord,
 } from "../shared/submissions";
+import { ActivitySelect } from "./ActivitySelect";
 import { ReceiptBadge } from "./ReceiptBadge";
-import {
-  activitiesForProject,
-  resolveActivity,
-  type Activity,
-} from "../shared/activities";
+import type { Activity } from "../shared/activities";
 import { useEffect, useRef, useState } from "react";
 import {
   Check,
@@ -20,7 +17,7 @@ import {
   RefreshCw,
   FilePlus2,
 } from "lucide-react";
-import { formatDuration, parseDuration } from "../shared/worklogs";
+import { formatDuration, parseDurationInput } from "../shared/worklogs";
 import { IssueLookup } from "./IssueLookup";
 import { dayLabel, shortDate } from "./period";
 import { daySummary, type EditorDay, type EditorEntry } from "./editor";
@@ -213,7 +210,7 @@ export function DaySection({
               {day.entries.map((entry, index) => {
                 const invalid =
                   entry.duration !== "" &&
-                  parseDuration(entry.duration) === null;
+                  parseDurationInput(entry.duration) === null;
                 const label = `da linha ${index + 1} em ${description}`;
                 const key = `${day.date}:${entry.id}`;
                 const receipt = submissions[key];
@@ -225,13 +222,6 @@ export function DaySection({
                   project?.issue === entry.issue.trim()
                     ? project.projectId
                     : undefined;
-                const available = activitiesForProject(activities, projectId);
-                const resolved = resolveActivity(
-                  activities,
-                  projectId,
-                  entry.activity,
-                );
-                const suggestions = `activities-${day.date}-${entry.id}`;
                 return (
                   <tr
                     key={entry.id}
@@ -310,13 +300,16 @@ export function DaySection({
                         automaticRequest={lookupRequests[entry.id]}
                         issue={entry.issue}
                         onProject={(projectId) =>
-                          setProjects((current) => ({
-                            ...current,
-                            [entry.id]: {
-                              issue: entry.issue.trim(),
-                              projectId,
-                            },
-                          }))
+                          setProjects((current) => {
+                            const next = { ...current };
+                            if (projectId === undefined) delete next[entry.id];
+                            else
+                              next[entry.id] = {
+                                issue: entry.issue.trim(),
+                                projectId,
+                              };
+                            return next;
+                          })
                         }
                         label={label}
                         disabled={disabled}
@@ -328,16 +321,21 @@ export function DaySection({
                         aria-label={`Duração ${label}`}
                         aria-invalid={invalid}
                         aria-describedby={
-                          invalid ? `duration-${day.date}-${index}` : undefined
+                          invalid
+                            ? `duration-${day.date}-${index}`
+                            : rowLocked
+                              ? undefined
+                              : `duration-hint-${day.date}-${index}`
                         }
-                        placeholder="00:00"
+                        placeholder="30 ou 1:30"
+                        inputMode="numeric"
                         value={entry.duration}
                         disabled={rowDisabled}
                         onChange={(event) =>
                           update(entry.id, "duration", event.target.value)
                         }
                         onBlur={() => {
-                          const minutes = parseDuration(entry.duration);
+                          const minutes = parseDurationInput(entry.duration);
                           if (
                             minutes !== null &&
                             entry.duration !== formatDuration(minutes)
@@ -354,44 +352,32 @@ export function DaySection({
                           className="field-error"
                           id={`duration-${day.date}-${index}`}
                         >
-                          Use HH:MM; minutos de 00 a 59.
+                          Use 30, 130 ou HH:MM; minutos de 00 a 59.
+                        </small>
+                      )}
+                      {!rowLocked && !invalid && (
+                        <small
+                          className="duration-hint"
+                          id={`duration-hint-${day.date}-${index}`}
+                        >
+                          30 → 00:30 · 130 → 01:30
                         </small>
                       )}
                     </td>
                     <td>
-                      <input
-                        aria-label={`Atividade ${label}`}
-                        placeholder="Tipo de atividade"
-                        list={suggestions}
+                      <ActivitySelect
+                        activities={activities}
+                        projectId={projectId}
                         value={entry.activity}
+                        label={`Atividade ${label}`}
                         disabled={rowDisabled}
-                        onChange={(event) =>
-                          update(entry.id, "activity", event.target.value)
+                        reviewedId={
+                          rowLocked ? receipt.snapshot.activityId : undefined
+                        }
+                        onChange={(value) =>
+                          update(entry.id, "activity", value)
                         }
                       />
-                      <datalist id={suggestions}>
-                        {available.map((activity) => (
-                          <option
-                            key={activity.activityId}
-                            value={activity.name}
-                          />
-                        ))}
-                      </datalist>
-                      <small
-                        className={`activity-hint ${!rowLocked && projectId && entry.activity && !resolved ? "is-unmapped" : ""}`}
-                      >
-                        {rowLocked
-                          ? `Atividade revisada · código ${receipt.snapshot.activityId}`
-                          : !projectId
-                            ? "Consulte a tarefa para identificar o projeto."
-                            : resolved
-                              ? `Atividade configurada · código ${resolved.activityId}`
-                              : !available.length
-                                ? "Cadastre as atividades deste projeto em Configurações. O rascunho pode ser salvo."
-                                : entry.activity
-                                  ? "Atividade sem vínculo neste projeto. O rascunho pode ser salvo."
-                                  : "Escolha uma atividade deste projeto."}
-                      </small>
                     </td>
                     <td>
                       <textarea

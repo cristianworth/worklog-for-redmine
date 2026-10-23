@@ -12,6 +12,29 @@ Histórico das versões locais. Criado em 23/10/2026 com a base anterior ao mode
 - Antes de cada commit/merge, ler este arquivo e seguir a regra de aprovação de Cristian. A criação deste histórico, da v0.0.0 e da v0.1.0 está explicitamente autorizada no pedido de 23/10/2026; alterações futuras de versão devem seguir a autorização da entrega.
 - Nunca incluir credenciais, planilhas privadas, bancos, backups ou dados reais nos registros, tags e arquivos distribuídos.
 
+## [0.2.0] — 2026-10-23
+
+### Adicionado — P6.1–P6.3, preenchimento
+
+- Seleção fechada de atividades nos dias e no modelo, com nome e código das opções cadastradas para o projeto da tarefa. Consultar/sair do código identifica o projeto; nenhum código global ou opção inicial é inventado.
+- Valores antigos sem correspondência permanecem visíveis, identificados e corrigíveis, sem apagar rascunhos. Linhas apropriadas mostram o código do recibo e continuam protegidas, mesmo após alterações no catálogo.
+- Consulta de tarefa no modelo com o mesmo cache e descarte de respostas antigas dos dias. Uma nova consulta suspende o contexto anterior até confirmar o projeto atual.
+- Duração abreviada em dias e modelo: `30`/`030` → `00:30`, `130`/`0130` → `01:30`, `800` → `08:00`. O formato `HH:MM` continua aceito; a normalização ocorre ao sair do campo.
+- Totalização e salvamento interpretam a duração abreviada mesmo antes de sair do campo. Minutos fora de 00–59, decimais, sinais e segundos são recusados, sem conversão silenciosa.
+
+### Preservado e verificado
+
+- Mesmos contratos de persistência e envio: duração em minutos inteiros, nome de atividade no rascunho e código resolvido por projeto no backend. Nenhuma migração dos dados anteriores.
+- Modelo mantém o contexto da tarefa ao salvar; fechar o painel preserva edições. Foco de teclado e estilo dos seletores integrados aos campos existentes.
+- 242 testes em 17 arquivos e compilação aprovados; testes integrados conferem IDs de projetos distintos, payload `HH:MM`, bloqueio de atividade sem vínculo e reabertura do banco.
+- Interface conferida com dias/projetos fictícios, duração inválida, correção de valor antigo, modelo e lote simulado de dois dias. Nenhuma hora real enviada; dias 19–21/10 e recibos preservados.
+- P5.1 removido do escopo por decisão de Cristian; envios continuam mantendo o status do card. Demo e publicação permanecem P7/P8.
+
+### Limites
+
+- O catálogo de atividades continua sendo cadastrado em Configurações por projeto. Não há descoberta automática de IDs; sem catálogo válido, novos envios continuam bloqueados.
+- O formato compacto usa os últimos dois dígitos como minutos: `90` e `160` são inválidos. Não há entrada de segundos nem arredondamento de minutos.
+
 ## [0.1.0] — 2026-10-23
 
 ### Adicionado — P5, modelo do dia
