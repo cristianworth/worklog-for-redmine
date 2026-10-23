@@ -7,6 +7,8 @@ A small local web application for organizing time-entry drafts and explicitly su
 Requires Node.js **24.20 or newer within the 24.x line**, and npm.
 
 ```sh
+git clone https://github.com/cristianworth/worklog-for-redmine.git
+cd worklog-for-redmine
 npm install
 npm run dev
 ```
@@ -28,9 +30,11 @@ Stop the server before switching between these modes; both use port 3000.
 4. Click **Salvar rascunhos**. It saves every changed day, including dates no longer visible after changing the period. Saves are atomic: a conflict or failure prevents a partial database update.
 5. Reopen to recover saved rows. The browser remembers the period preference; **Até hoje** recalculates the end date, keeping the chosen start. A refresh of the period preserves pending edits, including invalid duration input. Closing/reloading the page warns if unsaved edits remain.
 
+Use the arrow at the right of each day header to collapse or expand its rows. A collapsed day keeps its date, status, total and actions visible. Edits and selections are preserved; **Adicionar linha** expands the day and focuses the new issue field. Collapsed dates remain collapsed when changing the period in the current page; reloading opens all days. This display preference is not saved to SQLite.
+
 The default view covers the last seven calendar dates, including today. Weekends remain available. Range preferences are stored only in that browser; drafts stay in SQLite. The draft-day format is preserved; the activity catalog adds a separate table in the same database. **Modelo do dia** configures recurring rows for untouched new days. **Enviar dia** reviews the saved pending rows of one day. Check rows or day headers and use **Enviar selecionados** to review several dates together; neither action sends immediately. **Configurações** opens connection instructions and a read-only API access check.
 
-Incomplete rows can be saved as drafts. A blank duration contributes nothing to the total; malformed durations must be corrected or cleared before saving. Zero duration is allowed in a draft. Preparing submission validates required fields, resolves the activity inside the issue project and checks for equivalent existing entries; server-specific limits are enforced by Redmine. Activity text remains editable; project-specific suggestions come from the local catalog after looking up an issue. Incomplete or unmapped drafts can still be saved.
+Incomplete rows can be saved as drafts. A blank duration contributes nothing to the total; malformed durations must be corrected or cleared before saving. Zero duration is allowed in a draft. Preparing submission validates required fields, resolves the activity inside the issue project and checks for equivalent existing entries; server-specific limits are enforced by Redmine. Activities are selected from the local catalog for the issue project after lookup; historical unmapped names remain visible until corrected. Incomplete or unmapped drafts can still be saved.
 
 Data stays in `data/worklog.sqlite`, outside Git and independent of browser storage. The Node process opens this file when the application starts, creating it only if missing. Restarting the application reuses saved data; there is no separate database service or automatic sample-data import. Loading a period reads the database, while **Salvar rascunhos** commits the changes to disk. Back up that file with the server stopped. Saved data remains after changing browsers on the same computer. Simultaneous edits in another tab are rejected instead of silently overwriting newer data; copy pending edits before reloading that tab.
 
@@ -102,7 +106,7 @@ The normal local mode continues to use Node and SQLite. The public code reposito
 
 ## Versions
 
-Current version: **v0.2.0**, with closed project-specific activity selection and compact duration input in days and templates. The day template (P5) was delivered in **v0.1.0**. The earlier P0–P4.2 implementation is documented retrospectively as **v0.0.0**; historical manifests are preserved. The footer reads the current version from `package.json` during the build. See [CHANGELOG.md](CHANGELOG.md) for delivered changes and [ROADMAP.md](ROADMAP.md) for planned work. The next stages prepare an isolated public demo and then publication (P7/P8). Versions/tags are local until publication is explicitly completed.
+Current version: **v0.3.0**, with collapsible days, plus the project-specific activity selection and compact duration input delivered in v0.2.0. The day template (P5) was delivered in **v0.1.0**. The earlier P0–P4.2 implementation is documented retrospectively as **v0.0.0**; historical manifests are preserved. The footer reads the current version from `package.json` during the build. See [CHANGELOG.md](CHANGELOG.md) for delivered changes and [ROADMAP.md](ROADMAP.md) for planned work. The next stages prepare an isolated public demo and then publication (P7/P8). The source repository is [cristianworth/worklog-for-redmine](https://github.com/cristianworth/worklog-for-redmine). Publishing this code does not deploy the application; the public demo remains planned.
 
 ## Documentation and private reference
 
@@ -118,4 +122,8 @@ Current version: **v0.2.0**, with closed project-specific activity selection and
 - [Historical behavior examples](docs/behavior-specification.md)
 - [Contributing](CONTRIBUTING.md)
 
-The original spreadsheet and extracted VBA are private local references and must stay outside Git. Cristian confirmed that the historical workbook entries have already been submitted to Redmine; inspect them only as historical examples, never seed them as pending drafts or replay them for testing. Use synthetic examples; never commit credentials, databases or real work details. No GitHub remote exists yet. The license and publication destination still need confirmation; this private development package is not a public release.
+The original spreadsheet and extracted VBA are private local references and must stay outside Git. Cristian confirmed that the historical workbook entries have already been submitted to Redmine; inspect them only as historical examples, never seed them as pending drafts or replay them for testing. Use synthetic examples; never commit credentials, databases or real work details. Session handoffs also stay local. Public documentation contains sanitized workflow descriptions, not the workbook or extracted source.
+
+## License
+
+[MIT](LICENSE), copyright 2026 Cristian Weissmantel. This license covers the web application in this repository; dependencies retain their own licenses. The private reference spreadsheet, VBA, databases and credentials are not distributed.

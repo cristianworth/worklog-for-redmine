@@ -1607,3 +1607,16 @@ td select {
   min-width: 0;
   text-overflow: ellipsis;
 }
+
+.day-toggle {
+  flex-shrink: 0;
+  color: #527449;
+  width: 34px;
+  height: 34px;
+}
+.day-toggle:hover {
+  background: #e8efdf;
+}
+.is-collapsed .day-heading {
+  border-bottom: 0;
+}

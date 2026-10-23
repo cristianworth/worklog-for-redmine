@@ -1,6 +1,6 @@
 # Roadmap — Worklog for Redmine
 
-Atualizado em 23/10/2026. Este arquivo descreve o que falta fazer; o [CHANGELOG.md](CHANGELOG.md) registra o que cada versão já entregou. Versão atual: **v0.2.0 — atividades por opções e duração abreviada**.
+Atualizado em 23/10/2026. Este arquivo descreve o que falta fazer; o [CHANGELOG.md](CHANGELOG.md) registra o que cada versão já entregou. Versão atual: **v0.3.0 — dias recolhíveis e código público sob MIT**.
 
 ## Versões e prioridade
 
@@ -9,9 +9,12 @@ Atualizado em 23/10/2026. Este arquivo descreve o que falta fazer; o [CHANGELOG.
 | v0.0.0 | Base anterior ao modelo: rascunhos, períodos, catálogo por projeto, consultas, envios e proteção contra duplicação | Marco histórico concluído, P0–P4.2 |
 | v0.1.0 | Modelo configurável, cópia independente para dias novos e salvamento separado | Entregue, P5 |
 | v0.2.0 | Escolha de atividades por opções e duração abreviada; revisão integrada do preenchimento | Entregue, P6.1–P6.3 |
-| A definir | Demo isolada e publicação do código/demo | Depois do fluxo local validado, P7–P8 |
+| v0.3.0 | Recolher/expandir dias, catálogo privado preenchido e publicação do código com licença MIT | Entregue; código público sob MIT |
+| A definir | Demo isolada e publicação da demonstração | Depois do fluxo local validado, P7–P8 |
 
-**Próxima etapa:** P7 (preparar demo) → P8 (publicar). P6.1, P6.2 e P6.3 foram concluídas na v0.2.0. Não iniciar publicação antes da definição de destino e licença.
+**Ajuste entregue após P6:** recolher/expandir tarefas por dia; **Adicionar linha** reabre e foca a linha nova. Edições preservadas e preferência visual mantida durante a página, inclusive ao trocar o período. Registrado na v0.3.0, aprovada por Cristian. O catálogo privado de uso foi preenchido com a lista fornecida, sem criar dados padrão para novas instalações ou alterar recibos.
+
+**Próxima etapa:** P7 (preparar demo) → P8 (publicar a demo). O código foi publicado antecipadamente por pedido de 23/10/2026. P6.1–P6.3 foram concluídas na v0.2.0. Destino verificado: `cristianworth/worklog-for-redmine`, público, licença MIT. A autorização atual antecipa o código; não inclui hospedar o backend privado ou implementar a demo agora.
 
 ## Entregas já concluídas
 
@@ -79,13 +82,15 @@ Os dois últimos dígitos são minutos; os anteriores são horas. Um ou dois dí
 
 ## P8 — Publicar código e demonstração
 
+**Atualização de 23/10/2026:** Cristian pediu antecipar a publicação pública do repositório com licença open source. Conta autenticada conferida: `cristianworth`; licença escolhida: MIT. Revisão aprovada dos arquivos atuais e de 227 blobs do histórico Git; código em [cristianworth/worklog-for-redmine](https://github.com/cristianworth/worklog-for-redmine). Handoffs, planilha, VBA, configuração e dados privados ficam fora da distribuição. Publicação da demo continua dependendo do P7; URL/hospedagem da demo ainda serão definidas.
+
 **Objetivo:** entregar um projeto apresentável, com código acessível e link para experimentar a demo. Publicar o repositório não hospeda a aplicação automaticamente.
 
 | Chunk | Entrega | Como conferir |
 | --- | --- | --- |
-| A — Destino e licença | Confirmar conta GitHub, visibilidade, licença, endereço e serviço de hospedagem | Destinos e direitos de distribuição definidos, sem supor conta/domínio |
-| B — Revisão de publicação | Revisar arquivos, histórico Git e build para dados privados; conferir instruções, licença e versão | Clone limpo roda com configuração de exemplo; nenhum material da planilha/empresa é distribuído |
-| C — Código e site | Criar/configurar o repositório autorizado e publicar a demo isolada no destino aprovado | README oferece instruções locais, changelog e link público funcional |
+| A — Destino e licença | Código: conta `cristianworth`, repositório público e MIT definidos. Demo: escolher hospedagem/endereço após P7 | Repositório e LICENSE disponíveis; destino da demo continua pendente |
+| B — Revisão de publicação | Código: arquivos, histórico e build revisados; handoffs ignorados. Repetir a revisão no build da futura demo | Clone usa catálogo/banco novos e configuração de exemplo; dados de uso ficam locais |
+| C — Código e site | Repositório público com versões publicado. Site da demo continua pendente do P7 | README oferece clone, changelog e licença; link para brincar só após publicar a demo |
 | D — Conferência externa | Abrir o site publicado e executar o fluxo fictício completo, inclusive restauração | Funciona para um visitante novo e continua sem acesso aos dados/serviços reais |
 
 **Critério de conclusão:** outra pessoa consegue entender o projeto, executar o modo local ou experimentar a demo pelo navegador. Hospedagem do backend real, contas compartilhadas e sincronização de bancos entre usuários não fazem parte desta etapa.

@@ -9,6 +9,8 @@
 *.bin
 /private/
 /local/
+# Session handoffs contain local paths/context and are not public documentation.
+/docs/handoffs/
 
 # Credentials and machine-specific configuration.
 .env

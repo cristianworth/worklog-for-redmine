@@ -1,6 +1,6 @@
 # Changelog — Worklog for Redmine
 
-Histórico das versões locais. Criado em 23/10/2026 com a base anterior ao modelo registrada retrospectivamente como v0.0.0. Nenhuma dessas versões foi publicada no GitHub ou como demo pública.
+Histórico das versões. Criado em 23/10/2026 com a base anterior ao modelo registrada retrospectivamente como v0.0.0. A v0.3.0 marca a primeira publicação pública do código no GitHub, sob licença MIT. A demo pública ainda não foi implementada ou publicada.
 
 ## Regras de versionamento
 
@@ -11,6 +11,16 @@ Histórico das versões locais. Criado em 23/10/2026 com a base anterior ao mode
 - Tags locais `vX.Y.Z` identificam a revisão de cada versão. Não mover tags já criadas nem reescrever histórico. A tag retrospectiva v0.0.0 aponta para a última revisão anterior ao P5; os manifests antigos continuam como estavam.
 - Antes de cada commit/merge, ler este arquivo e seguir a regra de aprovação de Cristian. A criação deste histórico, da v0.0.0 e da v0.1.0 está explicitamente autorizada no pedido de 23/10/2026; alterações futuras de versão devem seguir a autorização da entrega.
 - Nunca incluir credenciais, planilhas privadas, bancos, backups ou dados reais nos registros, tags e arquivos distribuídos.
+
+## [0.3.0] — 2026-10-23
+
+### Navegação e publicação do código
+
+- Código público em [cristianworth/worklog-for-redmine](https://github.com/cristianworth/worklog-for-redmine), licença MIT, instruções de clone e exclusão explícita dos handoffs locais. Publicação do código antecipada por pedido de Cristian; demo continua em P7 e publicação da demo em P8.
+- Seta no cabeçalho para recolher/expandir as tarefas de cada dia. Data, situação, total e ações do dia continuam visíveis.
+- Recolher preserva edições e seleções; **Adicionar linha** expande o dia e leva o foco à tarefa nova. O estado visual acompanha as datas ao trocar o período enquanto a página estiver aberta; recarregar abre todos os dias.
+- Catálogo do banco local de uso preenchido com as 15 atividades fornecidas por Cristian, reutilizando a lista nos projetos das tarefas conhecidas. Operação privada com backup e conferência, sem valores reais no código, catálogo padrão ou alteração dos recibos antigos.
+- 242 testes/17 arquivos e compilação aprovados. Interface conferida com dados fictícios: editar, recolher, salvar, adicionar com foco e trocar o período. Banco auditado contra backup: rascunhos, recibos, lotes e modelo inalterados; nenhuma hora real enviada. Revisão de privacidade também conferiu 227 blobs do histórico Git, preservado sem reescrita.
 
 ## [0.2.0] — 2026-10-23
 

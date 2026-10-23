@@ -83,6 +83,7 @@ export function App() {
     dirtyDates: [],
   });
   const [visibleDates, setVisibleDates] = useState<string[]>([]);
+  const [collapsedDates, setCollapsedDates] = useState<string[]>([]);
   const [activeRange, setActiveRange] = useState<{
     from: string;
     to: string;
@@ -831,6 +832,16 @@ export function App() {
           {visibleDates.map((date) => (
             <DaySection
               key={date}
+              collapsed={collapsedDates.includes(date)}
+              onCollapsedChange={(collapsed) =>
+                setCollapsedDates((current) =>
+                  collapsed
+                    ? current.includes(date)
+                      ? current
+                      : [...current, date]
+                    : current.filter((value) => value !== date),
+                )
+              }
               day={editor.days[date] ?? emptyDay(date)}
               activities={catalog?.activities ?? []}
               hasTemplate={!!dayTemplate?.entries.length}

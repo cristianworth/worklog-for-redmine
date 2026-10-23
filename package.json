@@ -1,6 +1,6 @@
 {
   "name": "worklog-for-redmine",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -28,5 +28,6 @@
     "typescript": "^7.0.2",
     "vite": "^8.3.5",
     "vitest": "^5.0.5"
-  }
+  },
+  "license": "MIT"
 }

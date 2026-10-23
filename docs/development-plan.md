@@ -23,8 +23,9 @@ O checklist e os critérios de conclusão estão em [ROADMAP.md](../ROADMAP.md);
 - **v0.0.0 — entregue:** base P0–P4.2, com rascunhos, período, catálogo manual por projeto, consulta e envio protegido por recibos/validações.
 - **v0.1.0 — entregue:** modelo do dia P5, configurável e aplicado uma vez em dias novos.
 - **v0.2.0 — entregue:** P6.1 seleção fechada de atividades por projeto; P6.2 duração abreviada (`30`/`030` → `00:30`, `130` → `01:30`); P6.3 revisão integrada do preenchimento e fechamento da versão.
+- **v0.3.0 — entregue:** cabeçalho com seta para recolher/expandir as tarefas do dia; preserva edições, seleção e totais. Adicionar linha expande e foca o novo campo; recarregar abre os dias. A lista fornecida de atividades foi cadastrada somente no banco privado de uso, com backup e sem alterar histórico. Código publicado em `cristianworth/worklog-for-redmine`, público sob MIT; demo ainda pendente.
 - **P7 — depois:** preparar demo com dados fictícios, armazenamento do visitante e envio simulado, sem acesso a serviços/dados reais.
-- **P8 — por último:** definir destino/licença, revisar conteúdo e publicar código/demo, conferindo o uso por um visitante novo.
+- **P8 — código antecipado em 23/10/2026:** pedido explícito de repositório público. Conta `cristianworth` conferida e licença MIT escolhida; revisar arquivos/histórico antes do push. A demo só será hospedada depois do P7, com conferência por um visitante novo.
 - **P5.1 — cancelado:** Cristian retirou a movimentação de status do escopo. Consultar status continua informativo; envio mantém o card inalterado.
 
 A P2.1 implementou o catálogo e a resolução nome + projeto → código, mas deixou texto livre com sugestões na interface. A seleção fechada foi entregue em P6.1 (v0.2.0); o backend já bloqueia envio sem mapeamento. A duração abreviada foi entregue em P6.2, sem segundos e sem alterar minutos já persistidos; `HH:MM` continua aceito.
@@ -58,7 +59,7 @@ Preservar a validação coletiva observada no VBA: tarefa, data, observação e 
 | ------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
 | Dados         | Banco SQLite deste computador, ignorado pelo Git          | Somente exemplos fictícios incluídos deliberadamente na demo                             |
 | Persistência  | API Node local e transação SQLite; gravação explícita     | Armazenamento do navegador do visitante, com chave própria e sem acesso ao backend local |
-| Envio         | Ainda indisponível; integração futura passa pelo backend  | Simulado e identificado; nunca chama o Redmine real                                      |
+| Envio         | Revisão/confirmação explícita; integração pelo backend     | Simulado e identificado; nunca chama o Redmine real                                      |
 | Identificação | Banco local / Modo local, com explicação do armazenamento | Faixa permanente Modo demonstração, com aviso de dados fictícios                         |
 | Atalho        | Abrir demonstração desabilitado e marcado Em breve        | Link real após publicação; preservar edições pendentes antes de sair da aplicação local  |
 | Restauração   | Não há limpeza automática do banco                        | Restaurar demonstração repõe apenas exemplos do próprio navegador                        |
@@ -73,7 +74,7 @@ Hospedagem estática, como GitHub Pages, é uma candidata para a demo, não uma 
 2. Certificado vencido: Cristian autorizou exceção local para a origem HTTPS conhecida; manter padrão estrito, aviso visível e nenhuma alteração global. A API respondeu 401 sem credenciais e autenticou com a chave local. O processo precisa ser reiniciado após mudar o `.env`.
 3. Catálogo manual por projeto entregue: a mesma descrição pode ter IDs diferentes. Descoberta automática de atividades e novos tipos de campo ficam pendentes; os campos continuam exigindo implementação própria.
 4. Contrato de sucesso de cada transporte: HTTP 200 não é confirmação universal de criação. Preservar resultados confirmados/incertos e evitar reenvio indevido.
-5. Conta/visibilidade do GitHub, licença e proveniência antes da publicação.
+5. Código público autorizado em `cristianworth/worklog-for-redmine`, licença MIT; revisão de privacidade dos arquivos/histórico aprovada antes do primeiro push. Destino da demo ainda será definido no P8.
 
 Manter documentação curta e atualizada por entrega. Fontes técnicas prioritárias: código atual, testes reproduzíveis, VBA consultado estaticamente e decisões atuais de Cristian. Exemplos antigos em `docs/behavior-specification.md` são referências históricas, não uma obrigação de BDD.
 
