@@ -8,7 +8,7 @@ Use English identifiers and technical comments; the interface and collaboration 
 
 Run `npm test` for meaningful arithmetic and persistence checks, and `npm run build` for TypeScript/build verification. Manually check the interface using synthetic data. Browser automation can be added later if useful. Never write to the real Redmine service as part of routine tests.
 
-Keep dates as calendar dates and durations as integer minutes. Draft persistence is separate from future submission validation and remote results. Incomplete drafts are allowed. Compact HHMM input is normalized through `parseDurationInput`; invalid minutes/seconds are rejected. Keep the strict HH:MM transport parser unchanged. Activity choices are project-specific; preserve historical labels without silently choosing an ID from another project. Keep interface, persistence and time arithmetic sufficiently separate to test their actual boundaries.
+Keep dates as calendar dates and durations as integer minutes. Draft persistence is separate from future submission validation and remote results. Incomplete drafts are allowed. Compact HHMM input is normalized through `parseDurationInput`; invalid minutes/seconds are rejected. Keep the strict HH:MM transport parser unchanged. Activities use one name/code catalog per configured Redmine instance. Preserve historical labels and immutable receipt codes; validate project availability before sending when the remote API supplies it. Never silently consolidate conflicting legacy IDs. Keep interface, persistence and time arithmetic sufficiently separate to test their actual boundaries.
 
 ## Commits and publication
 

@@ -135,7 +135,7 @@ function setup(filename = ":memory:") {
   const remote = simulatedRedmine();
   store.saveActivities({
     revision: 0,
-    activities: [{ projectId: 10, activityId: 101, name: "Reunião" }],
+    activities: [{ activityId: 101, name: "Reunião" }],
   });
   const day = store.save({ date, revision: 0, entries: [entry] });
   return {
@@ -277,7 +277,7 @@ describe("individual submission lifecycle", () => {
       else
         store!.saveActivities({
           revision: 1,
-          activities: [{ projectId: 10, activityId: 101, name: "Reunião" }],
+          activities: [{ activityId: 101, name: "Reunião" }],
         });
       await expect(t.service.send(review.id)).rejects.toThrow(/mudou/);
       expect(t.posts()).toHaveLength(0);

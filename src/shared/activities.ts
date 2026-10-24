@@ -1,5 +1,4 @@
 export interface Activity {
-  projectId: number;
   activityId: number;
   name: string;
 }
@@ -27,24 +26,26 @@ export function validateActivityCatalog(value: unknown): ActivityCatalog {
   const activities = catalog.activities.map((activity) => {
     if (
       !activity ||
-      !positiveId(activity.projectId) ||
       !positiveId(activity.activityId) ||
       typeof activity.name !== "string" ||
       !activity.name.trim()
     )
       throw new Error(
-        "Informe projeto e atividade com códigos inteiros positivos e um nome para cada atividade.",
+        "Informe um código inteiro positivo e um nome para cada atividade.",
       );
-    const nameKey = `${activity.projectId}:${normalizedName(activity.name)}`;
-    const idKey = `${activity.projectId}:${activity.activityId}`;
+    if ("projectId" in activity)
+      throw new Error(
+        "O catálogo agora usa uma lista única, sem projeto. Recarregue a página antes de salvar.",
+      );
+    const nameKey = normalizedName(activity.name);
+    const idKey = String(activity.activityId);
     if (names.has(nameKey) || ids.has(idKey))
       throw new Error(
-        "Cada projeto deve ter códigos e nomes de atividade únicos.",
+        "O catálogo deve ter códigos e nomes de atividade únicos.",
       );
     names.add(nameKey);
     ids.add(idKey);
     return {
-      projectId: activity.projectId,
       activityId: activity.activityId,
       name: activity.name.trim().normalize("NFC"),
     };
@@ -52,23 +53,41 @@ export function validateActivityCatalog(value: unknown): ActivityCatalog {
   return { revision: catalog.revision!, activities };
 }
 
-export function activitiesForProject(
-  activities: Activity[],
-  projectId: number | undefined,
-): Activity[] {
-  return activities.filter((activity) => activity.projectId === projectId);
-}
-
 export function resolveActivity(
   activities: Activity[],
-  projectId: number | undefined,
   name: string,
 ): Activity | null {
-  if (!projectId || !name.trim()) return null;
-  // A label only resolves inside the issue's project; it is never a global activity identifier.
   return (
-    activitiesForProject(activities, projectId).find(
+    activities.find(
       (activity) => normalizedName(activity.name) === normalizedName(name),
     ) ?? null
   );
+}
+
+export function consolidateLegacyActivities(value: unknown): ActivityCatalog {
+  const catalog = value as {
+    revision: number;
+    activities: (Activity & { projectId: number })[];
+  };
+  if (!catalog || !Array.isArray(catalog.activities))
+    throw new Error("Formato do catálogo antigo inválido.");
+  const activities: Activity[] = [];
+  for (const activity of catalog.activities) {
+    if (!activity || !positiveId(activity.projectId))
+      throw new Error("O catálogo antigo contém um projeto inválido.");
+    const candidate = validateActivityCatalog({
+      revision: 0,
+      activities: [{ activityId: activity.activityId, name: activity.name }],
+    }).activities[0];
+    const previous = resolveActivity(activities, candidate.name);
+    if (previous) {
+      if (previous.activityId !== candidate.activityId)
+        throw new Error(
+          "O catálogo antigo contém códigos diferentes para o mesmo nome. Resolva o conflito antes de consolidar; nenhum dado foi alterado.",
+        );
+      continue;
+    }
+    activities.push(candidate);
+  }
+  return validateActivityCatalog({ revision: catalog.revision, activities });
 }

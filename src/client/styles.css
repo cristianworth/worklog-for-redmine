@@ -1241,10 +1241,9 @@ select[aria-invalid="true"] {
 }
 .catalog-table {
   width: 100%;
-  min-width: 580px;
+  min-width: 420px;
 }
-.catalog-table th:first-child,
-.catalog-table th:nth-child(2) {
+.catalog-table th:first-child {
   width: 145px;
 }
 .catalog-table th:last-child {

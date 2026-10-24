@@ -65,9 +65,6 @@ export function DaySection({
   collapsed,
   onCollapsedChange,
 }: Props) {
-  const [projects, setProjects] = useState<
-    Record<string, { issue: string; projectId: number }>
-  >({});
   const [lookupRequests, setLookupRequests] = useState<
     Record<string, { code: string }>
   >({});
@@ -109,11 +106,6 @@ export function DaySection({
   function update(id: string, field: keyof EditorEntry, value: string) {
     if (field === "issue") {
       setLookupRequests((current) => {
-        const next = { ...current };
-        delete next[id];
-        return next;
-      });
-      setProjects((current) => {
         const next = { ...current };
         delete next[id];
         return next;
@@ -241,11 +233,6 @@ export function DaySection({
                   const rowLocked =
                     !!receipt && isSubmissionLocked(receipt.state);
                   const rowDisabled = disabled || rowLocked;
-                  const project = projects[entry.id];
-                  const projectId =
-                    project?.issue === entry.issue.trim()
-                      ? project.projectId
-                      : undefined;
                   return (
                     <tr
                       key={entry.id}
@@ -323,19 +310,6 @@ export function DaySection({
                         <IssueLookup
                           automaticRequest={lookupRequests[entry.id]}
                           issue={entry.issue}
-                          onProject={(projectId) =>
-                            setProjects((current) => {
-                              const next = { ...current };
-                              if (projectId === undefined)
-                                delete next[entry.id];
-                              else
-                                next[entry.id] = {
-                                  issue: entry.issue.trim(),
-                                  projectId,
-                                };
-                              return next;
-                            })
-                          }
                           label={label}
                           disabled={disabled}
                         />
@@ -392,7 +366,6 @@ export function DaySection({
                       <td>
                         <ActivitySelect
                           activities={activities}
-                          projectId={projectId}
                           value={entry.activity}
                           label={`Atividade ${label}`}
                           disabled={rowDisabled}

@@ -1,13 +1,8 @@
 import { useId } from "react";
-import {
-  activitiesForProject,
-  resolveActivity,
-  type Activity,
-} from "../shared/activities";
+import { resolveActivity, type Activity } from "../shared/activities";
 
 export function ActivitySelect({
   activities,
-  projectId,
   value,
   label,
   disabled,
@@ -15,7 +10,6 @@ export function ActivitySelect({
   onChange,
 }: {
   activities: Activity[];
-  projectId?: number;
   value: string;
   label: string;
   disabled: boolean;
@@ -23,36 +17,29 @@ export function ActivitySelect({
   onChange(value: string): void;
 }) {
   const hintId = useId();
-  const available = activitiesForProject(activities, projectId);
-  const selected = resolveActivity(activities, projectId, value);
+  const selected = resolveActivity(activities, value);
   const unmatched = !!value && !selected && !reviewedId;
   const hint = reviewedId
     ? `Atividade revisada · código ${reviewedId}`
-    : !projectId
-      ? "Consulte a tarefa para carregar as opções do projeto. O valor anterior, se houver, está preservado."
-      : !available.length
-        ? `Cadastre atividades do projeto #${projectId} em Configurações. Nenhum código foi escolhido automaticamente.`
-        : selected
-          ? `Atividade configurada · código ${selected.activityId}`
-          : value
-            ? "Atividade anterior sem vínculo neste projeto. Escolha uma opção para corrigir; o envio fica bloqueado sem vínculo."
-            : "Escolha uma atividade deste projeto. O rascunho pode ficar incompleto.";
+    : !activities.length
+      ? "Cadastre atividades em Configurações. Nenhum código foi escolhido automaticamente."
+      : selected
+        ? `Atividade configurada · código ${selected.activityId}`
+        : value
+          ? "Atividade anterior fora do catálogo. Escolha uma opção para corrigir; o envio fica bloqueado sem cadastro."
+          : "Escolha uma atividade. O rascunho pode ficar incompleto.";
   return (
     <>
       <select
         aria-label={label}
         aria-describedby={hintId}
-        aria-invalid={!!projectId && unmatched}
+        aria-invalid={unmatched}
         value={reviewedId ? value : (selected?.name ?? value)}
-        disabled={disabled || !!reviewedId || !projectId || !available.length}
+        disabled={disabled || !!reviewedId || !activities.length}
         onChange={(event) => onChange(event.target.value)}
       >
         <option value="">
-          {!projectId
-            ? "Consulte a tarefa primeiro"
-            : !available.length
-              ? "Catálogo do projeto vazio"
-              : "Selecione uma atividade"}
+          {!activities.length ? "Catálogo vazio" : "Selecione uma atividade"}
         </option>
         {reviewedId ? (
           <option value={value}>
@@ -62,10 +49,10 @@ export function ActivitySelect({
           <>
             {unmatched && (
               <option value={value} disabled>
-                {value} · {projectId ? "sem vínculo" : "aguardando consulta"}
+                {value} · fora do catálogo
               </option>
             )}
-            {available.map((activity) => (
+            {activities.map((activity) => (
               <option key={activity.activityId} value={activity.name}>
                 {activity.name} · código {activity.activityId}
               </option>
@@ -75,7 +62,7 @@ export function ActivitySelect({
       </select>
       <small
         id={hintId}
-        className={`activity-hint ${projectId && unmatched ? "is-unmapped" : ""}`}
+        className={`activity-hint ${unmatched ? "is-unmapped" : ""}`}
       >
         {hint}
       </small>

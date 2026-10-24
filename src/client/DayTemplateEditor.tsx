@@ -27,15 +27,11 @@ export function DayTemplateEditor({
 }) {
   const [template, setTemplate] = useState<DayTemplate | null>(null);
   const [rows, setRows] = useState<EditorEntry[]>([]);
-  const [projects, setProjects] = useState<
-    Record<string, { issue: string; projectId: number }>
-  >({});
   const [lookupRequests, setLookupRequests] = useState<
     Record<string, { code: string }>
   >({});
   function resetRows(loaded: DayTemplate) {
     setRows(rowsFrom(loaded));
-    setProjects({});
     setLookupRequests({});
   }
   const [dirty, setDirty] = useState(false);
@@ -84,11 +80,6 @@ export function DayTemplateEditor({
   }
   function update(id: string, field: keyof EditorEntry, value: string) {
     if (field === "issue") {
-      setProjects((current) => {
-        const next = { ...current };
-        delete next[id];
-        return next;
-      });
       setLookupRequests((current) => {
         const next = { ...current };
         delete next[id];
@@ -202,9 +193,9 @@ export function DayTemplateEditor({
       </p>
       <p className="settings-note">
         Você pode deixar tarefa, duração ou outros campos vazios para completar
-        no dia. Saia do código da tarefa para carregar as atividades do projeto.
-        Escolha nome e código na lista; o envio confere o vínculo novamente.
-        Nenhum dado da planilha é importado automaticamente.
+        no dia. Escolha a atividade na lista, mesmo sem informar uma tarefa. O
+        envio confere a tarefa e a atividade novamente. Nenhum dado da planilha
+        é importado automaticamente.
       </p>
       {error && (
         <p className="field-error" role="alert">
@@ -250,18 +241,6 @@ export function DayTemplateEditor({
                       label={`do modelo ${index + 1}`}
                       disabled={blocked}
                       automaticRequest={lookupRequests[row.id]}
-                      onProject={(projectId) =>
-                        setProjects((current) => {
-                          const next = { ...current };
-                          if (projectId === undefined) delete next[row.id];
-                          else
-                            next[row.id] = {
-                              issue: row.issue.trim(),
-                              projectId,
-                            };
-                          return next;
-                        })
-                      }
                     />
                   </td>
                   <td>
@@ -303,11 +282,6 @@ export function DayTemplateEditor({
                   <td>
                     <ActivitySelect
                       activities={activities}
-                      projectId={
-                        projects[row.id]?.issue === row.issue.trim()
-                          ? projects[row.id].projectId
-                          : undefined
-                      }
                       value={row.activity}
                       label={`Atividade do modelo ${index + 1}`}
                       disabled={blocked}

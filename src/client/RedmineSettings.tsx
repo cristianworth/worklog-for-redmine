@@ -61,8 +61,8 @@ export function RedmineSettings({ onClose }: { onClose(): void }) {
         </button>
       </div>
       <p>
-        Conexão somente para consultas nesta etapa. Salvar rascunhos continua
-        independente do Redmine.
+        Conexão para consultar tarefas e enviar horas após revisão e
+        confirmação. Salvar rascunhos continua independente do Redmine.
       </p>
       <p className="connection-status">
         {status

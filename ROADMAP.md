@@ -1,6 +1,6 @@
 # Roadmap — Worklog for Redmine
 
-Atualizado em 23/10/2026. Este arquivo descreve o que falta fazer; o [CHANGELOG.md](CHANGELOG.md) registra o que cada versão já entregou. Versão atual: **v0.3.0 — dias recolhíveis e código público sob MIT**.
+Atualizado em 24/10/2026. Este arquivo descreve o que falta fazer; o [CHANGELOG.md](CHANGELOG.md) registra o que cada versão já entregou. Versão atual: **v0.4.0 — catálogo único e seleção antes do card**.
 
 ## Versões e prioridade
 
@@ -10,6 +10,7 @@ Atualizado em 23/10/2026. Este arquivo descreve o que falta fazer; o [CHANGELOG.
 | v0.1.0 | Modelo configurável, cópia independente para dias novos e salvamento separado | Entregue, P5 |
 | v0.2.0 | Escolha de atividades por opções e duração abreviada; revisão integrada do preenchimento | Entregue, P6.1–P6.3 |
 | v0.3.0 | Recolher/expandir dias, catálogo privado preenchido e publicação do código com licença MIT | Entregue; código público sob MIT |
+| v0.4.0 | Catálogo único, seleção antes do card, migração com backup e conferência real em dois projetos | Entregue, P6.4 |
 | A definir | Demo isolada e publicação da demonstração | Depois do fluxo local validado, P7–P8 |
 
 **Ajuste entregue após P6:** recolher/expandir tarefas por dia; **Adicionar linha** reabre e foca a linha nova. Edições preservadas e preferência visual mantida durante a página, inclusive ao trocar o período. Registrado na v0.3.0, aprovada por Cristian. O catálogo privado de uso foi preenchido com a lista fornecida, sem criar dados padrão para novas instalações ou alterar recibos.
@@ -44,7 +45,7 @@ A P2.1 já resolvia nome + projeto → código, mas a interface aceitava texto l
 | B — Rascunhos e modelo | Integração nos dois editores; valores antigos sem cadastro preservados e identificados; recibos apropriados continuam bloqueados com seu código original |
 | C — Envio e conferência | Backend mantém resolução/validação por projeto; testes conferem código correto em dois projetos e zero envio de atividade sem vínculo |
 
-**Uso:** saia do código da tarefa ou use Consultar; depois escolha nome/código na lista. Se o projeto não tiver atividades cadastradas, o campo explica como usar Configurações. O rascunho pode continuar incompleto; o envio permanece bloqueado sem vínculo válido.
+**Histórico da v0.2.0, substituído pelo P6.4:** saia do código da tarefa ou use Consultar; depois escolha nome/código na lista. Se o projeto não tiver atividades cadastradas, o campo explica como usar Configurações. O rascunho pode continuar incompleto; o envio permanece bloqueado sem vínculo válido.
 
 **Limite:** o catálogo continua manual por projeto. A instância nem sempre fornece a lista remota; descoberta automática não foi incluída, e nenhum ID é inventado, buscado em outro projeto ou escolhido como padrão.
 
@@ -67,6 +68,19 @@ Os dois últimos dígitos são minutos; os anteriores são horas. Um ou dois dí
 - Interface conferida em instância isolada com SQLite em memória: código por Tab, opções por projeto, edição de duração, mensagem de erro, correção de atividade antiga, salvar/reabrir modelo e lote simulado de dois dias.
 - Estilos/foco de teclado dos seletores integrados aos campos existentes; rolagem horizontal e tamanho de fonte em telas menores preservados. A conferência visual ocorreu no navegador integrado; teste adicional em telefone real fica para a revisão da demo/publicação.
 - Changelog, manifests, rodapé e tag da v0.2.0 fechados juntos. Dias 19, 20 e 21/10 de uso e seus recibos intactos. Nenhuma criação remota real nessa entrega.
+
+## P6.4 — Catálogo único — implementação concluída
+
+Decisão de Cristian em 24/10/2026, após conferir o VBA: manter uma lista de nomes/códigos para a instância configurada, sem repetir opções por projeto. Substitui o vínculo local exigido no P6.1; o projeto do card continua necessário na validação do envio.
+
+| Chunk | Resultado |
+| --- | --- |
+| A — Cadastro e migração | Vínculos equivalentes consolidados com backup, revisão nova e recusa de conflitos; nenhum recibo reescrito |
+| B — Interface | Atividades sem coluna de projeto; seleção disponível em dias/modelo antes de informar a tarefa |
+| C — Conferência | 247 testes/17 arquivos: migração, backup, concorrência, persistência, mesmo código em dois projetos e impedimento remoto bloqueando todo o lote |
+| D — Integração real | Dois alvos autorizados confirmados em projetos distintos com o mesmo código, readback correspondente e status preservados; autorização consumida e exclusão manual por Cristian |
+
+O banco privado de uso contém 15 atividades e quatro IDs corrigidos por comparação autorizada com a API. Dados reais, códigos e resultados permanecem privados. Aceitação nos dois testes não prova disponibilidade das 15 opções em todos os projetos. Entrega registrada na v0.4.0, aprovada em 24/10/2026; demo continua sendo a próxima etapa.
 
 ## P7 — Preparar uma demonstração segura para visitantes
 

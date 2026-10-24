@@ -44,6 +44,14 @@ if (!Number.isInteger(port) || port < 1 || port > 65535)
   throw new Error("PORT deve ser uma porta válida.");
 mkdirSync(join(root, "data"), { recursive: true });
 const store = openDraftStore(join(root, "data", "worklog.sqlite"));
+mkdirSync(join(root, "backups"), { recursive: true });
+await store.migrateActivities(
+  join(
+    root,
+    "backups",
+    `before-global-activities-${new Date().toISOString().replace(/[:.]/g, "-")}.sqlite`,
+  ),
+);
 const app = createApp(store, redmine);
 const server = createHttpServer(app);
 let vite: ViteDevServer | undefined;

@@ -36,7 +36,7 @@ function setup(filename = ":memory:", dates = ["2026-10-12"]) {
   cleanupStore = () => store.close();
   store.saveActivities({
     revision: 0,
-    activities: [{ projectId: 10, activityId: 101, name: "Review" }],
+    activities: [{ activityId: 101, name: "Review" }],
   });
   const days = dates.map((date) =>
     store.save({
@@ -421,7 +421,7 @@ describe("batch submission", () => {
       batch = await t.service.prepare(t.selections);
     store.saveActivities({
       revision: 1,
-      activities: [{ projectId: 10, activityId: 202, name: "Review" }],
+      activities: [{ activityId: 202, name: "Review" }],
     });
     expect(() => t.service.start(batch.id)).toThrow(/mudou/);
     expect(t.posts()).toBe(0);

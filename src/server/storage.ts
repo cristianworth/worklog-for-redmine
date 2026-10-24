@@ -10,6 +10,7 @@ import {
 } from "../shared/submissions";
 import {
   validateActivityCatalog,
+  consolidateLegacyActivities,
   type ActivityCatalog,
 } from "../shared/activities";
 import { DatabaseSync, backup } from "node:sqlite";
@@ -77,6 +78,50 @@ export function openDraftStore(filename: string) {
           activities: JSON.parse(row.activities),
         })
       : { revision: 0, activities: [] };
+  }
+  async function migrateActivities(backupFilename: string) {
+    const previous = db
+      .prepare("SELECT revision, activities FROM activity_catalog WHERE id = 1")
+      .get() as { revision: number; activities: string } | undefined;
+    if (!previous) return { migrated: false as const };
+    const oldActivities = JSON.parse(previous.activities);
+    if (!Array.isArray(oldActivities))
+      throw new Error("Formato do catálogo inválido.");
+    if (!oldActivities.some((activity) => activity && "projectId" in activity))
+      return { migrated: false as const };
+    const consolidated = consolidateLegacyActivities({
+      revision: previous.revision,
+      activities: oldActivities,
+    });
+    await backup(db, backupFilename);
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      const current = db
+        .prepare(
+          "SELECT revision, activities FROM activity_catalog WHERE id = 1",
+        )
+        .get() as typeof previous;
+      if (
+        current?.revision !== previous.revision ||
+        current.activities !== previous.activities
+      )
+        throw new ConflictError(
+          "O catálogo mudou durante o backup. Nenhuma migração foi aplicada; reinicie para conferir novamente.",
+        );
+      db.prepare(
+        "UPDATE activity_catalog SET revision = ?, activities = ? WHERE id = 1",
+      ).run(previous.revision + 1, JSON.stringify(consolidated.activities));
+      db.exec("COMMIT");
+      return {
+        migrated: true as const,
+        before: oldActivities.length,
+        after: consolidated.activities.length,
+        backupFilename,
+      };
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
   }
   function saveActivities(input: unknown): ActivityCatalog {
     const catalog = validateActivityCatalog(input);
@@ -590,6 +635,7 @@ export function openDraftStore(filename: string) {
     saveMany,
     readActivities,
     saveActivities,
+    migrateActivities,
     readDayTemplate,
     saveDayTemplate,
     submission,

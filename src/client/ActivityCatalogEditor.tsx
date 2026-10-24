@@ -7,14 +7,12 @@ import {
 
 interface Row {
   key: string;
-  projectId: string;
   activityId: string;
   name: string;
 }
 const rowsFrom = (catalog: ActivityCatalog): Row[] =>
   catalog.activities.map((activity) => ({
     key: crypto.randomUUID(),
-    projectId: String(activity.projectId),
     activityId: String(activity.activityId),
     name: activity.name,
   }));
@@ -71,19 +69,11 @@ export function ActivityCatalogEditor({
     if (!dirty || busy || !catalog) return;
     let payload: ActivityCatalog;
     try {
-      if (
-        rows.some(
-          (row) =>
-            !/^\d+$/.test(row.projectId) || !/^\d+$/.test(row.activityId),
-        )
-      )
-        throw new Error(
-          "Use códigos inteiros positivos para projeto e atividade.",
-        );
+      if (rows.some((row) => !/^\d+$/.test(row.activityId)))
+        throw new Error("Use códigos inteiros positivos para as atividades.");
       payload = validateActivityCatalog({
         revision,
-        activities: rows.map(({ projectId, activityId, name }) => ({
-          projectId: Number(projectId),
+        activities: rows.map(({ activityId, name }) => ({
           activityId: Number(activityId),
           name,
         })),
@@ -134,7 +124,7 @@ export function ActivityCatalogEditor({
       aria-labelledby="catalog-title"
     >
       <div className="settings-heading">
-        <h2 id="catalog-title">Atividades por projeto</h2>
+        <h2 id="catalog-title">Atividades</h2>
         <span className="catalog-state">
           {dirty
             ? "Alterações não salvas"
@@ -146,13 +136,13 @@ export function ActivityCatalogEditor({
         </span>
       </div>
       <p>
-        Cadastre o nome e o código da atividade no projeto correto. A mesma
-        atividade pode ter códigos diferentes em projetos distintos.
+        Cadastre cada atividade uma única vez, com o nome e o código usados no
+        Redmine. A lista é compartilhada pelos dias e pelo modelo.
       </p>
       <p className="settings-note">
-        Use <strong>Consultar</strong> em uma tarefa para ver o código do
-        projeto. Os códigos de atividade devem ser conferidos no Redmine;
-        nenhuma atividade vem cadastrada por padrão.
+        Você pode escolher a atividade antes de informar a tarefa. Os códigos
+        devem ser conferidos no Redmine; nenhuma atividade vem cadastrada por
+        padrão.
       </p>
       {(loadError || error) && (
         <p className="field-error" role="alert">
@@ -164,7 +154,6 @@ export function ActivityCatalogEditor({
           <table className="catalog-table">
             <thead>
               <tr>
-                <th>Projeto (ID)</th>
                 <th>Atividade (ID)</th>
                 <th>Nome da atividade</th>
                 <th>
@@ -175,18 +164,6 @@ export function ActivityCatalogEditor({
             <tbody>
               {rows.map((row, index) => (
                 <tr key={row.key}>
-                  <td>
-                    <input
-                      aria-label={`Projeto da atividade ${index + 1}`}
-                      inputMode="numeric"
-                      placeholder="Ex.: 10"
-                      value={row.projectId}
-                      disabled={blocked}
-                      onChange={(event) =>
-                        update(row.key, "projectId", event.target.value)
-                      }
-                    />
-                  </td>
                   <td>
                     <input
                       aria-label={`Código da atividade ${index + 1}`}
@@ -234,8 +211,7 @@ export function ActivityCatalogEditor({
           </table>
           {!rows.length && (
             <p className="catalog-empty">
-              Seu catálogo está vazio. Adicione a primeira atividade para um
-              projeto.
+              Seu catálogo está vazio. Adicione a primeira atividade.
             </p>
           )}
         </div>
@@ -249,7 +225,6 @@ export function ActivityCatalogEditor({
               ...current,
               {
                 key: crypto.randomUUID(),
-                projectId: "",
                 activityId: "",
                 name: "",
               },

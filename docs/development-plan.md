@@ -32,6 +32,12 @@ A P2.1 implementou o catálogo e a resolução nome + projeto → código, mas d
 
 Importação ampla do histórico, empacotamento e descoberta automática de atividades permanecem fora do escopo entregue na v0.2.0. A incorporação P4.1 foi específica e não autoriza reenvios.
 
+## P6.4 — simplificação aprovada em 24/10/2026
+
+VBA conferido: resolve nome → código fixo e envia card + código, sem resolver atividade pelo projeto. A implementação agora usa um catálogo único e permite escolher atividade antes do card. Migração consolida equivalências com backup e revisão; conflitos são recusados sem perda de dados. Configurações não exige projeto. Validação integral no backend e snapshots de recibos continuam preservados.
+
+247 testes/17 arquivos e compilação aprovados, interface fictícia conferida. Dois testes reais especificamente autorizados confirmaram um código em dois projetos, com leitura posterior e status mantidos. Não generalizar esse resultado para todos os códigos/projetos, nem repetir os alvos. A execução está apenas em `private/authorized-global-activity-tests.json` e SQLite separado; o banco de uso não recebeu testes. Catálogo de uso consolidado em 15 atividades e quatro IDs corrigidos com autorização. Dias protegidos, modelo e recibos preservados. Demo permanece P7; entrega v0.4.0 aprovada por Cristian em 24/10/2026.
+
 ## P1.2 — chunks A–D
 
 Base da implementação: `4856dae`, branch `master`. Autorização de Cristian em 22/10/2026. O planejamento anterior está no histórico Git.
@@ -72,7 +78,7 @@ Hospedagem estática, como GitHub Pages, é uma candidata para a demo, não uma 
 
 1. Autenticação por chave e consulta real de tarefa foram validadas. O envio individual também foi confirmado na P3; expiração e permissões futuras continuam específicas do ambiente; o login do navegador não autentica automaticamente o backend.
 2. Certificado vencido: Cristian autorizou exceção local para a origem HTTPS conhecida; manter padrão estrito, aviso visível e nenhuma alteração global. A API respondeu 401 sem credenciais e autenticou com a chave local. O processo precisa ser reiniciado após mudar o `.env`.
-3. Catálogo manual por projeto entregue: a mesma descrição pode ter IDs diferentes. Descoberta automática de atividades e novos tipos de campo ficam pendentes; os campos continuam exigindo implementação própria.
+3. Catálogo único aprovado em 24/10/2026, substituindo os vínculos locais por projeto. Nomes/códigos únicos para a instância; disponibilidade no projeto continua sendo uma validação remota. Descoberta automática e novos tipos de campo ficam pendentes.
 4. Contrato de sucesso de cada transporte: HTTP 200 não é confirmação universal de criação. Preservar resultados confirmados/incertos e evitar reenvio indevido.
 5. Código público autorizado em `cristianworth/worklog-for-redmine`, licença MIT; revisão de privacidade dos arquivos/histórico aprovada antes do primeiro push. Destino da demo ainda será definido no P8.
 

@@ -26,7 +26,10 @@ export function createSubmissionService(
     date: string,
     entryId: string,
     expectedRevision: number,
-    reader: Pick<RedmineClient, "account" | "issue" | "projectActivities"> = redmine,
+    reader: Pick<
+      RedmineClient,
+      "account" | "issue" | "projectActivities"
+    > = redmine,
   ) {
     if (
       !isWorkDate(date) ||
@@ -50,14 +53,10 @@ export function createSubmissionService(
       reader.issue(entry.issue.trim()),
     ]);
     const catalog = store.readActivities();
-    const activity = resolveActivity(
-      catalog.activities,
-      issue.project.id,
-      entry.activity,
-    );
+    const activity = resolveActivity(catalog.activities, entry.activity);
     if (!activity)
       throw new SubmissionError(
-        "Cadastre esta atividade para o projeto da tarefa em Configurações antes de enviar.",
+        "Cadastre esta atividade em Configurações antes de enviar.",
       );
     const available = await reader.projectActivities(issue.project.id);
     if (available && !available.some((a) => a.id === activity.activityId))
@@ -155,7 +154,9 @@ export function createSubmissionService(
       try {
         const record = store.submission(id);
         if (!record || record.state !== "prepared")
-          throw new ConflictError("A revisão mudou. Confira os resultados e prepare uma nova revisão.");
+          throw new ConflictError(
+            "A revisão mudou. Confira os resultados e prepare uma nova revisão.",
+          );
         const fresh = await context(
           record.snapshot.date,
           record.snapshot.entryId,
@@ -168,8 +169,8 @@ export function createSubmissionService(
         errors.set(
           id,
           error instanceof ConflictError ||
-          error instanceof SubmissionError ||
-          error instanceof RedmineError
+            error instanceof SubmissionError ||
+            error instanceof RedmineError
             ? error.message
             : "Não foi possível validar esta linha. Confira o acesso ao Redmine e tente uma nova revisão.",
         );

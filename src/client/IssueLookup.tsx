@@ -12,13 +12,11 @@ export function IssueLookup({
   automaticRequest,
   label,
   disabled,
-  onProject,
 }: {
   issue: string;
   automaticRequest?: { code: string };
   label: string;
   disabled: boolean;
-  onProject(projectId: number | undefined): void;
 }) {
   const code = issue.trim();
   const [result, setResult] = useState<{
@@ -30,8 +28,6 @@ export function IssueLookup({
   const request = useRef<AbortController | null>(null);
   const latestCode = useRef(code);
   latestCode.current = code;
-  const projectCallback = useRef(onProject);
-  projectCallback.current = onProject;
   useEffect(() => {
     setResult(null);
     setPending(null);
@@ -50,7 +46,6 @@ export function IssueLookup({
       return;
     }
     request.current?.abort();
-    projectCallback.current(undefined);
     const controller = new AbortController();
     request.current = controller;
     setPending(code);
@@ -78,7 +73,6 @@ export function IssueLookup({
         throw new Error("Resposta inválida para a tarefa consultada.");
       if (isCurrent()) {
         setResult({ code, data });
-        projectCallback.current(data.project.id);
       }
     } catch (error) {
       if (isCurrent())

@@ -12,6 +12,16 @@ Histórico das versões. Criado em 23/10/2026 com a base anterior ao modelo regi
 - Antes de cada commit/merge, ler este arquivo e seguir a regra de aprovação de Cristian. A criação deste histórico, da v0.0.0 e da v0.1.0 está explicitamente autorizada no pedido de 23/10/2026; alterações futuras de versão devem seguir a autorização da entrega.
 - Nunca incluir credenciais, planilhas privadas, bancos, backups ou dados reais nos registros, tags e arquivos distribuídos.
 
+## [0.4.0] — 2026-10-24
+
+### Catálogo único — P6.4
+
+- Um catálogo de atividades para a instância configurada, com nome e código únicos. Dias e modelo permitem escolher a atividade antes de preencher/consultar o card; Configurações não repete atividades por projeto.
+- Migração automática de vínculos antigos equivalentes com backup consistente, revisão incrementada e preservação dos rascunhos, modelo, lotes e recibos. Conflitos impedem a migração sem escolher um código silenciosamente; páginas antigas precisam recarregar.
+- Validação integral do lote preservada: consulta atual da tarefa, conta e disponibilidade da atividade por projeto quando a API a fornece. Recibos apropriados continuam mostrando os códigos originais.
+- Catálogo privado de uso consolidado em 15 atividades; quatro códigos corrigidos, com autorização, após comparação por nome com a API. Nenhum código privado incluído como padrão da aplicação.
+- 247 testes/17 arquivos aprovados; compilação e interface fictícia conferidas. Dois testes reais autorizados confirmaram o mesmo código de atividade em dois projetos, com leitura posterior e status mantidos. Autorização consumida, resultados somente no registro privado; exclusão manual fica com Cristian.
+
 ## [0.3.0] — 2026-10-23
 
 ### Navegação e publicação do código

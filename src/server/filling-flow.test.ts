@@ -40,14 +40,11 @@ afterEach(() => {
   if (folder) rmSync(folder, { recursive: true, force: true });
   folder = undefined;
 });
-function setup() {
+function setup(unavailableProject = false) {
   store = openDraftStore(":memory:");
   store.saveActivities({
     revision: 0,
-    activities: [
-      { projectId: 10, activityId: 101, name: "Revisão" },
-      { projectId: 20, activityId: 202, name: "Revisão" },
-    ],
+    activities: [{ activityId: 101, name: "Revisão" }],
   });
   const posts: any[] = [],
     rows: any[] = [];
@@ -76,7 +73,10 @@ function setup() {
         project: {
           id: project,
           time_entry_activities: [
-            { id: project === 10 ? 101 : 202, name: "Revisão" },
+            {
+              id: unavailableProject && project === 20 ? 202 : 101,
+              name: "Revisão",
+            },
           ],
         },
       });
@@ -114,8 +114,25 @@ function setup() {
   );
   return { service, posts };
 }
-describe("v0.2 filling and submission boundaries", () => {
-  it("sends each project's activity ID and canonical hours from two compact drafts", async () => {
+describe("global activities and submission boundaries", () => {
+  it("blocks the whole selection when the shared activity is unavailable in one project", async () => {
+    const t = setup(true);
+    const days = store!.saveMany([
+      toDraftDay(editorDay("2026-10-22", "1001", "30")),
+      toDraftDay(editorDay("2026-10-23", "1002", "30")),
+    ]);
+    const review = await t.service.prepare(
+      days.map((day) => ({
+        date: day.date,
+        entryId: day.entries[0].id,
+        revision: day.revision,
+      })),
+    );
+    expect(review.items[1].error).toContain("não está disponível");
+    expect(() => t.service.start(review.id)).toThrow();
+    expect(t.posts).toHaveLength(0);
+  });
+  it("reuses one activity ID across two task projects with canonical hours", async () => {
     const t = setup();
     const days = store!.saveMany([
       toDraftDay(editorDay("2026-10-22", "1001", "030")),
@@ -140,7 +157,7 @@ describe("v0.2 filling and submission boundaries", () => {
       ]),
     ).toEqual([
       [101, "00:30", "2026-10-22"],
-      [202, "01:30", "2026-10-23"],
+      [101, "01:30", "2026-10-23"],
     ]);
     expect(t.posts.every((payload) => !("status_id" in payload))).toBe(true);
   });

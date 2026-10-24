@@ -6,7 +6,7 @@ Salvar rascunhos continua apenas local. Para enviar, salve o dia, selecione uma 
 
 A revisão expira após 15 minutos. Uma alteração no dia, no catálogo, no projeto/atividade ou na conta/servidor exige nova revisão. Uma linha recusada pode ser corrigida e revisada novamente; não há repetição automática. A conferência de duplicidade é conservadora: mesmo usuário, servidor, tarefa, projeto, dia, atividade, minutos e observação. Lançamentos idênticos já existentes não são criados de novo.
 
-O catálogo manual resolve nome + projeto para ID. Quando a API oferece atividades do projeto, o código é conferido antes de enviar. Nesta instância, o include de atividades não foi disponibilizado: a revisão informa isso e o servidor valida o ID na criação. O teste autorizado usou um único candidato com o nome exato retornado pela enumeração real, no contexto do projeto; sua aceitação foi confirmada pelo registro criado. Isso não importa um catálogo nem prova aceitação de outros IDs/projetos.
+O catálogo único resolve o nome para ID, independentemente do projeto. Quando a API oferece atividades do projeto, o código é conferido antes de enviar. Nesta instância, o include de atividades não foi disponibilizado: a revisão informa isso e o servidor valida o ID na criação. O teste autorizado usou um único candidato com o nome exato retornado pela enumeração real, no contexto do projeto; sua aceitação foi confirmada pelo registro criado. Isso não importa um catálogo nem prova aceitação de outros IDs/projetos.
 
 ## Estados e persistência
 

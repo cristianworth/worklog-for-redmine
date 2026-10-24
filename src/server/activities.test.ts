@@ -1,5 +1,5 @@
 import { DatabaseSync } from "node:sqlite";
-import { mkdtempSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { Server } from "node:http";
@@ -7,7 +7,7 @@ import type { AddressInfo } from "node:net";
 import { afterEach, describe, expect, it } from "vitest";
 import { openDraftStore, ConflictError } from "./storage";
 import { createApp, handleErrors } from "./app";
-const activity = { projectId: 10, activityId: 101, name: "Revisão" };
+const activity = { activityId: 101, name: "Revisão" };
 let folder: string | undefined;
 let store: ReturnType<typeof openDraftStore> | undefined;
 let server: Server | undefined;
@@ -23,6 +23,103 @@ afterEach(async () => {
   folder = undefined;
 });
 describe("local activity catalog persistence", () => {
+  function legacyDatabase(activities: unknown[]) {
+    folder = mkdtempSync(join(tmpdir(), "worklog-global-catalog-"));
+    const filename = join(folder, "worklog.sqlite");
+    store = openDraftStore(filename);
+    const day = store.save({ date: "2026-10-22", revision: 0, entries: [] });
+    const template = store.saveDayTemplate({ revision: 0, entries: [] });
+    store.close();
+    const old = new DatabaseSync(filename);
+    old
+      .prepare("INSERT INTO activity_catalog VALUES (1, 7, ?)")
+      .run(JSON.stringify(activities));
+    old.close();
+    store = openDraftStore(filename);
+    return { filename, day, template, backup: join(folder, "before.sqlite") };
+  }
+  it("backs up and consolidates legacy mappings once while preserving drafts and template", async () => {
+    const legacy = [
+      { ...activity, projectId: 10 },
+      { ...activity, projectId: 20 },
+    ];
+    const t = legacyDatabase(legacy);
+    expect(await store!.migrateActivities(t.backup)).toMatchObject({
+      migrated: true,
+      before: 2,
+      after: 1,
+    });
+    expect(store!.readActivities()).toEqual({
+      revision: 8,
+      activities: [activity],
+    });
+    expect(store!.read(t.day.date)).toEqual(t.day);
+    expect(store!.readDayTemplate()).toEqual(t.template);
+    const backup = new DatabaseSync(t.backup, { readOnly: true });
+    expect(
+      JSON.parse(
+        (
+          backup.prepare("SELECT activities FROM activity_catalog").get() as {
+            activities: string;
+          }
+        ).activities,
+      ),
+    ).toEqual(legacy);
+    backup.close();
+    expect(() =>
+      store!.saveActivities({ revision: 7, activities: [activity] }),
+    ).toThrow(ConflictError);
+    const unused = join(folder!, "unused.sqlite");
+    expect(await store!.migrateActivities(unused)).toEqual({ migrated: false });
+    expect(existsSync(unused)).toBe(false);
+    store!.close();
+    store = openDraftStore(t.filename);
+    expect(store.readActivities()).toEqual({
+      revision: 8,
+      activities: [activity],
+    });
+  });
+  it("refuses conflicting legacy mappings without rewriting the original catalog", async () => {
+    const legacy = [
+      { ...activity, projectId: 10 },
+      { ...activity, projectId: 20, activityId: 202 },
+    ];
+    const t = legacyDatabase(legacy);
+    await expect(store!.migrateActivities(t.backup)).rejects.toThrow(
+      /códigos diferentes/,
+    );
+    expect(existsSync(t.backup)).toBe(false);
+    const raw = new DatabaseSync(t.filename, { readOnly: true });
+    expect(
+      JSON.parse(
+        (
+          raw.prepare("SELECT activities FROM activity_catalog").get() as {
+            activities: string;
+          }
+        ).activities,
+      ),
+    ).toEqual(legacy);
+    raw.close();
+    expect(store!.read(t.day.date)).toEqual(t.day);
+  });
+  it("does not overwrite a catalog changed while the backup is being taken", async () => {
+    const t = legacyDatabase([{ ...activity, projectId: 10 }]);
+    const other = new DatabaseSync(t.filename);
+    other.exec("PRAGMA journal_mode = WAL");
+    const migration = store!.migrateActivities(t.backup);
+    try {
+      other
+        .prepare("UPDATE activity_catalog SET revision = 8, activities = ?")
+        .run(JSON.stringify([activity]));
+    } finally {
+      other.close();
+    }
+    await expect(migration).rejects.toThrow(ConflictError);
+    expect(store!.readActivities()).toEqual({
+      revision: 8,
+      activities: [activity],
+    });
+  });
   it("adds an empty catalog when opening a database from the previous version", () => {
     folder = mkdtempSync(join(tmpdir(), "worklog-old-schema-"));
     const filename = join(folder, "worklog.sqlite");
