@@ -114,6 +114,7 @@ Current version: **v0.4.0**, with one activity catalog, selection before task lo
 
 - [Changelog / versions](CHANGELOG.md)
 - [Roadmap / checklist](ROADMAP.md)
+- [Project decisions and verified lessons](docs/project-decisions.md)
 - [Day template](docs/day-template.md)
 - [Plan and decisions](docs/development-plan.md)
 - [Connection checks](docs/redmine-access.md)

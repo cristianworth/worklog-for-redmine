@@ -16,6 +16,7 @@ Histórico das versões. Criado em 23/10/2026 com a base anterior ao modelo regi
 
 ### Catálogo único — P6.4
 
+- Validação visual de Cristian em 24/10/2026: os dois testes ficaram com o tipo de atividade esperado. Planejamento e decisões consolidados; o catálogo de uso permanece com 15 atividades únicas, sem cópias por projeto.
 - Um catálogo de atividades para a instância configurada, com nome e código únicos. Dias e modelo permitem escolher a atividade antes de preencher/consultar o card; Configurações não repete atividades por projeto.
 - Migração automática de vínculos antigos equivalentes com backup consistente, revisão incrementada e preservação dos rascunhos, modelo, lotes e recibos. Conflitos impedem a migração sem escolher um código silenciosamente; páginas antigas precisam recarregar.
 - Validação integral do lote preservada: consulta atual da tarefa, conta e disponibilidade da atividade por projeto quando a API a fornece. Recibos apropriados continuam mostrando os códigos originais.

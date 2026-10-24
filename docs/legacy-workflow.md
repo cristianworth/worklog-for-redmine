@@ -1,5 +1,9 @@
 # Referência do fluxo legado
 
+## Leitura atual
+
+Este documento descreve a investigação histórica. A decisão vigente é **um catálogo único**, sem cópias por projeto. A conversão do VBA usa nome → código fixo, sem consultar o projeto; os testes da v0.4.0 comprovaram o mesmo código em dois projetos, e Cristian confirmou o resultado visual. Ver [decisões e aprendizados](project-decisions.md) para as evidências e seus limites. As observações antigas de códigos distintos não impõem um cadastro duplicado.
+
 ## Proveniência e limite
 
 Esta é uma descrição sanitizada da investigação do main em 20–21/10/2026, complementada pela conferência estática da planilha movida para a raiz do projeto em 21/10/2026. Não contém o código VBA original, dados de trabalho, endereços do servidor ou credenciais.
@@ -44,7 +48,7 @@ A tabela da aba de validações mantém códigos em H e descrições em I. Entre
 
 Além disso, a lista suspensa do modelo e da planilha mensal usa um intervalo fixo da coluna I, terminando na linha 14 na cópia inspecionada. Adicionar linhas à tabela não atualiza automaticamente esse intervalo nem a conversão no VBA.
 
-Durante a consulta autenticada ao Redmine, foram encontrados os dois tipos pedidos por Cristian. Também foi observada a mesma descrição com IDs diferentes em projetos distintos. Os valores reais não são defaults públicos: o novo aplicativo deve usar configuração por ambiente/projeto, com exemplos fictícios.
+Durante a consulta autenticada ao Redmine, foram encontrados os dois tipos pedidos por Cristian. Também foi observada a mesma descrição com IDs diferentes em projetos distintos. Essa observação histórica não prova que cada projeto exija um código distinto. A decisão atual mantém um catálogo configurável por instância, sem cópias por projeto. Valores reais continuam fora dos exemplos públicos.
 
 ## Integração: cuidados ao portar
 
@@ -68,7 +72,7 @@ Foram feitas extração/leitura estática e consultas autenticadas somente de le
 
 A documentação oficial descreve o produto Redmine. Compatibilidade com a versão e as customizações da instância privada ainda precisa ser verificada.
 
-## Catálogo entregue na aplicação
+## Histórico do catálogo P2.1 — substituído na v0.4.0
 
 Na P2.1, a conversão fixa do VBA foi conferida novamente: `ObtenhaEnumeradorDoTextoAtividade` usa `Select Case` e não lê a tabela por `Cells`/`Range`. O novo catálogo mantém nome e ID configuráveis por projeto, com validação de duplicidade e persistência local. Corrige a limitação já identificada sem copiar códigos privados como defaults. Os nomes existentes nos rascunhos continuam preservados; a resolução usa o projeto da tarefa consultada e não autoriza envio por si só.
 

@@ -1,101 +1,33 @@
 # Plano de desenvolvimento
 
+Atualizado em 24/10/2026. O checklist está no [roadmap](../ROADMAP.md), o histórico de versões no [changelog](../CHANGELOG.md) e as evidências/limites nas [decisões e aprendizados](project-decisions.md).
+
 ## Objetivo e fluxo real
 
-Construir o **Worklog for Redmine**, uma aplicação pequena, pessoal e inicialmente local, portando o fluxo útil do Excel/VBA para a web. O resultado deve ser utilizável e demonstrável em portfólio, com documentação e estrutura proporcionais.
+Construir uma aplicação pessoal pequena, inicialmente local e demonstrável em portfólio, preservando o fluxo útil do Excel/VBA.
 
-Cristian costuma reconstruir vários dias em uma mesma sessão e enviar o período depois, frequentemente às quartas. O intervalo é livre, não uma semana fixa. A mesma tarefa pode aparecer em dias seguidos. Preservar navegação por scroll, cópia rápida do código, totais por dia e separação entre **Salvar rascunhos** e **Enviar ao Redmine**. Não acrescentar total semanal ou cópia de linhas para outros dias sem nova necessidade.
+Cristian costuma recompor vários dias em uma sessão e enviá-los depois, frequentemente às quartas. O período é livre, com dias por scroll, cópia rápida do código, total por dia e opção de recolher tarefas. Salvar rascunhos e enviar horas são intenções distintas. Não impor uma semana de segunda a sexta.
 
 ## Decisões vigentes
 
-- Nome e repositório: **Worklog for Redmine** / `worklog-for-redmine`.
-- Node.js, React, Vite, TypeScript, Express e SQLite aprovados. Manter um repositório e uma estrutura simples. shadcn/ui permanece adiado.
-- Vitest para regras e persistência; interface conferida manualmente. BDD, Cucumber e formalização obrigatória de cenários dispensados. Playwright pode ser adotado depois se trouxer benefício.
-- Salvar é explícito. O navegador lembra apenas preferências; os rascunhos locais ficam no SQLite. O banco é aberto junto com o Node e persiste entre execuções.
-- Commits coesos e pushes ordinários autorizados. Permanecer na `master`. Antes de qualquer commit/merge, conferir regras de changelog/versionamento. O histórico está em `CHANGELOG.md`: v0.0.0 identifica a base P0–P4.2 e v0.1.0 entrega o P5 e v0.2.0 entrega seleção de atividades/duração abreviada. Manifests e rodapé seguem a versão atual; não há publicação pública.
-- Criar o GitHub segue autorizado, mas confirmar conta e visibilidade e resolver licença/proveniência antes da primeira publicação. Não publicar a planilha, VBA, bancos locais, credenciais, hostnames ou dados reais.
-- **Demo pública deve ficar entre as últimas etapas**, conforme decisão de Cristian em 22/10/2026. Preparar identificação/atalho agora não significa implementar ou publicar a demo.
+- Node.js, React, Vite, TypeScript, Express e SQLite. Um repositório, estrutura simples e dependências apenas para uma necessidade real.
+- Vitest para regras, persistência e fronteiras relevantes; interface conferida manualmente. BDD/Cucumber dispensados; automação adicional de interface só quando trouxer benefício.
+- Banco aberto pelo Node e preservado entre execuções. Salvamento local explícito; envio exige revisão/confirmar. Cache de preenchimento não substitui a validação atual antes do envio.
+- **Catálogo único por instância configurada do Redmine.** O cadastro de uso tem 15 atividades sem cópias por projeto, disponível em dias/modelo antes de informar o card. Instalações novas começam com catálogo vazio; 15 não é um limite fixo da aplicação.
+- A consulta do card continua fornecendo descrição/status/projeto. A validação integral do lote permanece; se a API fornecer atividades disponíveis por projeto, elas também são conferidas. Uma lista remota ausente não prova permissão nem proibição.
+- Recibos guardam códigos/datas originais e protegem contra duplicação. Resultado incerto exige conferência por leitura; nenhuma repetição automática após falha ou exclusão remota.
+- Modelo é salvo separadamente e só é copiado uma vez para um dia não iniciado. Alterar modelo ou catálogo não reescreve dias/recibos anteriores. Movimentação de status foi cancelada.
+- Código já público em `cristianworth/worklog-for-redmine`, licença MIT. Permanecer na `master`, manter commits coesos e seguir as regras de versão do changelog. Planilha, VBA, configuração, bancos, backups e resultados reais ficam fora do Git.
 
-## Roadmap vigente em 23/10/2026
+## Marco atual — v0.4.0 / P6.4 concluído
 
-O checklist e os critérios de conclusão estão em [ROADMAP.md](../ROADMAP.md); o histórico por versão está em [CHANGELOG.md](../CHANGELOG.md).
+A duplicação de atividades por projeto foi removida. Os 60 vínculos foram consolidados em 15 atividades com backup, revisão incrementada e recusa de conflitos; quatro códigos foram corrigidos com autorização após comparação com a API. Todos os demais dados do banco de uso foram preservados.
 
-- **v0.0.0 — entregue:** base P0–P4.2, com rascunhos, período, catálogo manual por projeto, consulta e envio protegido por recibos/validações.
-- **v0.1.0 — entregue:** modelo do dia P5, configurável e aplicado uma vez em dias novos.
-- **v0.2.0 — entregue:** P6.1 seleção fechada de atividades por projeto; P6.2 duração abreviada (`30`/`030` → `00:30`, `130` → `01:30`); P6.3 revisão integrada do preenchimento e fechamento da versão.
-- **v0.3.0 — entregue:** cabeçalho com seta para recolher/expandir as tarefas do dia; preserva edições, seleção e totais. Adicionar linha expande e foca o novo campo; recarregar abre os dias. A lista fornecida de atividades foi cadastrada somente no banco privado de uso, com backup e sem alterar histórico. Código publicado em `cristianworth/worklog-for-redmine`, público sob MIT; demo ainda pendente.
-- **P7 — depois:** preparar demo com dados fictícios, armazenamento do visitante e envio simulado, sem acesso a serviços/dados reais.
-- **P8 — código antecipado em 23/10/2026:** pedido explícito de repositório público. Conta `cristianworth` conferida e licença MIT escolhida; revisar arquivos/histórico antes do push. A demo só será hospedada depois do P7, com conferência por um visitante novo.
-- **P5.1 — cancelado:** Cristian retirou a movimentação de status do escopo. Consultar status continua informativo; envio mantém o card inalterado.
+247 testes/17 arquivos, compilação e interface fictícia foram aprovados. Dois lançamentos autorizados usaram o mesmo código em dois projetos, com readback e status mantidos. Cristian confirmou visualmente que ambos ficaram com o tipo de atividade esperado. O teste não comparou código antigo/atual nem validou todas as atividades em todos os projetos. Os alvos estão apenas no registro privado; a autorização foi consumida e não se repete.
 
-A P2.1 implementou o catálogo e a resolução nome + projeto → código, mas deixou texto livre com sugestões na interface. A seleção fechada foi entregue em P6.1 (v0.2.0); o backend já bloqueia envio sem mapeamento. A duração abreviada foi entregue em P6.2, sem segundos e sem alterar minutos já persistidos; `HH:MM` continua aceito.
+## Ordem do trabalho restante
 
-Importação ampla do histórico, empacotamento e descoberta automática de atividades permanecem fora do escopo entregue na v0.2.0. A incorporação P4.1 foi específica e não autoriza reenvios.
+1. **P7 — Demo:** isolar o acesso aos dados; preparar exemplos/persistência do visitante; completar o fluxo simulado; conferir o build estático. Reusar interface e regras, sem acesso ao banco ou serviços reais.
+2. **P8 — Site:** definir hospedagem/endereço, publicar a demo e conferir o uso por uma pessoa nova. O repositório público e a licença já estão resolvidos.
 
-## P6.4 — simplificação aprovada em 24/10/2026
-
-VBA conferido: resolve nome → código fixo e envia card + código, sem resolver atividade pelo projeto. A implementação agora usa um catálogo único e permite escolher atividade antes do card. Migração consolida equivalências com backup e revisão; conflitos são recusados sem perda de dados. Configurações não exige projeto. Validação integral no backend e snapshots de recibos continuam preservados.
-
-247 testes/17 arquivos e compilação aprovados, interface fictícia conferida. Dois testes reais especificamente autorizados confirmaram um código em dois projetos, com leitura posterior e status mantidos. Não generalizar esse resultado para todos os códigos/projetos, nem repetir os alvos. A execução está apenas em `private/authorized-global-activity-tests.json` e SQLite separado; o banco de uso não recebeu testes. Catálogo de uso consolidado em 15 atividades e quatro IDs corrigidos com autorização. Dias protegidos, modelo e recibos preservados. Demo permanece P7; entrega v0.4.0 aprovada por Cristian em 24/10/2026.
-
-## P1.2 — chunks A–D
-
-Base da implementação: `4856dae`, branch `master`. Autorização de Cristian em 22/10/2026. O planejamento anterior está no histórico Git.
-
-| Chunk                   | Comportamento entregue                                                                                                                                                                                                                                                                | Verificação                                                                                                                                                                                                      |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A — Até hoje            | A preferência antiga é normalizada ao abrir o modo hoje. Desmarcar mantém como fim fixo a data que estava exibida; períodos fixos históricos escolhidos explicitamente são preservados                                                                                                | Vitest com fim antigo de 06/01/2000, reabertura, mudança de dia e período fixo legítimo; conferência manual da alternância                                                                                       |
-| B — Consulta automática | Consultar após uma pausa de 300 ms em datas completas e válidas. Exibir período removido. Intervalo incompleto/invertido mantém a vista válida anterior; requisições anteriores são canceladas e respostas obsoletas ignoradas. Tentar novamente permanece junto a falhas de consulta | Vitest das transições/validação e preservação do editor; conferência manual de intervalo inválido, nova consulta sem botão, dia alterado fora da vista e recuperação após recarga                                |
-| C — Destaques e modos   | Envio e total diário com maior destaque; total parcial diferenciado. Modo local identifica o banco deste computador; área expansível explica a futura separação dos dados. Abrir demonstração está desabilitado e marcado Em breve                                                    | Conferência visual de envio indisponível, totais e duração inválida; identificação de modo local e texto da futura demo                                                                                          |
-| D — Revisão integrada   | Manter o mesmo banco e os dados existentes, revisar o conjunto e a documentação. Nenhum dado da planilha é importado como rascunho de teste                                                                                                                                           | 37 testes Vitest e build aprovados. Dois dias fictícios isolados foram editados, salvos, recuperados e limpos. Aba original com edição pendente preservada; revisão feita em outra aba. Sem gravações no Redmine |
-
-Os testes protegem as alterações dos chunks respectivos; não há obrigação de um commit por chunk. Os testes reais estão em `src/client/period.test.ts`, `src/client/editor.test.ts`, `src/shared/worklogs.test.ts` e nos testes de persistência/API em `src/server/`. A conferência de colar o código no navegador habitual continua recomendada: a ferramenta de navegação usa um clipboard virtual separado.
-
-## Planilha histórica e limites da revisão
-
-**Decisão/informação de Cristian, 22/10/2026:** a planilha contém dados reais e os apontamentos existentes já foram apropriados no Redmine. Usá-la como referência histórica privada de preenchimento e comportamento; não como lista pendente, semente do banco, fixture pública ou alvo de reenvio.
-
-Leitura estática atual, sem executar macros nem salvar o workbook, encontrou coerência entre campos preenchidos e a marca local de apropriação. Não foram exportados códigos de tarefa, datas ou descrições reais. Essa observação e a informação de Cristian não equivalem a uma consulta de confirmação no servidor nesta entrega.
-
-Preservar a validação coletiva observada no VBA: tarefa, data, observação e atividade são exigidas para envio. Rascunhos podem ser incompletos. Na P3, os campos de ambos os caminhos foram conferidos. A aplicação mantém zero e durações inteiras nos rascunhos e delega limites de envio dependentes da configuração à API; o transporte individual foi validado no teste autorizado. Referências: `docs/legacy-workflow.md` e as funções reais do workbook. Não preservar um defeito conhecido apenas por paridade nem mudar regras de negócio silenciosamente.
-
-## Separação local / demo
-
-| Aspecto       | Modo local entregue                                       | Demo pública planejada para P7/P8                                                        |
-| ------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| Dados         | Banco SQLite deste computador, ignorado pelo Git          | Somente exemplos fictícios incluídos deliberadamente na demo                             |
-| Persistência  | API Node local e transação SQLite; gravação explícita     | Armazenamento do navegador do visitante, com chave própria e sem acesso ao backend local |
-| Envio         | Revisão/confirmação explícita; integração pelo backend     | Simulado e identificado; nunca chama o Redmine real                                      |
-| Identificação | Banco local / Modo local, com explicação do armazenamento | Faixa permanente Modo demonstração, com aviso de dados fictícios                         |
-| Atalho        | Abrir demonstração desabilitado e marcado Em breve        | Link real após publicação; preservar edições pendentes antes de sair da aplicação local  |
-| Restauração   | Não há limpeza automática do banco                        | Restaurar demonstração repõe apenas exemplos do próprio navegador                        |
-
-Reutilizar interface e regras em ambos os modos; separar o destino de consulta/salvamento na fronteira de persistência quando P7 for implementado. Não duplicar a aplicação inteira nem publicar uma cópia do banco real. A demo precisa ser verificável sem credenciais e não deve conter nem solicitar endereços privados.
-
-Hospedagem estática, como GitHub Pages, é uma candidata para a demo, não uma decisão de publicação já executada. Escolher a hospedagem na etapa de entrega e conferir configuração de build/caminhos. Hospedar a aplicação completa com banco compartilhado e usuários é outro escopo, não um requisito para este mini projeto.
-
-## Questões que permanecem abertas
-
-1. Autenticação por chave e consulta real de tarefa foram validadas. O envio individual também foi confirmado na P3; expiração e permissões futuras continuam específicas do ambiente; o login do navegador não autentica automaticamente o backend.
-2. Certificado vencido: Cristian autorizou exceção local para a origem HTTPS conhecida; manter padrão estrito, aviso visível e nenhuma alteração global. A API respondeu 401 sem credenciais e autenticou com a chave local. O processo precisa ser reiniciado após mudar o `.env`.
-3. Catálogo único aprovado em 24/10/2026, substituindo os vínculos locais por projeto. Nomes/códigos únicos para a instância; disponibilidade no projeto continua sendo uma validação remota. Descoberta automática e novos tipos de campo ficam pendentes.
-4. Contrato de sucesso de cada transporte: HTTP 200 não é confirmação universal de criação. Preservar resultados confirmados/incertos e evitar reenvio indevido.
-5. Código público autorizado em `cristianworth/worklog-for-redmine`, licença MIT; revisão de privacidade dos arquivos/histórico aprovada antes do primeiro push. Destino da demo ainda será definido no P8.
-
-Manter documentação curta e atualizada por entrega. Fontes técnicas prioritárias: código atual, testes reproduzíveis, VBA consultado estaticamente e decisões atuais de Cristian. Exemplos antigos em `docs/behavior-specification.md` são referências históricas, não uma obrigação de BDD.
-
-## Autorização específica para a etapa de envio
-
-Cristian autorizou em 22/10/2026 um único teste real futuro de apropriação individual, mantendo o status do card. Os dados e o estado estão somente em `private/authorized-time-entry-test.json`, ignorado pelo Git. Executado na P3 e confirmado com leitura posterior e status mantido. Nenhuma linha de teste foi adicionada ao banco de uso; não tratar a planilha histórica como fila. Antes de usar, validar contrato em simulação, conferir existência de registro equivalente e não repetir uma criação confirmada ou incerta. A autorização foi consumida. Não repetir esse lançamento nem ampliar o alvo para outros testes reais.
-
-Na P4, Cristian autorizou separadamente dois testes reais em ordem definida; os alvos e o andamento ficam somente em `private/authorized-batch-tests.json`, com SQLite de teste separado. A autorização individual anterior permanece consumida. A execução coletiva para na primeira falha e não retoma automaticamente após reiniciar. Ver [batch-submission.md](batch-submission.md).
-
-P4 conferida com 158 testes em 11 arquivos, build e interface aprovados. Os dois lotes reais autorizados foram concluídos; nove registros conferidos e status mantidos. A autorização foi consumida e não permite repetição.
-
-Em 22/10/2026, Cristian priorizou P4.1 antes do modelo do dia. A trava contra reenvio já existe; falta tornar a apropriação/data evidente e trazer o histórico confirmado para o banco de uso preservando rascunhos locais. Implementado em 23/10/2026: nove registros incorporados com recibos/IDs/datas, dois rascunhos preservados e backup criado. Verificação: 175 testes e build aprovados; consultas remotas sem gravações. Nenhum novo lançamento remoto faz parte dessa incorporação.
-
-P4.2 priorizada e entregue antes de P5 em 23/10/2026: descrição ao sair do código, cache temporário de leitura e validação integral no backend antes do primeiro envio do lote. Erro em uma tarefa bloqueia todas as datas selecionadas e identifica a linha; falhas surgidas depois das primeiras criações ainda preservam resultados parciais. 190 testes/13 arquivos e build aprovados; interface simulada, sem editar os dias 19–21/10 nem criar horas reais. Ver [batch-submission.md](batch-submission.md).
-
-P5 entregue em 23/10/2026: modelo local configurável, cópia independente por ação explícita em dias novos, salvamento separado e proteção de dias existentes. Adicionar linha continua avulso; abrir períodos não cria rascunhos. 203 testes/14 arquivos, build e interface fictícia aprovados. [Uso](day-template.md). A proposta posterior de P5.1 foi cancelada por Cristian em 23/10/2026. As próximas prioridades são seleção de atividade e duração abreviada, descritas no roadmap.
-
-v0.2.0 concluída em 23/10/2026 com P6.1–P6.3, 242 testes/17 arquivos e build aprovado. Conferência integrada exclusivamente fictícia, sem alterar dias protegidos ou criar horas reais. Demo e publicação são as próximas etapas.
+Critérios e chunks detalhados estão no roadmap. Não ampliar o catálogo por projeto nem transformar a demo em um backend público compartilhado. Nenhuma implementação da demo é iniciada por esta revisão documental.
