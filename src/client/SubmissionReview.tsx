@@ -6,17 +6,7 @@ import { formatDuration } from "../shared/worklogs";
 import { type SubmissionRecord } from "../shared/submissions";
 import { shortDate } from "./period";
 import { useWorklogData } from "./WorklogDataProvider";
-export const submissionLabel = {
-  prepared: "Revisão pronta",
-  sending: "Envio iniciado",
-  confirmed: "Apropriado",
-  rejected: "Recusado",
-  uncertain: "Resultado incerto",
-  existing: "Já existente no Redmine",
-};
-export const demoSubmissionLabel = { ...submissionLabel,
-  sending: "Simulação iniciada", confirmed: "Simulado", existing: "Simulação já existente",
-};
+import { demoSubmissionLabel, submissionLabel } from "./submission-labels";
 export function SubmissionReview({
   date,
   entryId,

@@ -9,8 +9,23 @@ Histórico das versões. Criado em 23/10/2026 com a base anterior ao modelo regi
 - Registrar somente alterações entregues nas versões datadas. Ideias e tarefas futuras ficam em [ROADMAP.md](ROADMAP.md), sem apresentar funcionalidades planejadas como existentes.
 - `package.json` e as duas versões raiz de `package-lock.json` devem coincidir com a versão atual. A interface lê a versão do manifest durante a compilação; recompilar depois de alterá-la.
 - Tags locais `vX.Y.Z` identificam a revisão de cada versão. Não mover tags já criadas nem reescrever histórico. A tag retrospectiva v0.0.0 aponta para a última revisão anterior ao P5; os manifests antigos continuam como estavam.
-- Antes de cada commit/merge, ler este arquivo e seguir a regra de aprovação de Cristian. A criação deste histórico, da v0.0.0 e da v0.1.0 está explicitamente autorizada no pedido de 23/10/2026; alterações futuras de versão devem seguir a autorização da entrega.
+- Antes de cada commit/merge, ler este arquivo e avaliar uma versão proporcional à entrega. Em 25/10/2026, Cristian delegou ao agente a decisão de versão neste projeto e pediu push automático dos commits coesos, sem nova confirmação rotineira. Não incrementar a versão por commit da mesma entrega. Publicação e dados reais continuam sujeitos ao escopo autorizado.
 - Nunca incluir credenciais, planilhas privadas, bancos, backups ou dados reais nos registros, tags e arquivos distribuídos.
+
+## [0.6.0] — 2026-10-25
+
+### Preparação de publicação e repositório — P8
+
+- Build/preview próprios para `/worklog-for-redmine/`, com auditoria dos caminhos e existência dos recursos. O workflow verifica suíte, build local, demo na raiz e Pages; somente o artefato estático aprovado pode ser publicado em `master` do repositório original. PRs/forks não publicam nesse destino; permissões de Pages/OIDC restritas ao job de deploy.
+- Atalho **Abrir demonstração** habilitado no modo local, em outra aba, e link para código/documentação no rodapé. Descrição da página adicionada para apresentação do projeto.
+- Rótulos de envio extraídos do componente para um módulo tipado de apresentação; estados fictícios com texto próprio. Quantidade pendente calculada uma vez na revisão. Estilos temporários sem uso removidos. Contratos HTTP, banco e regras de criação preservados.
+- README reorganizado para entrada de visitantes e contribuidores; guias de uso local, arquitetura, publicação/rollback e mapa da documentação. Guia de contribuição ampliado e política de segurança adicionada. Hipóteses antigas de catálogo por projeto e mudança de status identificadas como substituídas/canceladas; instruções do agente consolidadas no comportamento atual.
+- Cristian delegou ao agente a escolha de versão neste projeto e pediu push automático dos commits coesos. Manifests alinhados em 0.6.0.
+
+### Verificação e pendência externa
+
+- 346 testes/26 arquivos aprovados, builds local/demo/Pages e auditorias estáticas. Caminho de produção conferido manualmente: salvar/recarregar, revisar/simular dia, recuperar recibos, restaurar e navegar pela marca. Sem acesso ao banco de uso ou novo envio real.
+- Ativação do Pages em sessão autenticada e conferência da URL pública ainda pendentes. A revisão automática bloqueou reutilizar credencial do Git na API; o navegador estava sem login. O workflow pronto e o destino documentado não equivalem a deploy concluído. [Estado atual](ROADMAP.md).
 
 ## [0.5.0] — 2026-10-25
 

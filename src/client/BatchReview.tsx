@@ -8,7 +8,7 @@ import {
 } from "../shared/batches";
 import { formatDuration } from "../shared/worklogs";
 import { shortDate } from "./period";
-import { demoSubmissionLabel, submissionLabel } from "./SubmissionReview";
+import { demoSubmissionLabel, submissionLabel } from "./submission-labels";
 import { useWorklogData } from "./WorklogDataProvider";
 
 export function BatchReview({
@@ -29,6 +29,7 @@ export function BatchReview({
   const [busy, setBusy] = useState(true);
   const [confirmBlocked, setConfirmBlocked] = useState(false);
   const [error, setError] = useState("");
+  const pendingCount = batch?.items.filter((item) => item.record?.state === "prepared").length ?? 0;
   const accept = useCallback(
     (next: SubmissionBatch) => {
       setBatch(next);
@@ -284,8 +285,7 @@ export function BatchReview({
         {batch && canConfirmBatch(batch) && !confirmBlocked && (
           <button className="button primary" disabled={busy} onClick={confirm}>
             <Upload size={16} /> {data.mode === "demo" ? "Confirmar simulação de" : "Confirmar envio de"}{" "}
-            {batch.items.filter((i) => i.record?.state === "prepared").length}{" "}
-            {batch.items.filter((i) => i.record?.state === "prepared").length === 1 ? "linha" : "linhas"}
+            {pendingCount} {pendingCount === 1 ? "linha" : "linhas"}
           </button>
         )}
       </div>

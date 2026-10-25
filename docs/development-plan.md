@@ -19,7 +19,11 @@ Cristian costuma recompor vários dias em uma sessão e enviá-los depois, frequ
 - Modelo é salvo separadamente e só é copiado uma vez para um dia não iniciado. Alterar modelo ou catálogo não reescreve dias/recibos anteriores. Movimentação de status foi cancelada.
 - Código já público em `cristianworth/worklog-for-redmine`, licença MIT. Permanecer na `master`, manter commits coesos e seguir as regras de versão do changelog. Planilha, VBA, configuração, bancos, backups e resultados reais ficam fora do Git.
 
-## Marco atual — v0.5.0 / P7 implementado e verificado
+## Marco atual — v0.6.0 / P8 preparada
+
+Build do subdiretório e workflow de deploy da demo implementados; atalho, documentação pública e refatoração localizada de apresentação conferidos. 346 testes/26 arquivos, builds local/demo/Pages e auditorias passaram. O fluxo manual no caminho `/worklog-for-redmine/` preservou salvamento, recibos, restauração e navegação. A ativação do Pages e a conferência pública ainda dependem da configuração autenticada no GitHub. [Operação](deployment.md) e [arquitetura](architecture.md).
+
+### Base da demo — v0.5.0 / P7
 
 Demo isolada completa: exemplos persistidos, envio e recibos fictícios individuais/lotes, recuperação sem repetição, percurso inicial, teclado/tela menor e CI de testes/builds/auditoria. 342 testes/25 arquivos, builds local/demo e instalação limpa sem configuração privada aprovados. Versão, commit e push autorizados por Cristian; hospedagem permanece P8. [Contratos e limites](data-access.md).
 
@@ -31,6 +35,6 @@ A duplicação de atividades por projeto foi removida. Os 60 vínculos foram con
 
 ## Ordem do trabalho restante
 
-1. **P8 — Site:** configurar o subdiretório do build demo para GitHub Pages, publicar e conferir o uso por uma pessoa nova. O repositório público e a licença já estão resolvidos. P7-A–E concluídos; a publicação não faz parte dessa implementação.
+1. **P8 — Site:** ativar GitHub Actions como fonte no Pages, conferir deploy e URL pública. Build do subdiretório, pipeline e documentação estão prontos. Depois, obter observações de uma pessoa nova. P7-A–E concluídos.
 
-Critérios e chunks detalhados estão no roadmap e a fronteira implementada em [acesso aos dados](data-access.md). Não ampliar o catálogo por projeto nem transformar a demo em um backend público compartilhado. Cristian orientou foco em recrutadores/portfólio e informou que `github.io` é suficiente; GitHub Pages é a recomendação para P8. Nenhuma hospedagem foi configurada ou publicada.
+Critérios detalhados estão no roadmap e a fronteira implementada em [acesso aos dados](data-access.md). Não ampliar o catálogo por projeto nem transformar a demo em um backend público compartilhado. Cristian orientou foco em recrutadores/portfólio e informou que `github.io` é suficiente; GitHub Pages é o destino da P8. Uma execução de build não comprova que o site já está disponível.

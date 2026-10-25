@@ -1,12 +1,52 @@
 # Worklog for Redmine
 
-A small local web application for organizing time-entry drafts and explicitly submitting saved lines to Redmine. Choose any inclusive date range, scroll through stacked days, create/edit/remove rows, and save drafts locally. Each day has its own duration total.
+[![Verify and deploy](https://github.com/cristianworth/worklog-for-redmine/actions/workflows/verify.yml/badge.svg)](https://github.com/cristianworth/worklog-for-redmine/actions/workflows/verify.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-Built to replace a spreadsheet workflow where several days are reconstructed together and submitted after review. The same interface also runs as a self-contained portfolio demo: fictional examples, browser-only persistence and explicitly simulated receipts, without credentials or a backend. See [Try the isolated demo](#try-the-isolated-demo). Public hosting is the next stage.
+Organize several days of time-entry drafts, check daily totals, and explicitly review before submitting to Redmine. Built from a personal spreadsheet workflow where hours are reconstructed together and submitted later.
+
+**[Demo destination](https://cristianworth.github.io/worklog-for-redmine/)** · [Local usage](docs/local-usage.md) · [Architecture](docs/architecture.md) · [Contributing](CONTRIBUTING.md)
+
+The Pages build and deployment workflow are ready. Initial Pages activation and public availability are pending; see [deployment status](ROADMAP.md#p8--github-pages-e-conferência-pública). You can run the isolated preview below without a backend.
+
+The interface is in Brazilian Portuguese. This overview is in English; the detailed product guides are in Portuguese. The demo uses fictional data and simulated submissions. No account, Redmine key or installation is required.
+
+![Reviewing a fictional day before confirming the simulation](docs/images/demo.png)
+
+## Try it in a few minutes
+
+1. Edit one of the three example days. Fictional task IDs: **9001**, **9004**, **9007**.
+2. Use **Salvar rascunhos** to persist your changes in this browser.
+3. Choose **Simular dia**, or select rows across several dates and use **Simular selecionados**.
+4. Review and confirm. Results are labeled **Simulado**; **Ver resultado** lets you check a saved receipt without creating another.
+5. Reload to recover saved work. **Restaurar exemplos** asks before discarding the demo's saved data and open edits.
+
+## What it does
+
+- A free date range with stacked, collapsible days and a duration total per day.
+- Compact duration input: `30` → `00:30`, `130` → `01:30`; integer minutes internally.
+- One activity catalog, available before looking up a task.
+- A reusable day template, copied explicitly into untouched dates.
+- Saved-row selection, review, confirmation and sequential batches with partial results.
+- Protected receipts, conservative duplicate checks and read-only recovery after uncertain results.
+
+Saving and submitting are separate actions. Issue statuses stay unchanged. This project is independent of Redmine.
+
+## Two modes, one interface
+
+| | Public demo | Local application |
+| --- | --- | --- |
+| Runs on | GitHub Pages, static files | Node.js on your computer |
+| Data | Fictional examples; this browser's storage | Your drafts and receipts in SQLite |
+| Submission | Simulated; no operational network access | Redmine API after review and confirmation |
+| Credentials | None | Optional private `.env`, read only by Node |
+| Recovery | Reload saved data or restore examples | Preserve receipts and back up SQLite |
+
+Clearing site data loses demo history. Browsers without Web Locks show a one-tab-at-a-time notice. Reloading never resumes an interrupted batch automatically. The demo illustrates the workflow; it does not validate real Redmine permissions or availability.
 
 ## Run locally
 
-Requires Node.js **24.20 or newer within the 24.x line**, and npm.
+Requires **Node.js 24.20 or newer within 24.x**, and npm.
 
 ```sh
 git clone https://github.com/cristianworth/worklog-for-redmine.git
@@ -15,100 +55,11 @@ npm ci
 npm run dev
 ```
 
-Open http://127.0.0.1:3000. One process serves React and the local API. For the built interface:
+Open **http://127.0.0.1:3000**. A fresh installation starts with an empty local catalog and no imported examples. Draft editing works without Redmine configuration. Follow the [local usage guide](docs/local-usage.md) to configure the API, register activities, back up data and submit hours deliberately.
 
-```sh
-npm run build
-npm start
-```
+To run the built local interface, stop the development server, then run `npm run build` and `npm start`. Both use port 3000; `PORT` can override it. Do not expose this personal local server to the public Internet.
 
-Stop the server before switching between these modes; both use port 3000.
-
-## Use
-
-1. Choose **De** and **Até**, or select **Até hoje** to follow the current local date. Valid dates update the view automatically after a short pause. Switching off **Até hoje** keeps the displayed end date. Incomplete or reversed dates preserve the last valid view; failed requests offer **Tentar novamente**.
-2. Scroll through the days and add rows. Choose an activity by name/code, even before entering an issue. Enter the issue and leave its field to load the description/project, then enter the duration (`30`/`030` for 30 minutes, `130` for 1h30, or `01:30`) and observation.
-3. Click the copy icon next to an issue to copy only its code. Paste it into another row normally. Browsers may restrict clipboard access; a failed copy is reported.
-4. Click **Salvar rascunhos**. It saves every changed day, including dates no longer visible after changing the period. Saves are atomic: a conflict or failure prevents a partial database update.
-5. Reopen to recover saved rows. The browser remembers the period preference; **Até hoje** recalculates the end date, keeping the chosen start. A refresh of the period preserves pending edits, including invalid duration input. Closing/reloading the page warns if unsaved edits remain.
-
-Use the arrow at the right of each day header to collapse or expand its rows. A collapsed day keeps its date, status, total and actions visible. Edits and selections are preserved; **Adicionar linha** expands the day and focuses the new issue field. Collapsed dates remain collapsed when changing the period in the current page; reloading opens all days. This display preference is not saved to SQLite.
-
-The default view covers the last seven calendar dates, including today. Weekends remain available. Range preferences are stored only in that browser; drafts stay in SQLite. The draft-day format is preserved; the activity catalog adds a separate table in the same database. **Modelo do dia** configures recurring rows for untouched new days. **Enviar dia** reviews the saved pending rows of one day. Check rows or day headers and use **Enviar selecionados** to review several dates together; neither action sends immediately. **Configurações** opens connection instructions and a read-only API access check.
-
-Incomplete rows can be saved as drafts. A blank duration contributes nothing to the total; malformed durations must be corrected or cleared before saving. Zero duration is allowed in a draft. Preparing submission validates required fields, resolves the activity from the configured catalog and checks for equivalent existing entries; server-specific limits are enforced by Redmine. Activities are selected from the shared local catalog independently of issue lookup; historical unmapped names remain visible until corrected. Incomplete or unmapped drafts can still be saved.
-
-Data stays in `data/worklog.sqlite`, outside Git and independent of browser storage. The Node process opens this file when the application starts, creating it only if missing. Restarting the application reuses saved data; there is no separate database service or automatic sample-data import. Loading a period reads the database, while **Salvar rascunhos** commits the changes to disk. Back up that file with the server stopped. Saved data remains after changing browsers on the same computer. Simultaneous edits in another tab are rejected instead of silently overwriting newer data; copy pending edits before reloading that tab.
-
-## Redmine access (read-only)
-
-Copy `.env.example` to `.env` in the repository root. Set `REDMINE_URL` to the HTTPS base URL, including an installation subpath if needed. Set `REDMINE_API_KEY` locally when authentication is needed. Restart the server after changing configuration; environment variables take precedence over `.env`. The backend reads these values; no `VITE_` variables, browser credentials, passwords or session cookies are used. The key remains in the ignored `.env` file and server memory; it is not returned to the browser or stored in drafts.
-
-Open **Configurações → Testar acesso à API**. The backend performs only `GET /users/current.json`. Leaving a row’s issue-code field automatically looks up its subject, status and project. **Consultar / Atualizar tarefa** allows an explicit retry or refresh. Successful lookups are shared in backend memory for 10 minutes (up to 500 tasks per configured client), including simultaneous requests; failures are not cached. No lookup metadata is persisted in SQLite. Only `GET /issues/:id.json` is used. These results are temporary: they do not modify the draft, its observation or its saved revision. Changing a code cancels the previous lookup; copying a code still copies only the code.
-
-TLS verification is enabled by default. For a known private Redmine with an invalid certificate, an explicitly accepted local exception can be enabled with `REDMINE_ALLOW_INVALID_CERTIFICATE=true`. It accepts certificate errors only for that configured HTTPS origin, never changes global TLS settings, and never follows redirects. This includes chain, hostname and validity errors; encryption remains but certificate-based server authentication is lost. The interface shows when the exception is active. Certificate failures are reported separately from missing/invalid authentication and permission errors. Redirects are not followed with API credentials. The connection test and issue lookup never create hours or change issue status. Creation requires the separate reviewed confirmation. Creation uses `POST time_entries.json` with the same private API key. No HTML/session transport is implemented.
-
-The private server returned an expired-certificate error in strict mode on 2026-10-22. After Cristian accepted a scoped exception, the exact configured login page returned HTTP 200 and the API returned HTTP 401 without credentials. The installation subpath must be preserved. Authenticated account and issue reads were subsequently verified using the locally configured key. A running process with an older empty key returned 401 until restarted; changing `.env` requires restarting the application. See [connection checks](docs/redmine-access.md). Never paste credentials into chat. Use an optional `PORT` environment variable to choose another local port (default 3000).
-
-## Activity catalog
-
-Open **Configurações → Atividades**. Register each name and Redmine activity ID once, then use **Salvar catálogo**. All cards use this catalog; no project ID is needed. Fresh installations start with an empty catalog, with no workbook import or automatic discovery. Names and codes must be unique. [Redmine’s enumeration API](https://www.redmine.org/projects/redmine/wiki/Rest_Enumerations) lists activity IDs; a matching name does not authorize sending by itself.
-
-Days and templates offer the same options before issue lookup, without selecting a default. Historical unconfigured names remain visible until corrected; incomplete drafts can still be saved. Looking up a card retrieves its subject, status and project, independently of activity selection. Submission revalidates task/account and activity availability when the project API provides it. If that list is unavailable, the review identifies the limitation and Redmine validates creation. Receipt codes remain immutable after catalog edits.
-
-Upgrading an old project-based catalog consolidates identical name/code mappings once at startup, after a consistent backup in `backups/`. The catalog revision advances; existing drafts, templates, batches and receipts are untouched. If a legacy name has conflicting IDs, startup refuses the migration and leaves the original catalog intact: resolve those conflicts in the old version before upgrading. Never downgrade against a converted database; retain its backup. Old open pages must reload before saving catalog changes.
-
-Catalog settings live in `activity_catalog` in the same ignored SQLite database. Their save/revision is independent of day saves. Conflicting changes preserve the editor; copy pending changes, discard/reload the catalog, and reapply them deliberately. Closing Configurações keeps unsaved catalog edits in the current page; the header marks them **Não salvo**, and leaving the page warns. **Descartar alterações** resets catalog edits only. **Salvar rascunhos** does not save the catalog, and vice versa.
-
-## Submit saved rows or days
-
-1. Save the affected days. **Salvar rascunhos** only updates local drafts.
-2. Use **Enviar dia** to review all pending rows in one day, or select row/day checkboxes and choose **Enviar selecionados**. One selected row also works. Unsaved days and locked results cannot be selected. A batch accepts 1–100 rows and follows selection order.
-3. Review the exact dates, tasks, projects, observations, durations and activity codes. Resolve every preparation error before confirming. **Voltar sem enviar** creates no remote entries.
-4. Confirm the batch. Execution is sequential and stops at the first failure. Each result is persisted; later rows are identified as **Não enviado**. Existing equivalents are not created again. Issue statuses stay unchanged.
-5. Closing the dialog does not cancel an accepted batch. Use **Envios recentes neste período → Ver lote** after reopening the page. Refreshing results only reads local receipts; it never starts another worker. A server restart does not resume remaining rows.
-6. Use **Ver resultado → Conferir resultado** on an uncertain row to query Redmine without sending again. Confirmed/existing/started/uncertain rows remain protected. Other rows can be corrected, selected and reviewed in a new batch.
-
-Reviews expire after 15 minutes and are invalidated by saved day/catalog or remote account/project/activity changes. All selected local revisions are checked before the first creation. Preserve the SQLite file and receipts. [Batch details](docs/batch-submission.md) and [individual submission contract](docs/individual-submission.md) describe the limits and recovery behavior.
-
-## Appropriation status and real local data
-
-Confirmed rows show a green check, **Apropriado**, the remote ID and an original date. The day header distinguishes complete days from mixed or uncertain results. The daily total still includes pending drafts. Remote creation, first local confirmation and latest check are separate dates; unavailable creation dates are labeled as confirmation/check dates.
-
-**Ver resultado → Conferir no Redmine** performs reads only. Missing/hidden, divergent or unavailable remote records show a warning while preserving the original receipt and resend lock. The status does not silently follow external changes; request a check explicitly.
-
-The three specifically authorized P4 days have been incorporated into the normal local SQLite with nine confirmed receipts. Two preexisting drafts were preserved. A consistent backup preceded the atomic import, and every remote ID was checked without creating hours. Local history is now real usage data: keep the SQLite and receipts, and never commit the database or backups. The private import journal identifies the backup path. This controlled operation does not add a general upload/import interface or populate the manual activity catalog. [Status and import details](docs/appropriation-status-plan.md).
-
-Before any batch creation, the backend validates every selected pending row with current Redmine data, independently of the editor cache. An invalid/inaccessible task or other validation failure blocks all dates in that selection, with date, row and code in the error. Repeated tasks share reads only within that preflight. Each row retains its final individual guard. Redmine has no transaction across creations: failures after writes begin may still produce a preserved partial result.
-
-## Duration input
-
-`30` or `030` means `00:30`; `130` means `01:30`; `800` means `08:00`. Compact input uses its last two digits as minutes. `HH:MM` remains valid, and fields normalize on blur. Totals and saves use the same conversion even before blur; storage remains integer minutes. Invalid minutes (`90`, `160`, `1:60`), decimals, signs and seconds are rejected rather than silently repaired. Empty durations stay incomplete. The same rules apply in the day template.
-
-## Verify
-
-```sh
-npm test
-npm run build
-npm run build:demo
-npm run check:demo
-```
-
-Vitest checks duration arithmetic, period boundaries, dynamic end dates, preservation of pending edits, database reopening and atomic multi-day saves, including conflicts. Activity tests cover project isolation, duplicate mappings, catalog reopening, conflicts and opening an older draft database without rewriting its rows. Submission tests cover explicit confirmation, duplicate/concurrent sends, immutable receipts, rejection, uncertainty and read-only recovery across database reopening. Batch tests cover one day, multiple days, preparation errors, obsolete reviews, complete backend preflight before the first write (including a newly invalid task in the second day), partial failures, duplicate confirmation and interrupted execution. Lookup tests cover shared requests, expiry, refresh, bounded memory, failed requests and client isolation. Read-only Redmine tests cover private configuration, JSON contracts, error classification, credential handling and isolation from draft saves. Interface verification is manual. BDD, Cucumber and formal scenarios are not required.
-
-## Scope and stack
-
-React + Vite + TypeScript; Node + Express + SQLite through Node's built-in `node:sqlite` module. A single repository and process, bound to the local computer. Some Node 24 versions emit an experimental SQLite warning.
-
-The period-based editor uses Lucide icons, a highlighted daily total and separate save/review/confirm actions. **Modelo do dia** configures local recurring rows. On an untouched new date, **Criar dia com modelo** copies them once into an unsaved draft. Existing/edited dates, including saved empty days, are preserved; changing the model affects only future copies. **Adicionar linha** remains a blank row. The model starts empty, accepts incomplete defaults and saves separately from drafts; closing its panel preserves unsaved edits while the page remains open. [Usage and limits](docs/day-template.md). The shared activity catalog is available in Configurações. **Modo local** identifies this computer’s database and expands to explain storage. **Abrir demonstração** is a disabled future shortcut, not a published demo. See the plan for priorities.
-
-API access checks and automatic issue lookup are implemented with synthetic tests. Real account and issue reads have been verified with the local API key; one specifically authorized real time-entry test was created and verified, with issue status unchanged. Its private record is excluded from Git and must never be replayed. Two separately authorized batch tests were subsequently completed and verified, covering nine entries with unchanged issue statuses; those authorizations are also consumed. A single local activity catalog, individual submission and period batches are implemented; issue-status changes were explicitly removed from scope; submission always preserves the card status. Saving a draft does not send anything to Redmine. This project is independent of Redmine.
-
-## Try the isolated demo
-
-A separate demo build reuses the interface without the local API, SQLite or Redmine. A new visitor starts with three recent fictional days, one activity catalog and a day template. Tasks **9001**, **9004** and **9007** are synthetic; other task IDs fail locally. Explicitly saved changes survive page reloads in that browser. **Restaurar exemplos** asks for confirmation and restores only the demo data, including unsaved editors. If storage is blocked or full, the interface explains the limitation; invalid or unknown saved formats are preserved until an explicit reset.
-
-Select a saved row, use **Simular dia**, or select several dates and choose **Simular selecionados**. Review and explicitly confirm the simulation; badges and results are labeled **Simulado**. Reload and open **Ver resultado → Conferir resultado simulado** to verify a persisted receipt without creating another. An invalid task blocks the entire selection. **Restaurar exemplos** also clears simulated receipts and batches. No public link or deployment exists yet.
+For a backend-free demo preview:
 
 ```sh
 npm run build:demo
@@ -116,35 +67,37 @@ npm run check:demo
 npm run preview:demo
 ```
 
-Open `http://127.0.0.1:4173/`. This preview serves `dist-demo/` without starting Express or opening the usage database. Demo data uses its own versioned browser-storage record; the local period preference and unrelated browser data are preserved. The demo build skips `.env` files, excludes the HTTP/backend modules and blocks operational network connections. The normal `npm run build` still outputs the local application to `dist/`. [Boundary, persistence and verification](docs/data-access.md).
+Open **http://127.0.0.1:4173/**. To reproduce the deployed subdirectory, use `npm run build:pages`, `npm run check:demo -- /worklog-for-redmine/` and `npm run preview:pages`, then open **http://127.0.0.1:4174/worklog-for-redmine/**. Both demo builds use `dist-demo/`; the latest build replaces the previous one. The local build uses `dist/`.
 
-The normal local mode continues to use Node and SQLite. The public code repository and an eventual hosted demo are separate deliverables; publishing code alone does not host the Node application.
+## Engineering choices
 
-Browser storage is a deliberate trade-off: visitors need no account or shared backend, but clearing site data loses their demo. Web Locks coordinate saves and simulations across tabs when supported; otherwise use one tab, as the interface warns. Closing the review keeps accepted work running in that page; reloading can interrupt it and never resumes it automatically. Storage failures preserve prior results and protected rows. This simulation demonstrates the workflow, not live Redmine availability or permissions.
+React, TypeScript and Vite provide the editor; Express and Node's built-in SQLite module keep the local service small. A typed data-access contract selects HTTP or the browser simulation at startup. Shared validators preserve duration, catalog and review rules across both modes.
 
-The verification workflow runs tests, both builds and the static artifact audit on pushes and pull requests. Manual checks include keyboard operation, a 375px viewport, reload, invalid selections and restore. No credentials or private files are needed for a clean `npm ci` and verification run.
+Explicit saves and revision checks protect pending edits. Submission first persists a started receipt, then accepts only the service's verified creation contract. A batch validates the whole selection before its first write, runs sequentially and preserves partial successes. Uncertain creation is reconciled by reading, never by automatic retry.
 
-## Versions
+The demo build skips `.env`, excludes server/HTTP/private modules and includes a CSP blocking operational network connections. Deployment uploads only the audited static artifact. No shared backend, authentication system or telemetry was added for the portfolio. See [architecture and trade-offs](docs/architecture.md).
 
-Current version: **v0.5.0**, delivering the isolated portfolio demo (P7). The single activity catalog arrived in v0.4.0; collapsible days in v0.3.0; compact duration input in v0.2.0; the day template in v0.1.0. The earlier P0–P4.2 implementation is documented retrospectively as v0.0.0; historical manifests are preserved. The footer reads the current version from `package.json` during the build. See [CHANGELOG.md](CHANGELOG.md) for delivered changes and [ROADMAP.md](ROADMAP.md) for planned work. GitHub Pages publication remains P8. The source repository is [cristianworth/worklog-for-redmine](https://github.com/cristianworth/worklog-for-redmine).
+## Verify and contribute
 
-## Documentation and private reference
+```sh
+npm test
+npm run build
+npm run build:demo
+npm run check:demo
+npm run build:pages
+npm run check:demo -- /worklog-for-redmine/
+```
 
-- [Changelog / versions](CHANGELOG.md)
-- [Roadmap / checklist](ROADMAP.md)
-- [Project decisions and verified lessons](docs/project-decisions.md)
-- [Day template](docs/day-template.md)
-- [Plan and decisions](docs/development-plan.md)
-- [Connection checks](docs/redmine-access.md)
-- [Individual submission](docs/individual-submission.md)
-- [Batch submission](docs/batch-submission.md)
-- [Appropriation status and confirmed-history incorporation](docs/appropriation-status-plan.md)
-- [Legacy workflow](docs/legacy-workflow.md)
-- [Historical behavior examples](docs/behavior-specification.md)
-- [Contributing](CONTRIBUTING.md)
+CI repeats these checks; only verified `master` builds from this repository deploy. Pull requests run checks without publishing. Tests use temporary stores and fictional services. Never send real hours as a routine test. See [contributing](CONTRIBUTING.md), [security boundaries](SECURITY.md) and [deployment/recovery](docs/deployment.md).
 
-The original spreadsheet and extracted VBA are private local references and must stay outside Git. Cristian confirmed that the historical workbook entries have already been submitted to Redmine; inspect them only as historical examples, never seed them as pending drafts or replay them for testing. Use synthetic examples; never commit credentials, databases or real work details. Session handoffs also stay local. Public documentation contains sanitized workflow descriptions, not the workbook or extracted source.
+## Documentation and status
+
+- [Documentation map](docs/README.md): current guides and historical references.
+- [Changelog](CHANGELOG.md): delivered releases; the footer reads the version from `package.json`.
+- [Roadmap](ROADMAP.md): priorities, completed milestones and remaining visitor feedback.
+
+The legacy spreadsheet, VBA, keys, local databases, backups and session handoffs are excluded from this repository. Public examples are created from scratch. Repository history is preserved; older project-specific activity mappings are superseded by the single catalog introduced in v0.4.0.
 
 ## License
 
-[MIT](LICENSE), copyright 2026 Cristian Weissmantel. This license covers the web application in this repository; dependencies retain their own licenses. The private reference spreadsheet, VBA, databases and credentials are not distributed.
+[MIT](LICENSE), copyright 2026 Cristian Weissmantel. Dependencies retain their own licenses. The private spreadsheet, VBA and local data are not distributed.

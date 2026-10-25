@@ -180,19 +180,6 @@ h1 {
   color: #62705c;
   border-color: #dde3d9;
 }
-.future-control {
-  display: flex;
-  gap: 7px;
-  align-items: center;
-}
-.future-control > small {
-  font-size: 10px;
-  color: #87917f;
-  background: #ecf0e7;
-  border-radius: 4px;
-  padding: 2px 5px;
-  white-space: nowrap;
-}
 .period-panel {
   background: #fff;
   border: 1px solid #dfe5da;
@@ -669,9 +656,6 @@ select[aria-invalid="true"] {
   .header-actions {
     gap: 13px;
   }
-  .header-actions .future-control > small {
-    display: none;
-  }
   .period-hint {
     display: none;
   }
@@ -968,10 +952,15 @@ select[aria-invalid="true"] {
   color: #4f6844;
 }
 .demo-control {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
   flex-shrink: 0;
   align-self: flex-start;
 }
 .demo-control .button {
+  text-decoration: none;
   padding: 6px 10px;
   font-size: 11px;
 }

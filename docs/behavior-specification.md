@@ -6,6 +6,8 @@ Em 21/10/2026, Cristian dispensou BDD, Cucumber e a obrigação de formalizar fu
 
 O primeiro recorte usa Vitest para totalização (`src/shared/worklogs.test.ts`) e persistência (`src/server/storage.test.ts`). A interface será conferida manualmente. Playwright fica para depois, se trouxer benefício.
 
+**Referência histórica, não contrato atual.** Os blocos abaixo preservam hipóteses de planejamento de 21/10/2026. B04 (códigos por projeto) foi substituído pelo catálogo único na v0.4.0; B10 (movimentar status) foi cancelado. Validação, parada de lotes e reconciliação já foram implementadas depois dessa investigação. Use os [guias atuais](README.md), o código e a suíte como fonte do comportamento entregue.
+
 Todos os números, nomes de projetos e respostas usados aqui são fictícios. Não representam a configuração do servidor privado.
 
 ## Vocabulário
@@ -51,7 +53,7 @@ E nenhuma criação deve ser solicitada ao Redmine para esse apontamento
 
 Validar com Cristian quais campos são obrigatórios, incluindo comentário, e os limites de duração. Não transformar erro acidental do VBA em regra de negócio.
 
-## B04 — Resolver atividade no projeto correto
+## B04 — Resolver atividade no projeto correto — substituído
 
 Origem: diferença entre IDs por projeto observada no servidor durante a investigação.
 
@@ -123,7 +125,7 @@ E a aplicação não deve reenviá-lo automaticamente
 
 O procedimento de conferência/reconciliação será definido na integração; bloqueio de duplo clique sozinho não resolve esse caso.
 
-## B10 — Separar o apontamento da movimentação de status
+## B10 — Separar o apontamento da movimentação de status — cancelado
 
 Origem: ambos existem no legado, mas não devem ser tratados como uma única transação remota.
 

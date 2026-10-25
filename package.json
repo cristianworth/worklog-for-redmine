@@ -1,6 +1,6 @@
 {
   "name": "worklog-for-redmine",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -10,8 +10,10 @@
     "dev": "tsx watch src/server/index.ts --dev",
     "build": "tsc --noEmit && vite build",
     "build:demo": "tsc --noEmit && vite build --mode demo",
+    "build:pages": "tsc --noEmit && vite build --mode demo --base=/worklog-for-redmine/",
     "check:demo": "node scripts/check-demo-build.mjs",
     "preview:demo": "vite preview --mode demo --host 127.0.0.1 --port 4173",
+    "preview:pages": "vite preview --mode demo --base=/worklog-for-redmine/ --host 127.0.0.1 --port 4174",
     "start": "tsx src/server/index.ts",
     "test": "vitest run"
   },

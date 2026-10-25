@@ -1,6 +1,6 @@
 # Roadmap — Worklog for Redmine
 
-Atualizado em 25/10/2026. Versão da entrega: **v0.5.0 / P7**. Código público sob MIT; hospedagem da demo ainda pendente. Histórico no [changelog](CHANGELOG.md), invariantes nas [decisões](docs/project-decisions.md) e detalhes técnicos no [plano](docs/development-plan.md).
+Atualizado em 25/10/2026. Versão da entrega: **v0.6.0 / P8**. Código público sob MIT; build e workflow de publicação preparados, aguardando ativação/conferência do Pages. Histórico no [changelog](CHANGELOG.md), invariantes nas [decisões](docs/project-decisions.md) e detalhes técnicos no [plano](docs/development-plan.md).
 
 ## Objetivo e prioridades
 
@@ -19,6 +19,7 @@ Ordem de importância: **isolamento → dados recuperáveis → fluxo completo �
 | v0.4.0 / P6.4 | Catálogo único, atividade antes do card e migração com backup |
 | P7-A / sem nova versão | Acesso substituível completo e build estático isolado; commit `08b78a1` |
 | v0.5.0 / P7-A–E | Demo isolada completa, persistência, simulação/recibos, percurso inicial e verificações de entrega |
+| v0.6.0 / P8 | Build do subdiretório, CI com deploy condicionado, atalho e documentação de uso/arquitetura/operação |
 
 O cadastro privado tem 15 atividades únicas, sem cópias por projeto. Os dois testes reais anteriores mantiveram o mesmo código em dois projetos, com readback e confirmação visual de Cristian. Não validaram todas as atividades/projetos; suas autorizações estão consumidas.
 
@@ -74,13 +75,17 @@ Entregue e conferido: aviso permanente de simulação, percurso curto, rótulos 
 
 ## P8 — GitHub Pages e conferência pública
 
-Direção: recrutadores/portfólio e endereço `github.io`, conforme conversa de 25/10/2026. GitHub Pages é a recomendação; nenhuma hospedagem foi configurada ou publicada.
+Direção: recrutadores/portfólio e endereço `github.io`, conforme conversa de 25/10/2026. Destino: **https://cristianworth.github.io/worklog-for-redmine/**. [Guia de publicação e recuperação](docs/deployment.md).
 
 1. **Preparar destino:** confirmar Pages e endereço do projeto, configurar o subdiretório dos arquivos e o workflow de publicação do build demo. Conferir o artefato sob esse caminho antes de publicar.
 2. **Publicar:** habilitar/publicar no destino autorizado; incluir o endereço no README e no atalho local. Código público e licença MIT já estão resolvidos.
 3. **Conferir como visitante:** sessão nova, recarga, restauração, tela menor e caminho direto; conferir versão e disponibilidade real do link.
 
 **Aceite:** outra pessoa experimenta a demo sem instalar Node, informar credenciais ou alcançar o backend real.
+
+Implementado: `build:pages`/`preview:pages`, auditoria de recursos no subdiretório e workflow que verifica todos os builds antes de enviar somente `dist-demo/`. PRs/forks não publicam no destino original; permissões de publicação ficam no job de deploy. Atalho local e link para código/documentação funcionais. README reorganizado, guias de arquitetura/uso/operação e segurança, material histórico identificado e instruções antigas consolidadas. 346 testes/26 arquivos e os três builds/auditorias aprovados; fluxo sob o caminho de produção conferido manualmente.
+
+**Pendente para encerrar P8:** ativar **Settings → Pages → Source: GitHub Actions** em sessão autenticada, conferir o deploy e a URL pública. O navegador de verificação estava sem login; a revisão automática bloqueou a reutilização de credencial do Git na API. A preparação não equivale a site publicado. Avaliação independente por visitante continua sendo retorno de uso.
 
 ## Depois da primeira publicação
 

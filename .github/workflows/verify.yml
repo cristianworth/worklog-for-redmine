@@ -1,4 +1,4 @@
-name: Verify application and isolated demo
+name: Verify and deploy demo
 
 on:
   push:
@@ -26,3 +26,31 @@ jobs:
       - run: npm run build
       - run: npm run build:demo
       - run: npm run check:demo
+      - run: npm run build:pages
+      - run: npm run check:demo -- /worklog-for-redmine/
+      - name: Upload verified demo
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master' && github.repository == 'cristianworth/worklog-for-redmine'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist-demo
+
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master' && github.repository == 'cristianworth/worklog-for-redmine'
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Configure Pages
+        uses: actions/configure-pages@v6
+      - name: Deploy verified demo
+        id: deployment
+        uses: actions/deploy-pages@v5

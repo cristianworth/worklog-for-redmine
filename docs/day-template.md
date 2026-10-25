@@ -1,6 +1,8 @@
 # Modelo do dia — P5
 
-## Uso
+## Uso atual
+
+O catálogo é único desde v0.4.0. Seções datadas ao final registram a evolução; a seleção antiga por projeto não é a regra atual. Na demo, o modelo inicial é fictício; no modo local, começa vazio.
 
 1. Abra **Modelo do dia** e cadastre linhas recorrentes: tarefa, duração, atividade e observação. A atividade pode ser escolhida antes da tarefa, usando o mesmo catálogo dos dias; sair do código consulta a descrição e o projeto. Campos podem ficar vazios para completar no dia; duração aceita `30`/`030` → `00:30`, `130` → `01:30` ou `HH:MM`.
 2. **Salvar modelo** grava somente a configuração local. O modelo começa vazio e não importa valores da planilha. Até 100 linhas; salvar sem linhas desativa o preenchimento.

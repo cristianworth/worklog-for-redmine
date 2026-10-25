@@ -1,6 +1,6 @@
 # Decisões e aprendizados do projeto
 
-Atualizado em 24/10/2026. Referência para decisões futuras; o histórico de entregas fica no [changelog](../CHANGELOG.md) e o trabalho pendente no [roadmap](../ROADMAP.md).
+Atualizado em 25/10/2026. Referência para decisões futuras; o histórico de entregas fica no [changelog](../CHANGELOG.md) e o trabalho pendente no [roadmap](../ROADMAP.md).
 
 ## Atividades: decisão vigente
 
@@ -40,6 +40,10 @@ A demo deve usar somente exemplos e códigos fictícios, catálogo único, persi
 Em 25/10/2026, P7-A–E implementados na v0.5.0, com commit/push autorizados por Cristian. Snapshot schema 2 aceita dados de P7-B sem apagar edições; recibos/lotes/criações fictícios compartilham o mesmo registro. Web Locks coordenam mutações por origem quando disponíveis; sem a API, a interface orienta uma aba por vez. Recarregar não retoma lotes, conferência não recria resultados e restauração é serializada com o trabalho aceito. 342 testes/25 arquivos, builds/auditoria e instalação limpa sem configuração privada aprovados; teclado, tela menor, seleção inválida, recarga e restauração conferidos manualmente. CI de verificação adicionada; hospedagem e avaliação independente de visitante continuam na P8. Detalhes em [acesso aos dados](data-access.md).
 
 Planilha, VBA, configuração, bancos, backups, alvos e resultados detalhados dos testes ficam fora do Git. Os registros operacionais continuam nos arquivos privados já existentes. A confirmação visual do usuário não confirma que ele já excluiu os testes; não executar essa exclusão ou importar seus recibos para o banco de uso automaticamente.
+
+## Publicação e colaboração — 25/10/2026
+
+Cristian autorizou implementar P8 e revisar código/documentação para open source e portfólio. Delegou a decisão de versão ao agente neste projeto e pediu push automático dos commits coesos. Escolhida v0.6.0 para build de Pages, atalho público, pipeline condicionado e guias reorganizados. Os rótulos de envio foram separados do componente de revisão e estilos temporários removidos, sem alterar contratos de persistência/envio. Configuração autenticada do Pages e conferência da URL pública são distintas da preparação do código; o [roadmap](../ROADMAP.md) registra a pendência atual.
 
 ## Referências para conferir o comportamento
 

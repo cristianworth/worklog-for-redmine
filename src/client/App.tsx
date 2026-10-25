@@ -6,6 +6,7 @@ import {
 import { BatchReview } from "./BatchReview";
 import type { BatchSelection, SubmissionBatch } from "../shared/batches";
 import { SubmissionReview } from "./SubmissionReview";
+import { publicDemoUrl, repositoryUrl } from "./app-links";
 import {
   isSubmissionLocked,
   acceptReceipt,
@@ -592,23 +593,25 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
                 local. Eles continuam disponíveis após reiniciar a aplicação.
               </p>
               <p>
-                <strong>Futura demo pública:</strong> usará exemplos fictícios e
-                armazenamento no navegador de cada visitante, separado deste
-                banco. Não acessará seus apontamentos nem o Redmine real.
+                <strong>Demo pública:</strong> usa exemplos fictícios e
+                armazenamento no navegador de cada visitante. Você pode
+                experimentá-la sem compartilhar os apontamentos deste computador.
               </p>
               </>}
             </div>
           </details>
-          {data.mode !== "demo" && <span className="future-control demo-control">
-            <button
+          {data.mode !== "demo" && <span className="demo-control">
+            <a
               className="button quiet"
-              disabled
+              href={publicDemoUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               aria-describedby="demo-status"
             >
               <FlaskConical size={16} aria-hidden="true" />
               Abrir demonstração
-            </button>
-            <small id="demo-status">Em breve</small>
+            </a>
+            <small id="demo-status">Exemplos fictícios · abre em outra aba</small>
           </span>}
         </section>
 
@@ -922,6 +925,7 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
         )}
         <footer className="page-footer">
           <span>Worklog for Redmine · v{import.meta.env.VITE_APP_VERSION}</span>
+          <a href={repositoryUrl} target="_blank" rel="noopener noreferrer">Código e documentação</a>
           <span>
             <WifiOff size={13} aria-hidden="true" />
               {data.mode === "demo" ? "Demonstração · sem envios reais" : "Organização local · sem envio automático"}

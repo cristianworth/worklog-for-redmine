@@ -1,17 +1,30 @@
 # Contributing
 
-This is a small personal project. Read `AGENTS.md` and the development plan, consult the actual VBA before porting a rule, and discuss only consequential ambiguity with Cristian. Keep changes small and preserve the useful spreadsheet workflow.
+Thanks for helping improve Worklog for Redmine. Start with the [README](README.md), [architecture](docs/architecture.md) and [roadmap](ROADMAP.md). The product interface is in Brazilian Portuguese; new identifiers and technical comments use English. Follow existing conventions and keep changes focused.
 
-Use English identifiers and technical comments; the interface and collaboration are in Portuguese. Add dependencies and abstractions only for a current need. BDD, Cucumber and formal behavior scenarios are not required (Cristian's decision, 2026-10-21).
+## Set up and verify
 
-## Verification
+Use Node.js 24.20 or newer within 24.x and `npm ci`. No API key or private database is required to run the tests or demo. For UI work, prefer `npm run build:demo` and `npm run preview:demo` with the fictional examples.
 
-Run `npm ci`, `npm test`, `npm run build`, `npm run build:demo` and `npm run check:demo` for reproducible verification. The CI workflow runs the same checks without private configuration or a database. Manually check the interface using synthetic data, including keyboard operation, a narrow viewport, reload and demo restore. Browser automation can be added later if useful. Never write to the real Redmine service as part of routine tests.
+Run the checks from the README before a pull request. The Pages build has a different base path; check it even if the root demo preview works. Manually verify changed interactions, including keyboard use and a narrow viewport. The test suite uses Vitest; BDD/Cucumber and tests that only mirror implementation are not required.
 
-Keep dates as calendar dates and durations as integer minutes. Draft persistence is separate from future submission validation and remote results. Incomplete drafts are allowed. Compact HHMM input is normalized through `parseDurationInput`; invalid minutes/seconds are rejected. Keep the strict HH:MM transport parser unchanged. Activities use one name/code catalog per configured Redmine instance. Preserve historical labels and immutable receipt codes; validate project availability before sending when the remote API supplies it. Never silently consolidate conflicting legacy IDs. Keep interface, persistence and time arithmetic sufficiently separate to test their actual boundaries.
+## Issues and pull requests
 
-## Commits and publication
+For a bug, include the application version, browser/Node version, mode (demo/local), reproduction steps, expected and observed behavior. Use fictional task IDs, observations and screenshots. For a feature, describe the workflow problem before proposing a new dependency or layer.
 
-Use cohesive commits with short English messages. Remain on the established branch. Read `CHANGELOG.md` before committing and follow Cristian's version approval rule. Keep the current manifest, lockfile and displayed version aligned; record only delivered changes in released versions. Planned work belongs in the roadmap. Routine cohesive commits and ordinary pushes are authorized. Do not fabricate activity or rewrite history.
+Keep each pull request cohesive. Explain the resulting behavior, relevant trade-offs, checks actually run and known limitations. Preserve public contracts and avoid unrelated renames or formatting churn. Update current guides when behavior changes; record delivered changes in the changelog after the release/version decision. Historical release entries and tags must not be rewritten.
 
-Review the staged diff for private material. The workbook, extracted VBA, local databases, secrets, raw responses and real work details must remain outside Git. The public source is licensed under MIT. Keep private references and session handoffs outside the distribution; describe behavior with synthetic examples. Review provenance and privacy before publishing any additional material. No real Redmine writes or cross-chat messages are implied by Git authorization.
+## Invariants worth preserving
+
+- Saving drafts never submits hours. Submission requires saved data, review and explicit confirmation.
+- Activities come from one catalog per configured Redmine instance; project context does not duplicate catalog rows.
+- Confirmed/existing/started/uncertain receipts stay protected. Reconciliation reads; it never repeats creation.
+- Batch preflight covers the whole selection before the first write. Later failure preserves partial results. No automatic resume.
+- A template never overwrites an existing day, including a saved empty day. Issue status changes are outside scope.
+- Demo code cannot call the local API or include server modules, credentials, databases or private references.
+
+Never create/delete real Redmine entries or modify issue statuses for routine tests. Do not open or rewrite another person's usage database. Use temporary SQLite stores and simulated services. Never commit `.env`, keys, databases, backups, spreadsheet/VBA material or real task descriptions. See [SECURITY.md](SECURITY.md) before reporting a sensitive issue.
+
+## Publishing
+
+Pull requests only verify. The established `master` workflow publishes the audited demo after all checks pass; no npm package or local backend is published. Forks must configure their own destination before enabling deployment. [Deployment instructions](docs/deployment.md) cover paths, permissions and rollback.
