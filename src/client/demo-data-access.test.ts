@@ -33,22 +33,24 @@ describe("isolated demo access", () => {
     expect(storage).not.toHaveBeenCalled();
   });
 
-  it("fails every unfinished submission path explicitly without falling back to HTTP", async () => {
+  it("fails unknown receipt and batch references without falling back to HTTP", async () => {
     const http = vi.fn();
     vi.stubGlobal("fetch", http);
     const data = createDemoDataAccess();
     const selection = { date: "2026-10-26", entryId: "synthetic-row", revision: 1 };
     const operations = [
-      () => data.prepareSubmission(selection),
       () => data.actOnSubmission("synthetic-receipt", "confirm"),
       () => data.actOnSubmission("synthetic-receipt", "verify"),
       () => data.actOnSubmission("synthetic-receipt", "reconcile"),
-      () => data.prepareBatch([selection]),
       () => data.confirmBatch("synthetic-batch"),
       () => data.readBatch("synthetic-batch"),
     ];
     for (const operation of operations)
-      await expect(operation()).rejects.toMatchObject({ status: 501, message: expect.stringContaining("Nenhuma hora foi enviada") });
+      await expect(operation()).rejects.toMatchObject({ status: 404 });
+    await expect(data.prepareSubmission(selection)).rejects.toBeInstanceOf(Error);
+    const blocked = await data.prepareBatch([selection]);
+    expect(blocked.items[0].error).toBeTruthy();
+    await expect(data.confirmBatch(blocked.id)).rejects.toMatchObject({ status: 409 });
     expect(await data.listSubmissions(selection.date, selection.date)).toEqual([]);
     expect(await data.listBatches(selection.date, selection.date)).toEqual([]);
     expect(http).not.toHaveBeenCalled();

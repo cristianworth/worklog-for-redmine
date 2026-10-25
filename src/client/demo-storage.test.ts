@@ -103,7 +103,7 @@ describe("visitor demo persistence and recovery", () => {
     await data.demo!.restoreExamples();
     expect(data.demo?.persistent).toBe(true);
     expect(data.demo?.notice).toBeNull();
-    expect(JSON.parse(t.values.get(demoStorageKey)!).schemaVersion).toBe(1);
+    expect(JSON.parse(t.values.get(demoStorageKey)!).schemaVersion).toBe(2);
     expect(t.values.get("another-app")).toBe("unrelated-data");
   });
 

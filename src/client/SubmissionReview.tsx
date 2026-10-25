@@ -14,6 +14,9 @@ export const submissionLabel = {
   uncertain: "Resultado incerto",
   existing: "Já existente no Redmine",
 };
+export const demoSubmissionLabel = { ...submissionLabel,
+  sending: "Simulação iniciada", confirmed: "Simulado", existing: "Simulação já existente",
+};
 export function SubmissionReview({
   date,
   entryId,
@@ -117,11 +120,11 @@ export function SubmissionReview({
     >
       <div className="submission-heading">
         <div>
-          <p className="eyebrow">ENVIO INDIVIDUAL</p>
+          <p className="eyebrow">{access.mode === "demo" ? "RESULTADO INDIVIDUAL SIMULADO" : "ENVIO INDIVIDUAL"}</p>
           <h2 id="submission-title">
             {record?.state === "prepared"
               ? "Revise antes de enviar"
-              : "Resultado do lançamento"}
+              : access.mode === "demo" ? "Resultado simulado" : "Resultado do lançamento"}
           </h2>
         </div>
         <button
@@ -136,7 +139,7 @@ export function SubmissionReview({
       {busy && !record && (
         <p className="notice" role="status">
           <LoaderCircle size={17} className="spin" />
-          Consultando a tarefa, a conta e os lançamentos existentes…
+          {access.mode === "demo" ? "Carregando a revisão e os recibos fictícios…" : "Consultando a tarefa, a conta e os lançamentos existentes…"}
         </p>
       )}
       {s && (
@@ -187,7 +190,7 @@ export function SubmissionReview({
                 <div>
                   <dt>Origem</dt>
                   <dd>
-                    {record.origin === "imported"
+                    {record.simulated ? "Simulado neste navegador" : record.origin === "imported"
                       ? "Histórico confirmado incorporado"
                       : record.state === "existing"
                         ? "Lançamento encontrado no Redmine"
@@ -211,16 +214,16 @@ export function SubmissionReview({
             <strong>
               {hasVerificationProblem(record!)
                 ? "Apropriação a conferir"
-                : submissionLabel[record!.state]}
+                : (record?.simulated ? demoSubmissionLabel : submissionLabel)[record!.state]}
               {record?.remoteId ? ` · #${record.remoteId}` : ""}
             </strong>
             <span>{record?.message}</span>
           </p>
           {record?.state === "sending" && (
             <p className="settings-note">
-              Se a aplicação foi interrompida, aguarde um minuto e use Conferir
-              resultado. Essa ação consulta o Redmine e não cria outro
-              lançamento.
+              {access.mode === "demo"
+                ? "Se a página foi interrompida, confira o resultado fictício. A conferência não cria outro lançamento."
+                : "Se a aplicação foi interrompida, aguarde um minuto e use Conferir resultado. Essa ação consulta o Redmine e não cria outro lançamento."}
             </p>
           )}
         </>
@@ -271,7 +274,7 @@ export function SubmissionReview({
             ) : (
               <Upload size={16} />
             )}
-            Confirmar envio ao Redmine
+            {access.mode === "demo" ? "Confirmar simulação" : "Confirmar envio ao Redmine"}
           </button>
         )}
         {(record?.state === "confirmed" || record?.state === "existing") && (
@@ -280,7 +283,7 @@ export function SubmissionReview({
             disabled={busy}
             onClick={() => act("verify")}
           >
-            <RefreshCw size={16} /> Conferir no Redmine
+            <RefreshCw size={16} /> {access.mode === "demo" ? "Conferir resultado simulado" : "Conferir no Redmine"}
           </button>
         )}
         {isAppropriated(record ?? undefined) && (

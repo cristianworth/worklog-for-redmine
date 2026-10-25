@@ -18,7 +18,7 @@ describe("replaceable worklog data access", () => {
     const renderApp = (value: WorklogDataAccess) => renderToStaticMarkup(
       <WorklogDataProvider value={value}><App /></WorklogDataProvider>,
     );
-    expect(renderApp(demo)).toContain("Demo em preparação");
+    expect(renderApp(demo)).toContain("dados e envios simulados");
     expect(getItem).toHaveBeenLastCalledWith("worklog.demo.period");
     expect(renderApp(local)).toContain("Banco local");
     expect(getItem).toHaveBeenLastCalledWith("worklog.period");

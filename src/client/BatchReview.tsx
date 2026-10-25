@@ -8,7 +8,7 @@ import {
 } from "../shared/batches";
 import { formatDuration } from "../shared/worklogs";
 import { shortDate } from "./period";
-import { submissionLabel } from "./SubmissionReview";
+import { demoSubmissionLabel, submissionLabel } from "./SubmissionReview";
 import { useWorklogData } from "./WorklogDataProvider";
 
 export function BatchReview({
@@ -137,11 +137,11 @@ export function BatchReview({
     >
       <div className="submission-heading">
         <div>
-          <p className="eyebrow">ENVIO POR DIA OU PERÍODO</p>
+          <p className="eyebrow">{data.mode === "demo" ? "SIMULAÇÃO POR DIA OU PERÍODO" : "ENVIO POR DIA OU PERÍODO"}</p>
           <h2 id="batch-title">
             {batch?.state === "prepared"
-              ? "Revise o lote antes de enviar"
-              : "Resultados do lote"}
+              ? data.mode === "demo" ? "Revise antes de simular" : "Revise o lote antes de enviar"
+              : data.mode === "demo" ? "Resultados simulados" : "Resultados do lote"}
           </h2>
         </div>
         <button
@@ -162,15 +162,21 @@ export function BatchReview({
       {batch && (
         <>
           <p className="batch-summary" role="status">
-            {batch.items.length} linhas · {dates.length}{" "}
+            {batch.items.length} {batch.items.length === 1 ? "linha" : "linhas"} · {dates.length}{" "}
             {dates.length === 1 ? "dia" : "dias"}. {batch.message}
           </p>
           <p className="settings-note">
+            {data.mode === "demo" ? <>
+              Toda a seleção será validada antes de criar recibos fictícios. Um impedimento bloqueia o lote inteiro;
+              uma falha posterior preserva os resultados anteriores. O status dos cards não muda.
+              Fechar a revisão mantém a simulação nesta página; recarregar pode interrompê-la sem retomada automática.
+            </> : <>
             Todas as tarefas selecionadas serão validadas antes do primeiro envio.
             Um impedimento bloqueia o lote inteiro. Depois de iniciar as criações,
             uma falha interrompe as próximas linhas e preserva as anteriores.
             Status dos cards: <strong>Manter</strong>. Fechar esta janela após
             confirmar não cancela a execução.
+            </>}
           </p>
           {dates.map((date) => (
             <section
@@ -192,7 +198,7 @@ export function BatchReview({
                       : record
                         ? hasVerificationProblem(record)
                           ? "Apropriação a conferir"
-                          : submissionLabel[record.state]
+                          : (data.mode === "demo" ? demoSubmissionLabel : submissionLabel)[record.state]
                         : "Impedimento";
                   return (
                     <article
@@ -277,9 +283,9 @@ export function BatchReview({
         )}
         {batch && canConfirmBatch(batch) && !confirmBlocked && (
           <button className="button primary" disabled={busy} onClick={confirm}>
-            <Upload size={16} /> Confirmar envio de{" "}
+            <Upload size={16} /> {data.mode === "demo" ? "Confirmar simulação de" : "Confirmar envio de"}{" "}
             {batch.items.filter((i) => i.record?.state === "prepared").length}{" "}
-            linhas
+            {batch.items.filter((i) => i.record?.state === "prepared").length === 1 ? "linha" : "linhas"}
           </button>
         )}
       </div>

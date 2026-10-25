@@ -37,6 +37,8 @@ O modo local usa Node e SQLite; uma instalação nova começa sem dados reais e 
 
 A demo deve usar somente exemplos e códigos fictícios, catálogo único, persistência própria do visitante e envio simulado. Deve reaproveitar a interface e as regras, sem acessar a API local, o SQLite de uso ou o Redmine real. Publicar o repositório não publica a demo nem o backend.
 
+Em 25/10/2026, P7-A–E implementados na v0.5.0, com commit/push autorizados por Cristian. Snapshot schema 2 aceita dados de P7-B sem apagar edições; recibos/lotes/criações fictícios compartilham o mesmo registro. Web Locks coordenam mutações por origem quando disponíveis; sem a API, a interface orienta uma aba por vez. Recarregar não retoma lotes, conferência não recria resultados e restauração é serializada com o trabalho aceito. 342 testes/25 arquivos, builds/auditoria e instalação limpa sem configuração privada aprovados; teclado, tela menor, seleção inválida, recarga e restauração conferidos manualmente. CI de verificação adicionada; hospedagem e avaliação independente de visitante continuam na P8. Detalhes em [acesso aos dados](data-access.md).
+
 Planilha, VBA, configuração, bancos, backups, alvos e resultados detalhados dos testes ficam fora do Git. Os registros operacionais continuam nos arquivos privados já existentes. A confirmação visual do usuário não confirma que ele já excluiu os testes; não executar essa exclusão ou importar seus recibos para o banco de uso automaticamente.
 
 ## Referências para conferir o comportamento

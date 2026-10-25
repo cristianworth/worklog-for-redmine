@@ -1,10 +1,12 @@
 import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 
 const { version } = JSON.parse(
   readFileSync(new URL("./package.json", import.meta.url), "utf8"),
 );
+const sourceRoot = fileURLToPath(new URL("./", import.meta.url)).replaceAll("\\", "/");
 
 const demoIsolation: Plugin = {
   name: "verify-demo-isolation",
@@ -23,8 +25,9 @@ const demoIsolation: Plugin = {
     for (const output of Object.values(bundle)) {
       if (output.type !== "chunk") continue;
       for (const id of Object.keys(output.modules)) {
-        const path = id.replaceAll("\\", "/");
-        if (/\/(?:src\/server|private|data)\//.test(path) ||
+        const absolute = id.replaceAll("\\", "/");
+        const path = absolute.startsWith(sourceRoot) ? absolute.slice(sourceRoot.length) : absolute;
+        if (/(?:^|\/)(?:src\/server|private|data)\//.test(path) ||
           path.endsWith("/http-data-access.ts"))
           this.error("O build da demo contém uma dependência local não permitida.");
       }

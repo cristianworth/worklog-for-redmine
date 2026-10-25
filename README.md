@@ -2,6 +2,8 @@
 
 A small local web application for organizing time-entry drafts and explicitly submitting saved lines to Redmine. Choose any inclusive date range, scroll through stacked days, create/edit/remove rows, and save drafts locally. Each day has its own duration total.
 
+Built to replace a spreadsheet workflow where several days are reconstructed together and submitted after review. The same interface also runs as a self-contained portfolio demo: fictional examples, browser-only persistence and explicitly simulated receipts, without credentials or a backend. See [Try the isolated demo](#try-the-isolated-demo). Public hosting is the next stage.
+
 ## Run locally
 
 Requires Node.js **24.20 or newer within the 24.x line**, and npm.
@@ -9,7 +11,7 @@ Requires Node.js **24.20 or newer within the 24.x line**, and npm.
 ```sh
 git clone https://github.com/cristianworth/worklog-for-redmine.git
 cd worklog-for-redmine
-npm install
+npm ci
 npm run dev
 ```
 
@@ -88,6 +90,8 @@ Before any batch creation, the backend validates every selected pending row with
 ```sh
 npm test
 npm run build
+npm run build:demo
+npm run check:demo
 ```
 
 Vitest checks duration arithmetic, period boundaries, dynamic end dates, preservation of pending edits, database reopening and atomic multi-day saves, including conflicts. Activity tests cover project isolation, duplicate mappings, catalog reopening, conflicts and opening an older draft database without rewriting its rows. Submission tests cover explicit confirmation, duplicate/concurrent sends, immutable receipts, rejection, uncertainty and read-only recovery across database reopening. Batch tests cover one day, multiple days, preparation errors, obsolete reviews, complete backend preflight before the first write (including a newly invalid task in the second day), partial failures, duplicate confirmation and interrupted execution. Lookup tests cover shared requests, expiry, refresh, bounded memory, failed requests and client isolation. Read-only Redmine tests cover private configuration, JSON contracts, error classification, credential handling and isolation from draft saves. Interface verification is manual. BDD, Cucumber and formal scenarios are not required.
@@ -100,14 +104,15 @@ The period-based editor uses Lucide icons, a highlighted daily total and separat
 
 API access checks and automatic issue lookup are implemented with synthetic tests. Real account and issue reads have been verified with the local API key; one specifically authorized real time-entry test was created and verified, with issue status unchanged. Its private record is excluded from Git and must never be replayed. Two separately authorized batch tests were subsequently completed and verified, covering nine entries with unchanged issue statuses; those authorizations are also consumed. A single local activity catalog, individual submission and period batches are implemented; issue-status changes were explicitly removed from scope; submission always preserves the card status. Saving a draft does not send anything to Redmine. This project is independent of Redmine.
 
-## Isolated demo — P7-A/B
+## Try the isolated demo
 
 A separate demo build reuses the interface without the local API, SQLite or Redmine. A new visitor starts with three recent fictional days, one activity catalog and a day template. Tasks **9001**, **9004** and **9007** are synthetic; other task IDs fail locally. Explicitly saved changes survive page reloads in that browser. **Restaurar exemplos** asks for confirmation and restores only the demo data, including unsaved editors. If storage is blocked or full, the interface explains the limitation; invalid or unknown saved formats are preserved until an explicit reset.
 
-This is not yet a complete portfolio demonstration: submission paths still return an explicit unavailable message and never fall back to the real service. Simulated receipts, presentation/accessibility checks and the release gate remain P7-C/D/E. No public link or deployment exists yet.
+Select a saved row, use **Simular dia**, or select several dates and choose **Simular selecionados**. Review and explicitly confirm the simulation; badges and results are labeled **Simulado**. Reload and open **Ver resultado → Conferir resultado simulado** to verify a persisted receipt without creating another. An invalid task blocks the entire selection. **Restaurar exemplos** also clears simulated receipts and batches. No public link or deployment exists yet.
 
 ```sh
 npm run build:demo
+npm run check:demo
 npm run preview:demo
 ```
 
@@ -115,9 +120,13 @@ Open `http://127.0.0.1:4173/`. This preview serves `dist-demo/` without starting
 
 The normal local mode continues to use Node and SQLite. The public code repository and an eventual hosted demo are separate deliverables; publishing code alone does not host the Node application.
 
+Browser storage is a deliberate trade-off: visitors need no account or shared backend, but clearing site data loses their demo. Web Locks coordinate saves and simulations across tabs when supported; otherwise use one tab, as the interface warns. Closing the review keeps accepted work running in that page; reloading can interrupt it and never resumes it automatically. Storage failures preserve prior results and protected rows. This simulation demonstrates the workflow, not live Redmine availability or permissions.
+
+The verification workflow runs tests, both builds and the static artifact audit on pushes and pull requests. Manual checks include keyboard operation, a 375px viewport, reload, invalid selections and restore. No credentials or private files are needed for a clean `npm ci` and verification run.
+
 ## Versions
 
-Current version: **v0.4.0**, with one activity catalog, selection before task lookup and a backed-up migration from project mappings. Collapsible days arrived in v0.3.0; compact duration input arrived in v0.2.0. The day template (P5) was delivered in **v0.1.0**. The earlier P0–P4.2 implementation is documented retrospectively as **v0.0.0**; historical manifests are preserved. The footer reads the current version from `package.json` during the build. See [CHANGELOG.md](CHANGELOG.md) for delivered changes and [ROADMAP.md](ROADMAP.md) for planned work. The next stages prepare an isolated public demo and then publication (P7/P8). The source repository is [cristianworth/worklog-for-redmine](https://github.com/cristianworth/worklog-for-redmine). Publishing this code does not deploy the application; the public demo remains planned.
+Current version: **v0.5.0**, delivering the isolated portfolio demo (P7). The single activity catalog arrived in v0.4.0; collapsible days in v0.3.0; compact duration input in v0.2.0; the day template in v0.1.0. The earlier P0–P4.2 implementation is documented retrospectively as v0.0.0; historical manifests are preserved. The footer reads the current version from `package.json` during the build. See [CHANGELOG.md](CHANGELOG.md) for delivered changes and [ROADMAP.md](ROADMAP.md) for planned work. GitHub Pages publication remains P8. The source repository is [cristianworth/worklog-for-redmine](https://github.com/cristianworth/worklog-for-redmine).
 
 ## Documentation and private reference
 

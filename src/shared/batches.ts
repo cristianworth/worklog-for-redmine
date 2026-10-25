@@ -12,6 +12,7 @@ export interface BatchItem {
   error: string | null;
 }
 export interface SubmissionBatch {
+  simulated?: boolean;
   id: string;
   state: "prepared" | "running" | "finished" | "interrupted";
   items: BatchItem[];

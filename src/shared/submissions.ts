@@ -20,6 +20,7 @@ export interface SubmissionSnapshot {
   statusName: string;
 }
 export interface SubmissionRecord {
+  simulated?: boolean;
   id: string;
   snapshot: SubmissionSnapshot;
   state: SubmissionState;

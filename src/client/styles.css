@@ -398,6 +398,7 @@ h1 {
   padding: 8px 0 8px 7px;
 }
 .table-scroll {
+  position: relative;
   overflow-x: auto;
 }
 table {
@@ -1635,3 +1636,41 @@ td select {
 .demo-controls p { font-size: 13px; line-height: 1.6; margin: 8px 0; }
 .demo-restore-confirmation { flex: 1 1 100%; }
 .demo-restore-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
+.demo-mode {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  padding: 9px 16px;
+  color: #fff;
+  background: #294b39;
+  font-size: 12px;
+}
+.skip-link {
+  position: fixed;
+  left: 12px;
+  top: -100px;
+  z-index: 100;
+  padding: 12px;
+  background: #fff;
+  color: #263831;
+  border: 2px solid #294b39;
+}
+.skip-link:focus { top: 12px; }
+.demo-steps { padding-left: 20px; font-size: 13px; line-height: 1.6; }
+.demo-steps li + li { margin-top: 5px; }
+.demo-controls button { min-height: 44px; }
+.table-scroll:focus-visible { outline: 2px solid #438269; outline-offset: -2px; }
+main:focus { outline: none; }
+@media (max-width: 620px) {
+  .demo-controls { padding: 14px; gap: 12px; }
+  .demo-controls > div:first-child { flex-basis: 100%; min-width: 0; }
+  .demo-mode { font-size: 11px; }
+  .day-heading > .day-send { margin-left: 0; }
+  .day-heading .button { min-height: 40px; }
+  .table-scroll { max-width: 100%; }
+}

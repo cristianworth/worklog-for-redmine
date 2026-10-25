@@ -1,6 +1,6 @@
 # Changelog — Worklog for Redmine
 
-Histórico das versões. Criado em 23/10/2026 com a base anterior ao modelo registrada retrospectivamente como v0.0.0. A v0.3.0 marca a primeira publicação pública do código no GitHub, sob licença MIT. A demo pública ainda não foi implementada ou publicada.
+Histórico das versões. Criado em 23/10/2026 com a base anterior ao modelo registrada retrospectivamente como v0.0.0. A v0.3.0 marca a primeira publicação pública do código no GitHub, sob licença MIT. A v0.5.0 entrega a demo isolada; sua hospedagem pública permanece na P8.
 
 ## Regras de versionamento
 
@@ -12,23 +12,24 @@ Histórico das versões. Criado em 23/10/2026 com a base anterior ao modelo regi
 - Antes de cada commit/merge, ler este arquivo e seguir a regra de aprovação de Cristian. A criação deste histórico, da v0.0.0 e da v0.1.0 está explicitamente autorizada no pedido de 23/10/2026; alterações futuras de versão devem seguir a autorização da entrega.
 - Nunca incluir credenciais, planilhas privadas, bancos, backups ou dados reais nos registros, tags e arquivos distribuídos.
 
-## [Unreleased]
+## [0.5.0] — 2026-10-25
 
-### Exemplos, persistência e recuperação — P7-B
+### Demo isolada — P7-A–E
 
-- Três dias relativos à primeira visita, três tarefas fictícias de dois projetos, catálogo único e modelo de exemplo. O período inicial mostra os exemplos; as datas salvas não são recalculadas a cada visita.
-- Salvamento explícito de catálogo, dias e modelo em snapshot próprio e versionado do navegador. Conflitos de revisão, falhas de gravação e dados inválidos preservam o conteúdo anterior; armazenamento indisponível gera aviso de sessão temporária.
-- Restauração antecipada para P7-B, com confirmação e limpeza dos editores abertos, preservando o modo local e outras chaves do navegador. Revisões avançam para rejeitar payloads anteriores ao reset.
-- Roadmap reordenado para portfólio: recuperação antes dos envios simulados, primeira experiência/acessibilidade e etapa explícita de verificações/CI antes da publicação no Pages.
-- 326 testes/23 arquivos e builds local/demo aprovados. Recarga de dias/catálogo/modelo, cancelamento e confirmação da restauração conferidos na interface. Sem alterações do banco de uso ou envios reais; a simulação de envios permanece em P7-C.
-- Cristian autorizou manter a versão 0.4.0 e registrar o roadmap revisado e P7-B em commit, reservando a decisão da próxima versão para a entrega consolidada.
+- Mesmo editor com acesso substituível para catálogo, dias, modelo, tarefas, conexão, recibos e lotes. Adaptador local preserva HTTP, revisões, conflitos 409, cancelamento e conferência do salvamento; catálogo único e dados de uso preservados.
+- Build estático separado em `dist-demo/`, sem `.env`, adaptador HTTP, backend ou SQLite. Barreira na compilação, CSP sem conexões operacionais e auditoria reproduzível do artefato.
+- Três dias relativos à primeira visita, tarefas/projetos fictícios, catálogo e modelo; salvamento explícito no navegador. Conteúdo inválido/schema futuro é preservado até restauração confirmada. Falhas de gravação mantêm dados/edições anteriores; armazenamento indisponível informa sessão temporária.
+- Revisão e confirmação fictícias para uma linha, um dia ou várias datas. Validação integral antes da primeira criação, execução sequencial, resultados parciais, revisões/expiração e trava contra repetição. Recibos, lotes e conferência persistem; conferência/reconciliação não recria resultados e recarga não retoma trabalho automaticamente.
+- Schema 2 aceita os dados de P7-B sem apagar alterações. Web Locks coordenam gravação, simulação e restauração quando disponíveis; sem a API, aviso para usar uma aba por vez. Restaurar inclui recibos e editores abertos, preservando outras chaves e o modo local.
+- Aviso permanente de demonstração, percurso sugerido, resultados identificados como simulados, atalho para o conteúdo, foco na restauração e tabelas acessíveis por teclado. Corrigido transbordamento da página em tela menor. Atalho para a demo pública continua pendente da hospedagem.
+- CI executa testes, build local/demo e auditoria estática. README e roadmap atualizados para portfólio, com GitHub Pages reservado à P8.
 
-### Isolamento da demo — P7-A
+### Verificação e limites
 
-- Acesso substituível para catálogo, dias, modelo, tarefas, conexão, recibos e lotes. O modo local mantém contratos HTTP, revisões, erros 409, cancelamento e recuperação sem repetir envios.
-- Build separado em `dist-demo/`, sem carregar `.env`, adaptador HTTP, backend ou SQLite. A demo mínima usa estado em memória e uma tarefa fictícia; operações de envio ainda indisponíveis falham explicitamente sem fallback real. Preferência de período separada.
-- 316 testes/22 arquivos e builds local/demo aprovados. Interface conferida com dados e serviços fictícios; nenhum dado de uso alterado e nenhum envio real executado. Exemplos persistidos, envio simulado completo, restauração e publicação permanecem pendentes.
-- Cristian autorizou manter a versão 0.4.0 neste recorte e registrar P7-A em commit, sem criar ou mover tag de versão.
+- 342 testes/25 arquivos aprovados, ambos os builds e auditoria de cinco arquivos estáticos. Instalação limpa sem `.env`, chave ou banco aprovada.
+- Interface conferida com dados fictícios: confirmação de uma linha, dia e várias datas, recarga/conferência, bloqueio integral por tarefa inválida, restauração com recibos, teclado e viewport de 375px. Testes cobrem quota, corrupção, conflitos, rejeição parcial, resposta perdida e interrupção sem retomada.
+- Nenhum envio real, acesso ou alteração do SQLite de uso. Simulação não comprova permissões/disponibilidade do Redmine. Limpar dados do site perde o histórico fictício; sem Web Locks, usar uma aba por vez.
+- Cristian aprovou v0.5.0, commit e push. Os recortes A/B foram registrados inicialmente sem mudar a v0.4.0; esta versão consolida P7. Publicação da demo e conferência por visitante independente continuam na P8.
 
 ## [0.4.0] — 2026-10-24
 

@@ -20,7 +20,10 @@ export const demoStartDate = (anchorDate: string) => daysBefore(anchorDate, 3);
 
 export function createDemoExamples(today: string): DemoState {
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
+    submissions: [],
+    batches: [],
+    creations: [],
     anchorDate: today,
     catalog: { revision: 1, activities: [
       { activityId: 9901, name: "Desenvolvimento" },

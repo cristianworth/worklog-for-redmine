@@ -2,30 +2,41 @@ import { validateActivityCatalog, type ActivityCatalog } from "../shared/activit
 import { validateDayTemplate, type DayTemplate } from "../shared/day-template";
 import { isWorkDate, validateDays, type DraftDay } from "../shared/worklogs";
 import { DataAccessError } from "./data-access";
+import { validateDemoReceipts, type DemoCreation } from "./demo-receipts";
+import type { SubmissionRecord } from "../shared/submissions";
+import type { SubmissionBatch } from "../shared/batches";
 
 export const demoStorageKey = "worklog-for-redmine.demo.state";
 export type DemoStorage = Pick<Storage, "getItem" | "setItem">;
 export interface DemoState {
-  schemaVersion: 1;
+  schemaVersion: 2;
   anchorDate: string;
   catalog: ActivityCatalog;
   days: DraftDay[];
   template: DayTemplate;
+  submissions: SubmissionRecord[];
+  batches: SubmissionBatch[];
+  creations: DemoCreation[];
 }
 
 function parseState(raw: string): DemoState {
   const value = JSON.parse(raw);
-  if (!value || value.schemaVersion !== 1 ||
+  if (!value || ![1, 2].includes(value.schemaVersion) ||
     typeof value.anchorDate !== "string" || !isWorkDate(value.anchorDate))
     throw new Error("Unsupported demo data format");
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     anchorDate: value.anchorDate,
     catalog: validateActivityCatalog(value.catalog),
     days: validateDays(value.days),
     template: validateDayTemplate(value.template),
+    ...(value.schemaVersion === 1
+      ? { submissions: [], batches: [], creations: [] }
+      : validateDemoReceipts(value)),
   };
 }
+
+export type DemoStore = ReturnType<typeof createDemoStore>;
 
 export function createDemoStore(initial: DemoState, storage?: DemoStorage) {
   let state = structuredClone(initial);

@@ -25,6 +25,7 @@ import { dayLabel, shortDate } from "./period";
 import { daySummary, type EditorDay, type EditorEntry } from "./editor";
 
 interface Props {
+  simulated?: boolean;
   day: EditorDay;
   activities: Activity[];
   dirty: boolean;
@@ -46,6 +47,7 @@ interface Props {
 }
 
 export function DaySection({
+  simulated = false,
   day,
   activities,
   dirty,
@@ -83,6 +85,7 @@ export function DaySection({
     day.entries.map((entry) => entry.id),
     dayReceipts,
   );
+  const statusLabel = simulated ? appropriation.label.replaceAll("apropriadas", "simuladas") : appropriation.label;
   useEffect(() => {
     if (focusId.current && !collapsed) {
       const target = [
@@ -133,8 +136,8 @@ export function DaySection({
           </h2>
           <span className="day-status">
             {dirty
-              ? `Alterações não salvas · ${appropriation.label}`
-              : appropriation.label}
+              ? `Alterações não salvas · ${statusLabel}`
+              : statusLabel}
             {day.date === today && <span className="today-label">Hoje</span>}
           </span>
         </div>
@@ -149,14 +152,14 @@ export function DaySection({
           className="button day-send"
           onClick={onSendDay}
           disabled={disabled || dirty || !pending.length}
-          aria-label={`Enviar dia ${description}`}
+          aria-label={`${simulated ? "Simular dia" : "Enviar dia"} ${description}`}
           title={
             dirty
               ? "Salve o dia antes de enviar"
               : "Revisar as linhas pendentes deste dia"
           }
         >
-          <RefreshCw size={16} aria-hidden="true" /> Enviar dia
+          <RefreshCw size={16} aria-hidden="true" /> {simulated ? "Simular dia" : "Enviar dia"}
         </button>
         <button
           className="button secondary add-line"
@@ -186,7 +189,7 @@ export function DaySection({
       </header>
       <div id={`day-content-${day.date}`} hidden={collapsed}>
         {day.entries.length > 0 ? (
-          <div className="table-scroll">
+          <div className="table-scroll" role="region" aria-label={`Tarefas de ${description}`} tabIndex={0}>
             <table>
               <colgroup>
                 <col className="number-col" />

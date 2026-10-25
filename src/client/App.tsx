@@ -461,6 +461,11 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
 
   return (
     <div className="app-shell">
+      <a className="skip-link" href="#main-content">Pular para os apontamentos</a>
+      {data.mode === "demo" && <div className="demo-mode">
+        <strong>Demonstração · dados e envios simulados</strong>
+        <span>Nenhuma conexão com o Redmine</span>
+      </div>}
       <header className="app-header">
         <div className="header-inner">
           <a
@@ -481,7 +486,7 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
           <div className="header-actions">
             <span className="local-badge">
               <Database size={14} aria-hidden="true" />
-              {data.mode === "demo" ? "Demo em preparação · sem conexão externa" : "Banco local"}
+              {data.mode === "demo" ? "Demonstração isolada" : "Banco local"}
             </span>
             <button
               className="button quiet"
@@ -518,7 +523,7 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
           onBatch={receiveBatch}
         />
       )}
-      <main>
+      <main id="main-content" tabIndex={-1}>
         <div className="settings-area" hidden={!settingsOpen}>
           {settingsOpen && (
             <RedmineSettings onClose={() => setSettingsOpen(false)} />
@@ -580,7 +585,7 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
             <div className="data-description">
               {data.mode === "demo" ? <p>
                 Os exemplos são fictícios e não acessam o Redmine. Salve suas edições para recuperá-las neste navegador.
-                Envios simulados ainda estão em preparação.
+                A revisão e a confirmação produzem somente recibos fictícios neste navegador.
               </p> : <>
               <p>
                 <strong>Seus dados:</strong> salvar grava os rascunhos no banco
@@ -594,7 +599,7 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
               </>}
             </div>
           </details>
-          <span className="future-control demo-control">
+          {data.mode !== "demo" && <span className="future-control demo-control">
             <button
               className="button quiet"
               disabled
@@ -604,10 +609,11 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
               Abrir demonstração
             </button>
             <small id="demo-status">Em breve</small>
-          </span>
+          </span>}
         </section>
 
         {data.demo && <DemoControls session={data.demo} onRestored={onDemoRestored} />}
+        {data.demo && resetPeriod && <p className="notice" role="status">Exemplos restaurados. Os dados e as edições anteriores da demonstração foram descartados.</p>}
 
         <section className="period-panel" aria-label="Período de trabalho">
           <div className="period-title">
@@ -702,7 +708,7 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
               aria-describedby="send-status"
             >
               <Upload size={18} aria-hidden="true" />
-              Enviar selecionados
+              {data.mode === "demo" ? "Simular selecionados" : "Enviar selecionados"}
               {selection.length ? ` (${selection.length})` : ""}
             </button>
             <span id="send-status">
@@ -712,7 +718,7 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
         </div>
         {recentBatches.some((batch) => batch.state !== "prepared") && (
           <div className="recent-batches">
-            <span>Envios recentes neste período</span>
+            <span>{data.mode === "demo" ? "Simulações recentes neste período" : "Envios recentes neste período"}</span>
             {recentBatches
               .filter((batch) => batch.state !== "prepared")
               .slice(0, 5)
@@ -722,7 +728,7 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
                   key={batch.id}
                   onClick={() => setBatchReview({ batchId: batch.id })}
                 >
-                  Ver lote · {batch.items.length} linhas ·{" "}
+                  Ver lote · {batch.items.length} {batch.items.length === 1 ? "linha" : "linhas"} ·{" "}
                   {batch.state === "finished"
                     ? "Concluído"
                     : batch.state === "running"
@@ -819,6 +825,7 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
           {visibleDates.map((date) => (
             <DaySection
               key={date}
+              simulated={data.mode === "demo"}
               collapsed={collapsedDates.includes(date)}
               onCollapsedChange={(collapsed) =>
                 setCollapsedDates((current) =>
@@ -917,7 +924,7 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
           <span>Worklog for Redmine · v{import.meta.env.VITE_APP_VERSION}</span>
           <span>
             <WifiOff size={13} aria-hidden="true" />
-            Organização local · sem envio automático
+              {data.mode === "demo" ? "Demonstração · sem envios reais" : "Organização local · sem envio automático"}
           </span>
         </footer>
       </main>

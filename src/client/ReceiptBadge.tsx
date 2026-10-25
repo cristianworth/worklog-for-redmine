@@ -29,7 +29,9 @@ export function ReceiptBadge({ record }: { record?: SubmissionRecord }) {
   const checking =
     problem || receipt?.state === "sending" || receipt?.state === "uncertain";
   const rejected = receipt?.state === "rejected";
-  const label = problem
+  const label = receipt?.simulated && complete
+    ? receipt.state === "existing" ? "Simulação existente" : "Simulado"
+    : problem
     ? "Apropriação a conferir"
     : receipt?.state === "existing"
       ? "Já apropriado no Redmine"
@@ -57,14 +59,14 @@ export function ReceiptBadge({ record }: { record?: SubmissionRecord }) {
     >
       <span className="receipt-state">
         <Icon size={14} aria-hidden="true" />
-        <strong>{label}</strong>
+        <strong>{receipt?.simulated && !complete ? `${label} · simulado` : label}</strong>
         {receipt?.remoteId && (
           <span className="receipt-id">#{receipt.remoteId}</span>
         )}
       </span>
       {complete && creation && (
         <small>
-          {receipt?.remoteCreatedAt ? "Apropriado em" : "Confirmado em"}{" "}
+          {receipt?.simulated ? "Simulado em" : receipt?.remoteCreatedAt ? "Apropriado em" : "Confirmado em"}{" "}
           {formatReceiptDate(creation)}
         </small>
       )}

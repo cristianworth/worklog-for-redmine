@@ -1,6 +1,6 @@
 # Roadmap — Worklog for Redmine
 
-Atualizado em 25/10/2026. Versão publicada: **v0.4.0**. Código público sob MIT; demo pública ainda pendente. Histórico no [changelog](CHANGELOG.md), invariantes nas [decisões](docs/project-decisions.md) e detalhes técnicos no [plano](docs/development-plan.md).
+Atualizado em 25/10/2026. Versão da entrega: **v0.5.0 / P7**. Código público sob MIT; hospedagem da demo ainda pendente. Histórico no [changelog](CHANGELOG.md), invariantes nas [decisões](docs/project-decisions.md) e detalhes técnicos no [plano](docs/development-plan.md).
 
 ## Objetivo e prioridades
 
@@ -18,6 +18,7 @@ Ordem de importância: **isolamento → dados recuperáveis → fluxo completo �
 | v0.3.0 | Dias recolhíveis e código publicado sob MIT |
 | v0.4.0 / P6.4 | Catálogo único, atividade antes do card e migração com backup |
 | P7-A / sem nova versão | Acesso substituível completo e build estático isolado; commit `08b78a1` |
+| v0.5.0 / P7-A–E | Demo isolada completa, persistência, simulação/recibos, percurso inicial e verificações de entrega |
 
 O cadastro privado tem 15 atividades únicas, sem cópias por projeto. Os dois testes reais anteriores mantiveram o mesmo código em dois projetos, com readback e confirmação visual de Cristian. Não validaram todas as atividades/projetos; suas autorizações estão consumidas.
 
@@ -25,9 +26,9 @@ O cadastro privado tem 15 atividades únicas, sem cópias por projeto. Os dois t
 
 ### A — Isolamento — concluído
 
-Todos os acessos operacionais passam pelo contrato substituível. O build da demo não carrega `.env`, adaptador HTTP, backend ou SQLite. A simulação mínima recusa explicitamente envios ainda indisponíveis. Evidência da entrega: 316 testes/22 arquivos, ambos os builds e conferência manual fictícia em 25/10/2026. [Contratos e limites](docs/data-access.md).
+Todos os acessos operacionais passam pelo contrato substituível. O build da demo não carrega `.env`, adaptador HTTP, backend ou SQLite. Evidência original de A: 316 testes/22 arquivos, ambos os builds e conferência manual fictícia em 25/10/2026. A simulação completa foi entregue em C. [Contratos e limites](docs/data-access.md).
 
-### B — Exemplos, persistência e recuperação — implementado
+### B — Exemplos, persistência e recuperação — concluído
 
 - Preparar poucos dias/tarefas fictícios, catálogo único e modelo; datas relativas à primeira visita, preservadas nas visitas seguintes.
 - Salvar catálogo, dias e modelo explicitamente no navegador, em um espaço próprio e com formato versionado. Não persistir edições ainda não salvas.
@@ -39,7 +40,7 @@ Todos os acessos operacionais passam pelo contrato substituível. O build da dem
 
 Implementado em 25/10/2026: três dias, catálogo/modelo e tarefas fictícios; snapshot próprio versionado, salvamento explícito, avisos/recuperação e restauração confirmada dos dados e editores abertos. 326 testes/23 arquivos e builds local/demo aprovados; recarga e cancelamento/restauração conferidos na interface. Limite: revisões entre abas não equivalem a uma transação de banco. [Detalhes](docs/data-access.md).
 
-### C — Envio simulado e recibos — próximo recorte
+### C — Envio simulado e recibos — concluído
 
 - Revisão e confirmação simuladas para uma linha, um dia ou várias datas; resultados sempre identificados como simulados.
 - Reutilizar regras compartilhadas: validar toda a seleção antes da primeira criação fictícia, preservar revisões, resultados parciais e trava contra duplicação.
@@ -48,7 +49,9 @@ Implementado em 25/10/2026: três dias, catálogo/modelo e tarefas fictícios; s
 
 **Aceite:** completar o percurso de preenchimento até recibo; tarefa inválida bloqueia o lote inteiro. Recarregar ou repetir confirmação não duplica resultados simulados.
 
-### D — Primeira experiência e acessibilidade
+Entregue: recibos individuais e lotes sequenciais, validação integral, resultados parciais e reconciliação sem recriação. Snapshot da demo evoluído para schema 2, preservando dados de B. Web Locks coordenam mutações entre abas quando disponíveis; alternativa informa uso em uma aba. Interrupção nunca retoma automaticamente.
+
+### D — Primeira experiência e acessibilidade — concluído
 
 - Explicar brevemente o problema resolvido e oferecer um percurso sugerido de poucos minutos, sem tutorial obrigatório.
 - Destacar o modo demonstração, as tarefas fictícias disponíveis, o salvamento e a restauração; eliminar rótulos temporários de implementação.
@@ -57,13 +60,17 @@ Implementado em 25/10/2026: três dias, catálogo/modelo e tarefas fictícios; s
 
 **Aceite:** uma pessoa nova entende o propósito e completa o percurso sem explicação no chat, usando mouse ou teclado; o fluxo principal permanece acessível em tela menor.
 
-### E — Verificação de entrega — nova etapa explícita
+Entregue e conferido: aviso permanente de simulação, percurso curto, rótulos fictícios, atalho para o conteúdo, foco na restauração, tabelas roláveis pelo teclado e página sem transbordamento a 375px. Percurso executado manualmente com teclado e tela menor; avaliação independente por um visitante continua na P8.
+
+### E — Verificação de entrega — concluído
 
 - Automatizar testes, build local e build demo em CI antes de publicar; manter a barreira que impede backend/API/dados privados no bundle.
 - Conferir instalação limpa sem chave, nova visita, recarga, restauração, conflitos e falhas de armazenamento, preservando os dados locais.
 - Revisar o artefato distribuível e documentação; escolher a versão da entrega consolidada com Cristian. Sugestão: v0.5.0, sem incremento a cada recorte.
 
 **Aceite:** verificações reproduzíveis passam e as limitações remanescentes estão documentadas. Publicação usa somente o artefato da demo.
+
+342 testes/25 arquivos, builds local/demo e auditoria do artefato aprovados; instalação limpa sem `.env`, chave ou banco conferida. CI definida para repetir os mesmos checks em pushes/PRs. Revisões, quota, corrupção, reset durante trabalho e interrupção cobertos por testes. Cristian aprovou v0.5.0, commit e push em 25/10/2026. A execução remota da CI é conferida após o push; este roadmap não equivale a um deploy.
 
 ## P8 — GitHub Pages e conferência pública
 
