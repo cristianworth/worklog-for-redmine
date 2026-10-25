@@ -5,9 +5,7 @@
 
 Organize several days of time-entry drafts, check daily totals, and explicitly review before submitting to Redmine. Built from a personal spreadsheet workflow where hours are reconstructed together and submitted later.
 
-**[Demo destination](https://cristianworth.github.io/worklog-for-redmine/)** · [Local usage](docs/local-usage.md) · [Architecture](docs/architecture.md) · [Contributing](CONTRIBUTING.md)
-
-The Pages build and deployment workflow are ready. Initial Pages activation and public availability are pending; see [deployment status](ROADMAP.md#p8--github-pages-e-conferência-pública). You can run the isolated preview below without a backend.
+**[Try the live demo](https://cristianworth.github.io/worklog-for-redmine/)** · [Local usage](docs/local-usage.md) · [Architecture](docs/architecture.md) · [Contributing](CONTRIBUTING.md)
 
 The interface is in Brazilian Portuguese. This overview is in English; the detailed product guides are in Portuguese. The demo uses fictional data and simulated submissions. No account, Redmine key or installation is required.
 

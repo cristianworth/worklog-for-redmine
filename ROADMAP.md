@@ -1,6 +1,6 @@
 # Roadmap — Worklog for Redmine
 
-Atualizado em 25/10/2026. Versão da entrega: **v0.6.0 / P8**. Código público sob MIT; build e workflow de publicação preparados, aguardando ativação/conferência do Pages. Histórico no [changelog](CHANGELOG.md), invariantes nas [decisões](docs/project-decisions.md) e detalhes técnicos no [plano](docs/development-plan.md).
+Atualizado em 25/10/2026. Versão da entrega: **v0.6.0 / P8 concluída**. Código público sob MIT; demo publicada e conferida no GitHub Pages. Histórico no [changelog](CHANGELOG.md), invariantes nas [decisões](docs/project-decisions.md) e detalhes técnicos no [plano](docs/development-plan.md).
 
 ## Objetivo e prioridades
 
@@ -73,7 +73,7 @@ Entregue e conferido: aviso permanente de simulação, percurso curto, rótulos 
 
 342 testes/25 arquivos, builds local/demo e auditoria do artefato aprovados; instalação limpa sem `.env`, chave ou banco conferida. CI definida para repetir os mesmos checks em pushes/PRs. Revisões, quota, corrupção, reset durante trabalho e interrupção cobertos por testes. Cristian aprovou v0.5.0, commit e push em 25/10/2026. A execução remota da CI é conferida após o push; este roadmap não equivale a um deploy.
 
-## P8 — GitHub Pages e conferência pública
+## P8 — GitHub Pages e conferência pública — concluída
 
 Direção: recrutadores/portfólio e endereço `github.io`, conforme conversa de 25/10/2026. Destino: **https://cristianworth.github.io/worklog-for-redmine/**. [Guia de publicação e recuperação](docs/deployment.md).
 
@@ -85,7 +85,7 @@ Direção: recrutadores/portfólio e endereço `github.io`, conforme conversa de
 
 Implementado: `build:pages`/`preview:pages`, auditoria de recursos no subdiretório e workflow que verifica todos os builds antes de enviar somente `dist-demo/`. PRs/forks não publicam no destino original; permissões de publicação ficam no job de deploy. Atalho local e link para código/documentação funcionais. README reorganizado, guias de arquitetura/uso/operação e segurança, material histórico identificado e instruções antigas consolidadas. 346 testes/26 arquivos e os três builds/auditorias aprovados; fluxo sob o caminho de produção conferido manualmente.
 
-**Pendente para encerrar P8:** ativar **Settings → Pages → Source: GitHub Actions** em sessão autenticada, conferir o deploy e a URL pública. O navegador de verificação estava sem login; a revisão automática bloqueou a reutilização de credencial do Git na API. A preparação não equivale a site publicado. Avaliação independente por visitante continua sendo retorno de uso.
+**Conferência de 25/10/2026:** Pages ativado pelo painel em sessão autenticada, fonte GitHub Actions e HTTPS obrigatório. [Workflow aprovado com deploy](https://github.com/cristianworth/worklog-for-redmine/actions/runs/40203255383), após repetir somente o job que havia parado antes da ativação. URL pública abriu a v0.6.0 com exemplos; edição/salvamento, simulação de duas datas pelo teclado, recarga, conferência de recibo sem recriação, restauração e navegação pela marca passaram sem erros no console. Nenhum backend ou dado de uso publicado. P8 técnica concluída; avaliação independente por visitante continua como próximo retorno de uso.
 
 ## Depois da primeira publicação
 

@@ -45,7 +45,7 @@ Conferência manual de B: exemplos preenchidos, edição/salvamento/recarga de d
 
 P7 completo: 342 testes/25 arquivos, ambos os builds e `npm run check:demo` aprovados. Instalação independente com `npm ci`, sem `.env`, chave, planilha, dados privados ou banco, também executou os checks. Na v0.6.0, o workflow passou a verificar também o subdiretório do Pages e publicar o artefato aprovado somente em `master` do repositório original; PRs continuam sem publicação. 346 testes/26 arquivos passaram nessa revisão. [Operação e estado da publicação](deployment.md).
 
-Conferência manual de C/D/E: confirmação de uma linha, um dia e várias datas, recarga e conferência do recibo, tarefa inválida bloqueando toda a seleção, restauração após recibos, teclado/foco e tela de 375px sem rolagem horizontal da página. Tabelas mantêm rolagem própria. Console sem erros/avisos na sessão final. Avaliação independente por recrutador/visitante e hospedagem ficam na P8; não se afirma auditoria completa de acessibilidade ou teste em todos os navegadores.
+Conferência manual de C/D/E: confirmação de uma linha, um dia e várias datas, recarga e conferência do recibo, tarefa inválida bloqueando toda a seleção, restauração após recibos, teclado/foco e tela de 375px sem rolagem horizontal da página. Tabelas mantêm rolagem própria. Console sem erros/avisos na sessão final. P8 publicou e conferiu o mesmo fluxo no [site público](https://cristianworth.github.io/worklog-for-redmine/). Avaliação independente por recrutador/visitante continua como retorno de uso; não se afirma auditoria completa de acessibilidade ou teste em todos os navegadores.
 
 ## Simulação e recibos — P7-C
 

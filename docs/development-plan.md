@@ -19,9 +19,9 @@ Cristian costuma recompor vários dias em uma sessão e enviá-los depois, frequ
 - Modelo é salvo separadamente e só é copiado uma vez para um dia não iniciado. Alterar modelo ou catálogo não reescreve dias/recibos anteriores. Movimentação de status foi cancelada.
 - Código já público em `cristianworth/worklog-for-redmine`, licença MIT. Permanecer na `master`, manter commits coesos e seguir as regras de versão do changelog. Planilha, VBA, configuração, bancos, backups e resultados reais ficam fora do Git.
 
-## Marco atual — v0.6.0 / P8 preparada
+## Marco atual — v0.6.0 / P8 publicada e conferida
 
-Build do subdiretório e workflow de deploy da demo implementados; atalho, documentação pública e refatoração localizada de apresentação conferidos. 346 testes/26 arquivos, builds local/demo/Pages e auditorias passaram. O fluxo manual no caminho `/worklog-for-redmine/` preservou salvamento, recibos, restauração e navegação. A ativação do Pages e a conferência pública ainda dependem da configuração autenticada no GitHub. [Operação](deployment.md) e [arquitetura](architecture.md).
+Build do subdiretório e workflow de deploy da demo implementados; atalho, documentação pública e refatoração localizada de apresentação conferidos. 346 testes/26 arquivos, builds local/demo/Pages e auditorias passaram localmente e na CI. Pages ativado pelo painel e publicação aprovada; a [URL pública](https://cristianworth.github.io/worklog-for-redmine/) abriu a v0.6.0 e passou por edição/salvamento, duas datas simuladas, recarga/conferência de recibos, restauração e navegação. [Operação](deployment.md) e [arquitetura](architecture.md).
 
 ### Base da demo — v0.5.0 / P7
 
@@ -35,6 +35,6 @@ A duplicação de atividades por projeto foi removida. Os 60 vínculos foram con
 
 ## Ordem do trabalho restante
 
-1. **P8 — Site:** ativar GitHub Actions como fonte no Pages, conferir deploy e URL pública. Build do subdiretório, pipeline e documentação estão prontos. Depois, obter observações de uma pessoa nova. P7-A–E concluídos.
+1. **Retorno de uso:** convidar uma pessoa nova a experimentar a demo e priorizar impedimentos concretos de compreensão ou uso. P7-A–E e P8 técnica concluídos; novas funcionalidades dependem desse retorno.
 
 Critérios detalhados estão no roadmap e a fronteira implementada em [acesso aos dados](data-access.md). Não ampliar o catálogo por projeto nem transformar a demo em um backend público compartilhado. Cristian orientou foco em recrutadores/portfólio e informou que `github.io` é suficiente; GitHub Pages é o destino da P8. Uma execução de build não comprova que o site já está disponível.

@@ -16,6 +16,7 @@
 - Demo mode selects a separate `WorklogDataAccess` at startup. It uses fictional tasks, one catalog and browser-only state. No fallback to HTTP, local API, SQLite or Redmine is allowed.
 - P7-A–E were delivered in v0.5.0 (`eb89be2`), with 342 tests/25 files, both builds/audit and clean-install verification passing. Those are historical results; rerun checks for new changes.
 - P8 targets GitHub Pages at `https://cristianworth.github.io/worklog-for-redmine/`, for recruiters/portfolio. Only audited `dist-demo/` is deployable. `dist/` is the local application. Current commands, CI and recovery are documented in `docs/deployment.md`; a source push alone does not prove successful deployment.
+- P8 was published and checked on 2026-10-25 in v0.6.0: 346 tests/26 files, local/root-demo/Pages builds and artifact audits passed locally and in CI. Cristian authenticated the normal browser session; Pages was enabled through the UI with Actions source/HTTPS, and the failed initial deploy job was rerun successfully. The public URL passed save/reload, two-date simulated confirmation, receipt verification, reset and brand navigation with no console errors. Independent visitor feedback is next; do not invent that feedback or treat it as another implementation stage.
 - Public code is `cristianworth/worklog-for-redmine`, MIT, under the verified `cristianworth` account. Publishing the Node backend or private reference material is not authorized.
 
 ## Catalog, days and templates

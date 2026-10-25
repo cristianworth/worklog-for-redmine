@@ -43,7 +43,7 @@ Planilha, VBA, configuração, bancos, backups, alvos e resultados detalhados do
 
 ## Publicação e colaboração — 25/10/2026
 
-Cristian autorizou implementar P8 e revisar código/documentação para open source e portfólio. Delegou a decisão de versão ao agente neste projeto e pediu push automático dos commits coesos. Escolhida v0.6.0 para build de Pages, atalho público, pipeline condicionado e guias reorganizados. Os rótulos de envio foram separados do componente de revisão e estilos temporários removidos, sem alterar contratos de persistência/envio. Configuração autenticada do Pages e conferência da URL pública são distintas da preparação do código; o [roadmap](../ROADMAP.md) registra a pendência atual.
+Cristian autorizou implementar P8 e revisar código/documentação para open source e portfólio. Delegou a decisão de versão ao agente neste projeto e pediu push automático dos commits coesos. Escolhida v0.6.0 para build de Pages, atalho público, pipeline condicionado e guias reorganizados. Os rótulos de envio foram separados do componente de revisão e estilos temporários removidos, sem alterar contratos de persistência/envio. A configuração foi feita pelo painel após Cristian autenticar a sessão normal; nenhuma credencial foi extraída. CI/deploy e [URL pública](https://cristianworth.github.io/worklog-for-redmine/) conferidos com sucesso. Avaliação independente de visitante segue como retorno de uso, distinta da validação técnica. Evidência no [roadmap](../ROADMAP.md).
 
 ## Referências para conferir o comportamento
 

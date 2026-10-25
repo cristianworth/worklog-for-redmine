@@ -1,6 +1,6 @@
 # Changelog — Worklog for Redmine
 
-Histórico das versões. Criado em 23/10/2026 com a base anterior ao modelo registrada retrospectivamente como v0.0.0. A v0.3.0 marca a primeira publicação pública do código no GitHub, sob licença MIT. A v0.5.0 entrega a demo isolada; sua hospedagem pública permanece na P8.
+Histórico das versões. Criado em 23/10/2026 com a base anterior ao modelo registrada retrospectivamente como v0.0.0. A v0.3.0 marca a publicação do código sob MIT; a v0.5.0 entrega a demo isolada; a v0.6.0 publica a demo no GitHub Pages e reorganiza a documentação pública.
 
 ## Regras de versionamento
 
@@ -14,18 +14,18 @@ Histórico das versões. Criado em 23/10/2026 com a base anterior ao modelo regi
 
 ## [0.6.0] — 2026-10-25
 
-### Preparação de publicação e repositório — P8
+### Publicação e repositório — P8
 
 - Build/preview próprios para `/worklog-for-redmine/`, com auditoria dos caminhos e existência dos recursos. O workflow verifica suíte, build local, demo na raiz e Pages; somente o artefato estático aprovado pode ser publicado em `master` do repositório original. PRs/forks não publicam nesse destino; permissões de Pages/OIDC restritas ao job de deploy.
-- Atalho **Abrir demonstração** habilitado no modo local, em outra aba, e link para código/documentação no rodapé. Descrição da página adicionada para apresentação do projeto.
+- Atalho **Abrir demonstração** habilitado no modo local, em outra aba, e link para código/documentação no rodapé. Descrição da página adicionada para apresentação do projeto; About do GitHub atualizado com o endereço do Pages.
 - Rótulos de envio extraídos do componente para um módulo tipado de apresentação; estados fictícios com texto próprio. Quantidade pendente calculada uma vez na revisão. Estilos temporários sem uso removidos. Contratos HTTP, banco e regras de criação preservados.
 - README reorganizado para entrada de visitantes e contribuidores; guias de uso local, arquitetura, publicação/rollback e mapa da documentação. Guia de contribuição ampliado e política de segurança adicionada. Hipóteses antigas de catálogo por projeto e mudança de status identificadas como substituídas/canceladas; instruções do agente consolidadas no comportamento atual.
 - Cristian delegou ao agente a escolha de versão neste projeto e pediu push automático dos commits coesos. Manifests alinhados em 0.6.0.
 
-### Verificação e pendência externa
+### Verificação e publicação
 
 - 346 testes/26 arquivos aprovados, builds local/demo/Pages e auditorias estáticas. Caminho de produção conferido manualmente: salvar/recarregar, revisar/simular dia, recuperar recibos, restaurar e navegar pela marca. Sem acesso ao banco de uso ou novo envio real.
-- Ativação do Pages em sessão autenticada e conferência da URL pública ainda pendentes. A revisão automática bloqueou reutilizar credencial do Git na API; o navegador estava sem login. O workflow pronto e o destino documentado não equivalem a deploy concluído. [Estado atual](ROADMAP.md).
+- Demo publicada em [cristianworth.github.io/worklog-for-redmine](https://cristianworth.github.io/worklog-for-redmine/) com HTTPS, após ativação do Pages pelo painel em sessão autenticada por Cristian. CI e deploy aprovados. Na URL pública: primeira visita, edição/salvamento, simulação de duas datas por teclado, recarga/conferência, restauração e navegação conferidas, com versão 0.6.0 e console sem erros. A avaliação independente por visitante permanece como retorno de uso, sem bloquear a entrega técnica.
 
 ## [0.5.0] — 2026-10-25
 

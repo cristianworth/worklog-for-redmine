@@ -2,6 +2,8 @@
 
 Destino deste repositório: **https://cristianworth.github.io/worklog-for-redmine/**. O código é público sob MIT; somente a demo estática é hospedada. O serviço Node, configuração privada e SQLite continuam locais.
 
+**Publicado e conferido em 25/10/2026, v0.6.0.** Pages usa GitHub Actions e HTTPS obrigatório. A [execução de entrega](https://github.com/cristianworth/worklog-for-redmine/actions/runs/40203255383) aprovou testes, três builds, auditorias e deploy. O percurso público de salvar, simular duas datas, recarregar/conferir e restaurar foi executado com dados fictícios. A primeira tentativa de deploy havia parado antes da ativação do Pages; repetir o job após configurar a fonte pelo painel concluiu a publicação.
+
 ## Caminhos e artefato
 
 | Comando | Saída / endereço de prévia |
