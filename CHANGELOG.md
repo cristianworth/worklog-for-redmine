@@ -14,6 +14,15 @@ Histórico das versões. Criado em 23/10/2026 com a base anterior ao modelo regi
 
 ## [Unreleased]
 
+### Exemplos, persistência e recuperação — P7-B
+
+- Três dias relativos à primeira visita, três tarefas fictícias de dois projetos, catálogo único e modelo de exemplo. O período inicial mostra os exemplos; as datas salvas não são recalculadas a cada visita.
+- Salvamento explícito de catálogo, dias e modelo em snapshot próprio e versionado do navegador. Conflitos de revisão, falhas de gravação e dados inválidos preservam o conteúdo anterior; armazenamento indisponível gera aviso de sessão temporária.
+- Restauração antecipada para P7-B, com confirmação e limpeza dos editores abertos, preservando o modo local e outras chaves do navegador. Revisões avançam para rejeitar payloads anteriores ao reset.
+- Roadmap reordenado para portfólio: recuperação antes dos envios simulados, primeira experiência/acessibilidade e etapa explícita de verificações/CI antes da publicação no Pages.
+- 326 testes/23 arquivos e builds local/demo aprovados. Recarga de dias/catálogo/modelo, cancelamento e confirmação da restauração conferidos na interface. Sem alterações do banco de uso ou envios reais; a simulação de envios permanece em P7-C.
+- Cristian autorizou manter a versão 0.4.0 e registrar o roadmap revisado e P7-B em commit, reservando a decisão da próxima versão para a entrega consolidada.
+
 ### Isolamento da demo — P7-A
 
 - Acesso substituível para catálogo, dias, modelo, tarefas, conexão, recibos e lotes. O modo local mantém contratos HTTP, revisões, erros 409, cancelamento e recuperação sem repetir envios.

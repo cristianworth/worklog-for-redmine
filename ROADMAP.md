@@ -1,56 +1,89 @@
 # Roadmap — Worklog for Redmine
 
-Atualizado em 25/10/2026. Versão atual: **v0.4.0**. P7-A implementado sem nova versão; demonstração pública ainda pendente. O [changelog](CHANGELOG.md) preserva o histórico; [decisões e aprendizados](docs/project-decisions.md) orientam as próximas implementações.
+Atualizado em 25/10/2026. Versão publicada: **v0.4.0**. Código público sob MIT; demo pública ainda pendente. Histórico no [changelog](CHANGELOG.md), invariantes nas [decisões](docs/project-decisions.md) e detalhes técnicos no [plano](docs/development-plan.md).
 
-## Estado atual validado
+## Objetivo e prioridades
 
-- **Um catálogo único:** o banco de uso contém 15 atividades, com 15 nomes/códigos únicos e nenhuma cópia por projeto. Os antigos 60 vínculos já foram consolidados com backup; não repetir a migração ou repovoar o banco.
-- Dias e modelo permitem escolher a atividade antes de informar o card. O projeto continua sendo informação da tarefa e parte da validação remota, sem duplicar o cadastro local.
-- O mesmo código de atividade foi aceito em dois projetos. Além do readback técnico, Cristian confirmou visualmente o tipo de atividade dos dois lançamentos. O teste não comparou códigos antigo/atual nem validou todas as opções em todos os projetos.
-- Rascunhos, modelo, lotes e recibos anteriores foram preservados. A v0.4.0 foi conferida com 247 testes/17 arquivos, compilação e interface fictícia. Nenhum novo envio real está pendente de execução.
+A demo deve permitir que um recrutador entenda o problema e experimente editar, salvar e revisar apontamentos em poucos minutos, sem conta, credenciais ou instalação. O modo local continua sendo a aplicação de uso, com seus dados preservados.
 
-## Marcos entregues
+Ordem de importância: **isolamento → dados recuperáveis → fluxo completo → apresentação/acessibilidade → qualidade → publicação**. Entregar recortes utilizáveis e conferidos; não ampliar o produto com funcionalidades sem necessidade demonstrada.
+
+## Base entregue
 
 | Versão / etapa | Resultado |
 | --- | --- |
-| v0.0.0 / P0–P4.2 | Rascunhos em SQLite, período livre, consulta com cache, envios individuais/lotes, recibos e validação integral antes do envio |
-| v0.1.0 / P5 | Modelo configurável, salvamento separado e cópia independente para dias novos |
-| v0.2.0 / P6.1–P6.3 | Seleção de atividades e duração abreviada; o cadastro por projeto dessa versão foi substituído na v0.4.0 |
-| v0.3.0 | Recolher/expandir tarefas por dia e publicação do código sob MIT |
-| v0.4.0 / P6.4 | Catálogo único, seleção antes do card, migração com backup e conferência real em dois projetos |
+| v0.0.0 / P0–P4.2 | Rascunhos em SQLite, período livre, consulta com cache, envios individuais/lotes, recibos e preflight integral |
+| v0.1.0 / P5 | Modelo do dia, salvamento separado e cópia independente para dias novos |
+| v0.2.0 / P6.1–P6.3 | Seleção de atividades e duração abreviada; catálogo por projeto substituído na v0.4.0 |
+| v0.3.0 | Dias recolhíveis e código publicado sob MIT |
+| v0.4.0 / P6.4 | Catálogo único, atividade antes do card e migração com backup |
+| P7-A / sem nova versão | Acesso substituível completo e build estático isolado; commit `08b78a1` |
 
-## Próxima implementação — P7: preparar a demo
+O cadastro privado tem 15 atividades únicas, sem cópias por projeto. Os dois testes reais anteriores mantiveram o mesmo código em dois projetos, com readback e confirmação visual de Cristian. Não validaram todas as atividades/projetos; suas autorizações estão consumidas.
 
-**Objetivo:** deixar um visitante experimentar o fluxo pelo navegador com dados fictícios, sem configurar chave ou instalar o backend. Esta etapa prepara e confere o build estático; hospedagem fica no P8.
+## P7 — Preparar uma demo utilizável
 
-| Chunk | Trabalho | Critério de conclusão |
-| --- | --- | --- |
-| A — Acesso aos dados e isolamento | Mapear as operações de tarefas, catálogo, dias, modelo e envios. Criar um ponto de acesso substituível para usar HTTP no modo local e simulação na demo, reaproveitando a interface e as regras | A demo não consulta a API local nem o Redmine, não lê SQLite ou configuração privada e não exige credenciais. O modo local conserva seus contratos |
-| B — Exemplos e persistência | Criar poucos dias/cards/atividades fictícios, um catálogo único e um modelo de exemplo. Persistir as alterações somente no navegador do visitante, com identificação própria dos dados da demo | Salvar continua explícito; recarregar recupera os dados da demo. Nenhum exemplo vem da planilha ou do banco de uso; não copiar os códigos reais das 15 atividades |
-| C — Experiência completa | Identificar permanentemente o modo demonstração, oferecer envio claramente simulado e restaurar exemplos. Preservar período livre, atividade antes do card, duração abreviada, modelo e dias recolhíveis | Visitante consegue editar, salvar e revisar um dia ou várias datas. Resultados são identificados como simulados; restaurar afeta somente a demo daquele navegador |
-| D — Revisão integrada | Conferir instalação/build sem chave, persistência, restauração, tarefa inválida bloqueando o lote inteiro, recibos simulados e ausência de dados privados | Vitest para as regras/fronteiras relevantes e conferência manual do fluxo. Build estático funciona para visitante novo, sem chamadas aos serviços reais |
+### A — Isolamento — concluído
 
-**Ordem:** A → B → C → D. Manter o catálogo simples; não reintroduzir cópias por projeto, outro framework ou uma aplicação duplicada para viabilizar a demo. Testes reais anteriores não devem ser repetidos nessa etapa.
+Todos os acessos operacionais passam pelo contrato substituível. O build da demo não carrega `.env`, adaptador HTTP, backend ou SQLite. A simulação mínima recusa explicitamente envios ainda indisponíveis. Evidência da entrega: 316 testes/22 arquivos, ambos os builds e conferência manual fictícia em 25/10/2026. [Contratos e limites](docs/data-access.md).
 
-**A implementado em 25/10/2026:** todos os acessos da interface passam pelo contrato substituível. O build separado da demo não carrega `.env`, adaptador HTTP, backend ou banco de uso. A simulação mínima mantém catálogo/dias/modelo em memória, consulta somente a tarefa fictícia 9001 e recusa explicitamente operações de envio ainda indisponíveis, sem fallback real. 316 testes/22 arquivos, builds local/demo e conferências manuais fictícias passaram. [Contratos, evidências e limites](docs/data-access.md). Exemplos persistidos, fluxo completo simulado e restauração permanecem em B/C/D; próxima implementação é B.
+### B — Exemplos, persistência e recuperação — implementado
 
-## P8 — Publicar e conferir a demo
+- Preparar poucos dias/tarefas fictícios, catálogo único e modelo; datas relativas à primeira visita, preservadas nas visitas seguintes.
+- Salvar catálogo, dias e modelo explicitamente no navegador, em um espaço próprio e com formato versionado. Não persistir edições ainda não salvas.
+- Manter revisão/conflitos e gravação de todos os dias ou nenhum; identificar limitações entre abas sem prometer uma transação de banco.
+- Antecipar **Restaurar exemplos**: confirmação explica o descarte das alterações da demo e afeta somente seus dados, inclusive edições abertas. Não apagar outros dados do navegador.
+- Tratar armazenamento bloqueado/cheio, conteúdo inválido e versão desconhecida. Informar limites e preservar o conteúdo anterior até restauração explícita.
 
-O repositório [cristianworth/worklog-for-redmine](https://github.com/cristianworth/worklog-for-redmine) e a licença MIT já estão publicados. Essa parte do P8 está concluída; falta o site demonstrativo.
+**Aceite:** visitante abre uma demo já preenchida, edita/salva/recarrega, mantém os dados e consegue restaurar os exemplos. Sem HTTP ou alteração do modo local; falhas de gravação não aparecem como sucesso.
 
-Direção discutida em 25/10/2026: foco em recrutadores/portfólio, com endereço `github.io` suficiente para Cristian. GitHub Pages é a recomendação atual; caminhos de publicação, workflow e publicação continuam pendentes de P8.
+Implementado em 25/10/2026: três dias, catálogo/modelo e tarefas fictícios; snapshot próprio versionado, salvamento explícito, avisos/recuperação e restauração confirmada dos dados e editores abertos. 326 testes/23 arquivos e builds local/demo aprovados; recarga e cancelamento/restauração conferidos na interface. Limite: revisões entre abas não equivalem a uma transação de banco. [Detalhes](docs/data-access.md).
 
-| Chunk | Trabalho | Critério de conclusão |
-| --- | --- | --- |
-| A — Destino e preparação | Definir hospedagem estática/endereço e configurar os caminhos dos arquivos. Revisar o build da demo para configuração, dados e referências privadas | Artefato distribuível contém somente interface, regras e exemplos fictícios; destino definido sem expor o backend local |
-| B — Publicação | Publicar o build do P7 no destino definido e incluir o link no README e no atalho da aplicação | Outra pessoa abre a demo pelo link, sem instalar Node ou informar credenciais |
-| C — Conferência externa | Executar o fluxo fictício em uma sessão nova, incluindo recarga/restauração e tela menor | Site publicado funciona e permanece isolado; versão, changelog e instruções refletem a entrega |
+### C — Envio simulado e recibos — próximo recorte
 
-## Decisões e limites que permanecem
+- Revisão e confirmação simuladas para uma linha, um dia ou várias datas; resultados sempre identificados como simulados.
+- Reutilizar regras compartilhadas: validar toda a seleção antes da primeira criação fictícia, preservar revisões, resultados parciais e trava contra duplicação.
+- Persistir recibos/lotes da demo no mesmo espaço do visitante. Conferir e reconciliar sem repetir criação; restauração inclui esses resultados.
+- Manter status dos cards e distinguir claramente salvar rascunhos de enviar.
 
-- **P5.1 — Movimentar status: cancelado.** O envio mantém o status do card; não criar uma etapa equivalente.
-- Salvar rascunhos e enviar ao Redmine continuam ações separadas. Intervalo livre, sem total semanal ou cópia automática entre dias.
-- Importação ampla da planilha, agendamento do modelo, múltiplos modelos e construtor genérico de campos ficam fora do escopo atual. Novos tipos de campo devem partir de uma necessidade concreta.
-- Não implementar exceções de atividade por projeto sem uma incompatibilidade demonstrada e uma decisão específica. Quantidade de projetos não justifica duplicar a lista.
-- Preservar os dias 19–21/10 do banco de uso. Os testes reais anteriores estão concluídos e suas autorizações consumidas; eventual exclusão manual não autoriza reenvio automático.
-- Banco/credenciais compartilhados na internet, autenticação multiusuário e hospedagem do backend real são outro escopo. A demo será estática e isolada.
+**Aceite:** completar o percurso de preenchimento até recibo; tarefa inválida bloqueia o lote inteiro. Recarregar ou repetir confirmação não duplica resultados simulados.
+
+### D — Primeira experiência e acessibilidade
+
+- Explicar brevemente o problema resolvido e oferecer um percurso sugerido de poucos minutos, sem tutorial obrigatório.
+- Destacar o modo demonstração, as tarefas fictícias disponíveis, o salvamento e a restauração; eliminar rótulos temporários de implementação.
+- Conferir leitura em tela menor, foco visível, ações por teclado, nomes acessíveis, erros compreensíveis e contraste dos estados.
+- Ajustar README com contexto, decisões/trade-offs e instruções rápidas para demo e instalação local; não criar uma segunda aplicação para apresentar o projeto.
+
+**Aceite:** uma pessoa nova entende o propósito e completa o percurso sem explicação no chat, usando mouse ou teclado; o fluxo principal permanece acessível em tela menor.
+
+### E — Verificação de entrega — nova etapa explícita
+
+- Automatizar testes, build local e build demo em CI antes de publicar; manter a barreira que impede backend/API/dados privados no bundle.
+- Conferir instalação limpa sem chave, nova visita, recarga, restauração, conflitos e falhas de armazenamento, preservando os dados locais.
+- Revisar o artefato distribuível e documentação; escolher a versão da entrega consolidada com Cristian. Sugestão: v0.5.0, sem incremento a cada recorte.
+
+**Aceite:** verificações reproduzíveis passam e as limitações remanescentes estão documentadas. Publicação usa somente o artefato da demo.
+
+## P8 — GitHub Pages e conferência pública
+
+Direção: recrutadores/portfólio e endereço `github.io`, conforme conversa de 25/10/2026. GitHub Pages é a recomendação; nenhuma hospedagem foi configurada ou publicada.
+
+1. **Preparar destino:** confirmar Pages e endereço do projeto, configurar o subdiretório dos arquivos e o workflow de publicação do build demo. Conferir o artefato sob esse caminho antes de publicar.
+2. **Publicar:** habilitar/publicar no destino autorizado; incluir o endereço no README e no atalho local. Código público e licença MIT já estão resolvidos.
+3. **Conferir como visitante:** sessão nova, recarga, restauração, tela menor e caminho direto; conferir versão e disponibilidade real do link.
+
+**Aceite:** outra pessoa experimenta a demo sem instalar Node, informar credenciais ou alcançar o backend real.
+
+## Depois da primeira publicação
+
+Coletar observações reais de uso e priorizar correções que impeçam entender ou completar o percurso. Novas funcionalidades dependem desse retorno; não adicionar login, análises de uso, domínio próprio ou backend público só para ampliar o portfólio.
+
+## Limites preservados
+
+- **P5.1 — Movimentar status: cancelado.** Não reintroduzir.
+- Período livre, sem total semanal obrigatório, cópia automática entre datas ou agendamento do modelo.
+- Catálogo único; não duplicar por projeto sem incompatibilidade concreta e decisão específica.
+- Banco de uso, recibos e especialmente os dias 19–21/10 permanecem protegidos. Não repetir migração, população, importação ou envios reais anteriores.
+- Planilha, VBA, credenciais, bancos, backups e resultados reais ficam fora do Git e da demo. Exemplos são criados do zero.
+- Importação ampla, múltiplos modelos, autenticação multiusuário e hospedagem do backend de uso ficam fora deste roteiro.

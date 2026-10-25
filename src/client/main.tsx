@@ -5,7 +5,7 @@ import { WorklogDataProvider } from "./WorklogDataProvider";
 import "./styles.css";
 
 const data = import.meta.env.MODE === "demo"
-  ? (await import("./demo-data-access")).createDemoDataAccess()
+  ? (await import("./demo-data-access")).createBrowserDemoDataAccess()
   : (await import("./http-data-access")).createHttpDataAccess();
 
 createRoot(document.getElementById("root")!).render(

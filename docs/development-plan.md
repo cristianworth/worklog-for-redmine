@@ -27,7 +27,7 @@ A duplicação de atividades por projeto foi removida. Os 60 vínculos foram con
 
 ## Ordem do trabalho restante
 
-1. **P7 — Demo:** P7-A implementado em 25/10/2026: acesso substituível completo e build isolado, com estado mínimo em memória e recusa explícita de envios ainda indisponíveis. 316 testes/22 arquivos, ambos os builds e fluxo fictício conferidos. Restam exemplos/persistência do visitante (B), fluxo simulado/restauração (C) e revisão completa (D). Reusar interface e regras, sem acesso ao banco ou serviços reais.
+1. **P7 — Demo:** A e B implementados: isolamento, exemplos, persistência e recuperação. B antecipou a restauração para que o visitante não fique preso a uma edição; 326 testes/23 arquivos, builds local/demo e recarga/restauração manual conferidos. Próximo recorte é fluxo simulado/recibos (C), seguido de primeira experiência/acessibilidade (D) e verificações de entrega/CI (E). Detalhes e limitações em [acesso aos dados](data-access.md).
 2. **P8 — Site:** definir hospedagem/endereço, publicar a demo e conferir o uso por uma pessoa nova. O repositório público e a licença já estão resolvidos.
 
 Critérios e chunks detalhados estão no roadmap e a fronteira implementada em [acesso aos dados](data-access.md). Não ampliar o catálogo por projeto nem transformar a demo em um backend público compartilhado. Cristian orientou foco em recrutadores/portfólio e informou que `github.io` é suficiente; GitHub Pages é a recomendação para P8. Nenhuma hospedagem foi configurada ou publicada.

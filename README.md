@@ -100,16 +100,18 @@ The period-based editor uses Lucide icons, a highlighted daily total and separat
 
 API access checks and automatic issue lookup are implemented with synthetic tests. Real account and issue reads have been verified with the local API key; one specifically authorized real time-entry test was created and verified, with issue status unchanged. Its private record is excluded from Git and must never be replayed. Two separately authorized batch tests were subsequently completed and verified, covering nine entries with unchanged issue statuses; those authorizations are also consumed. A single local activity catalog, individual submission and period batches are implemented; issue-status changes were explicitly removed from scope; submission always preserves the card status. Saving a draft does not send anything to Redmine. This project is independent of Redmine.
 
-## Isolated demo foundation — P7-A
+## Isolated demo — P7-A/B
 
-A separate technical demo build now reuses the interface without the local API, SQLite or Redmine. It is not yet a complete portfolio demonstration: catalog, days and template start empty and last only until the page reloads. Task **9001** is synthetic; other task IDs fail locally. Submission paths return an explicit unavailable message and never fall back to the real service. Examples, visitor persistence, simulated receipts and reset remain P7-B/C/D. No public link or deployment exists yet.
+A separate demo build reuses the interface without the local API, SQLite or Redmine. A new visitor starts with three recent fictional days, one activity catalog and a day template. Tasks **9001**, **9004** and **9007** are synthetic; other task IDs fail locally. Explicitly saved changes survive page reloads in that browser. **Restaurar exemplos** asks for confirmation and restores only the demo data, including unsaved editors. If storage is blocked or full, the interface explains the limitation; invalid or unknown saved formats are preserved until an explicit reset.
+
+This is not yet a complete portfolio demonstration: submission paths still return an explicit unavailable message and never fall back to the real service. Simulated receipts, presentation/accessibility checks and the release gate remain P7-C/D/E. No public link or deployment exists yet.
 
 ```sh
 npm run build:demo
 npm run preview:demo
 ```
 
-Open `http://127.0.0.1:4173/`. This preview serves `dist-demo/` without starting Express or opening the usage database. Only the demo period preference persists, under its own key. The demo build skips `.env` files, excludes the HTTP/backend modules and blocks operational network connections. The normal `npm run build` still outputs the local application to `dist/`. [Boundary, contracts and verification](docs/data-access.md).
+Open `http://127.0.0.1:4173/`. This preview serves `dist-demo/` without starting Express or opening the usage database. Demo data uses its own versioned browser-storage record; the local period preference and unrelated browser data are preserved. The demo build skips `.env` files, excludes the HTTP/backend modules and blocks operational network connections. The normal `npm run build` still outputs the local application to `dist/`. [Boundary, persistence and verification](docs/data-access.md).
 
 The normal local mode continues to use Node and SQLite. The public code repository and an eventual hosted demo are separate deliverables; publishing code alone does not host the Node application.
 

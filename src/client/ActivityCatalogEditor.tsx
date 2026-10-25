@@ -95,7 +95,7 @@ export function ActivityCatalogEditor({
       setDirty(false);
       setMessage(
         data.mode === "demo"
-          ? "Catálogo salvo nesta sessão de demonstração. Nenhum dado foi enviado ao Redmine."
+          ? `Catálogo salvo ${data.demo?.persistent ? "neste navegador" : "nesta sessão de demonstração"}. Nenhum dado foi enviado ao Redmine.`
           : "Catálogo salvo neste computador. Nenhum dado foi enviado ao Redmine.",
       );
     } catch (error) {

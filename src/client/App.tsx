@@ -53,21 +53,37 @@ import { RedmineSettings } from "./RedmineSettings";
 import { ActivityCatalogEditor } from "./ActivityCatalogEditor";
 import type { ActivityCatalog } from "../shared/activities";
 import { useWorklogData } from "./WorklogDataProvider";
+import { DemoControls } from "./DemoControls";
 
-function initialPeriod(storageKey: string): PeriodPreference {
+function initialPeriod(storageKey: string, exampleStartDate?: string, reset = false): PeriodPreference {
+  const fallback = exampleStartDate
+    ? restorePeriod({ from: exampleStartDate, to: localDate(), endMode: "today" })
+    : restorePeriod(null);
+  if (reset) return fallback;
   try {
-    return restorePeriod(
-      JSON.parse(localStorage.getItem(storageKey) ?? "null"),
-    );
+    const stored = JSON.parse(localStorage.getItem(storageKey) ?? "null");
+    return stored === null ? fallback : restorePeriod(stored);
   } catch {
-    return restorePeriod(null);
+    return fallback;
   }
 }
 
 export function App() {
+  const [restoration, setRestoration] = useState(0);
+  return <WorklogApp key={restoration} resetPeriod={restoration > 0}
+    onDemoRestored={() => setRestoration((current) => current + 1)} />;
+}
+
+function WorklogApp({ resetPeriod, onDemoRestored }: {
+  resetPeriod: boolean;
+  onDemoRestored(): void;
+}) {
   const data = useWorklogData();
   const storageKey = data.mode === "demo" ? "worklog.demo.period" : periodStorageKey;
-  const [period, setPeriod] = useState(() => initialPeriod(storageKey));
+  const saveLocation = data.mode === "demo"
+    ? data.demo?.persistent ? "neste navegador" : "nesta sessão de demonstração"
+    : "neste computador";
+  const [period, setPeriod] = useState(() => initialPeriod(storageKey, data.demo?.exampleStartDate, resetPeriod));
   const [filters, setFilters] = useState(period);
   const [today, setToday] = useState(localDate);
   const [editor, setEditor] = useState<EditorState>({
@@ -325,7 +341,9 @@ export function App() {
       setPreferenceNotice("");
     } catch {
       setPreferenceNotice(
-        "Este navegador não permitiu lembrar o período. Seus rascunhos continuam no banco local.",
+        data.mode === "demo"
+          ? "O navegador não permitiu lembrar o período. Confira o aviso de armazenamento da demonstração."
+          : "Este navegador não permitiu lembrar o período. Seus rascunhos continuam no banco local.",
       );
     }
   }, [period, storageKey]);
@@ -407,7 +425,7 @@ export function App() {
         dirtyDates: current.dirtyDates.filter((date) => !expected.has(date)),
       }));
       setMessage(
-        `${saved.length === 1 ? "Rascunhos de 1 dia salvos" : `Rascunhos de ${saved.length} dias salvos`} ${data.mode === "demo" ? "nesta sessão de demonstração" : "neste computador"}.`,
+        `${saved.length === 1 ? "Rascunhos de 1 dia salvos" : `Rascunhos de ${saved.length} dias salvos`} ${saveLocation}.`,
       );
     } catch (error) {
       setError(
@@ -553,14 +571,16 @@ export function App() {
               <Database size={18} aria-hidden="true" />
               <span>
                 <strong>{data.mode === "demo" ? "Demonstração isolada" : "Modo local"}</strong>
-                <small>{data.mode === "demo" ? "Dados temporários; recarregar descarta os rascunhos" : "Rascunhos no banco deste computador"}</small>
+                <small>{data.mode === "demo"
+                  ? data.demo?.persistent ? "Exemplos salvos somente neste navegador" : "Dados temporários ou aguardando recuperação"
+                  : "Rascunhos no banco deste computador"}</small>
               </span>
               <ChevronDown size={15} aria-hidden="true" />
             </summary>
             <div className="data-description">
               {data.mode === "demo" ? <p>
-                Demonstração em preparação: catálogo, dias e modelo começam vazios e ficam somente nesta sessão.
-                A tarefa fictícia 9001 permite conferir consultas. Envios simulados ainda estão indisponíveis.
+                Os exemplos são fictícios e não acessam o Redmine. Salve suas edições para recuperá-las neste navegador.
+                Envios simulados ainda estão em preparação.
               </p> : <>
               <p>
                 <strong>Seus dados:</strong> salvar grava os rascunhos no banco
@@ -586,6 +606,8 @@ export function App() {
             <small id="demo-status">Em breve</small>
           </span>
         </section>
+
+        {data.demo && <DemoControls session={data.demo} onRestored={onDemoRestored} />}
 
         <section className="period-panel" aria-label="Período de trabalho">
           <div className="period-title">
@@ -868,7 +890,7 @@ export function App() {
                       ? "Carregando rascunhos…"
                       : loadFailed
                         ? "Não foi possível abrir o período"
-                        : message || (data.mode === "demo" ? "Tudo salvo nesta sessão de demonstração" : "Tudo salvo neste computador")}
+                        : message || `Tudo salvo ${saveLocation}`}
               </strong>
               <p>
                 {dirtyCount

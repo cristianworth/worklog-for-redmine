@@ -1,24 +1,25 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDemoDataAccess } from "./demo-data-access";
+import { createDemoExamples } from "./demo-examples";
 
 afterEach(() => vi.unstubAllGlobals());
 
-describe("minimal isolated demo", () => {
+describe("isolated demo access", () => {
   it("runs every supported operation without HTTP or private configuration", async () => {
     const http = vi.fn(() => { throw new Error("HTTP is forbidden"); });
-    const storage = vi.fn(() => { throw new Error("Visitor persistence belongs to P7-B"); });
+    const storage = vi.fn(() => { throw new Error("Memory sessions must not use global storage"); });
     vi.stubGlobal("fetch", http);
     vi.stubGlobal("localStorage", { getItem: storage, setItem: storage });
-    const data = createDemoDataAccess();
+    const data = createDemoDataAccess({ today: "2026-10-25" });
     expect(data.mode).toBe("demo");
     expect(await data.readConnectionStatus()).toEqual({
       configured: false, hasApiKey: false, certificateException: false,
     });
     await data.checkConnection();
-    expect(await data.readActivities()).toEqual({ revision: 0, activities: [] });
-    const catalog = await data.saveActivities({ revision: 0, activities: [{ activityId: 901, name: "Synthetic review" }] });
+    expect(await data.readActivities()).toEqual(createDemoExamples("2026-10-25").catalog);
+    const catalog = await data.saveActivities({ revision: 1, activities: [{ activityId: 901, name: "Synthetic review" }] });
     expect(await data.readActivities()).toEqual(catalog);
-    const template = await data.saveDayTemplate({ revision: 0, entries: [{ issue: "", minutes: null, activity: "", comment: "" }] });
+    const template = await data.saveDayTemplate({ revision: 1, entries: [{ issue: "", minutes: null, activity: "", comment: "" }] });
     expect(await data.readDayTemplate()).toEqual(template);
     const days = await data.saveDays([{ date: "2026-10-26", revision: 0, entries: [] }]);
     expect(await data.readDays("2026-10-26", "2026-10-26")).toEqual(days);
@@ -54,11 +55,11 @@ describe("minimal isolated demo", () => {
   });
 
   it("preserves revisions, atomic day saves and independent session data", async () => {
-    const first = createDemoDataAccess(), second = createDemoDataAccess();
-    const catalog = { revision: 0, activities: [{ activityId: 901, name: "Synthetic" }] };
+    const first = createDemoDataAccess({ today: "2026-10-25" }), second = createDemoDataAccess({ today: "2026-10-25" });
+    const catalog = { revision: 1, activities: [{ activityId: 901, name: "Synthetic" }] };
     await first.saveActivities(catalog);
     await expect(first.saveActivities(catalog)).rejects.toMatchObject({ status: 409 });
-    const template = { revision: 0, entries: [] };
+    const template = { revision: 1, entries: [] };
     await first.saveDayTemplate(template);
     await expect(first.saveDayTemplate(template)).rejects.toMatchObject({ status: 409 });
     const days = await first.saveDays([
@@ -70,8 +71,8 @@ describe("minimal isolated demo", () => {
     expect((await first.readDays("2026-10-26", "2026-10-27")).map((day) => day.revision)).toEqual([1, 2]);
     days[0].entries.push({ id: "outside", issue: "", minutes: null, activity: "", comment: "" });
     expect((await first.readDays("2026-10-26", "2026-10-26"))[0].entries).toEqual([]);
-    expect(await second.readActivities()).toEqual({ revision: 0, activities: [] });
-    expect(await second.readDayTemplate()).toEqual({ revision: 0, entries: [] });
+    expect(await second.readActivities()).toEqual(createDemoExamples("2026-10-25").catalog);
+    expect(await second.readDayTemplate()).toEqual(createDemoExamples("2026-10-25").template);
     expect(await second.readDays("2026-10-26", "2026-10-27")).toEqual([]);
   });
 
@@ -87,6 +88,6 @@ describe("minimal isolated demo", () => {
       () => data.listSubmissions("2026-10-26", "2026-10-27", controller.signal),
       () => data.listBatches("2026-10-26", "2026-10-27", controller.signal),
     ]) await expect(operation()).rejects.toMatchObject({ name: "AbortError" });
-    expect(await data.readActivities()).toEqual({ revision: 0, activities: [] });
+    expect((await data.readActivities()).activities).toHaveLength(3);
   });
 });

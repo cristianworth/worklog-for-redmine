@@ -45,9 +45,10 @@ describe("replaceable worklog data access", () => {
     );
     expect(received).toBe(memory);
     const data = received!;
-    expect(await data.readActivities()).toEqual({ revision: 0, activities: [] });
+    const initialCatalog = await data.readActivities();
+    expect(initialCatalog.activities).toHaveLength(3);
     const saved = await data.saveActivities({
-      revision: 0,
+      revision: initialCatalog.revision,
       activities: [{ activityId: 902, name: "Synthetic planning" }],
     });
     expect(await data.readActivities()).toEqual(saved);

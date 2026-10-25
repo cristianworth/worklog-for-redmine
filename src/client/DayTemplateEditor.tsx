@@ -136,7 +136,7 @@ export function DayTemplateEditor({
       onTemplate(saved);
       setMessage(
         data.mode === "demo"
-          ? "Modelo salvo nesta sessão de demonstração. Seus dias existentes não mudaram."
+          ? `Modelo salvo ${data.demo?.persistent ? "neste navegador" : "nesta sessão de demonstração"}. Seus dias existentes não mudaram.`
           : "Modelo salvo neste computador. Seus dias existentes não mudaram.",
       );
     } catch (error) {

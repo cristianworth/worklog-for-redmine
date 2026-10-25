@@ -1619,3 +1619,19 @@ td select {
 .is-collapsed .day-heading {
   border-bottom: 0;
 }
+
+.demo-controls {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 20px;
+  margin: 0 0 24px;
+  border: 1px solid #d7e0ce;
+  border-radius: 12px;
+  background: #f5f8f0;
+}
+.demo-controls > div:first-child { flex: 1 1 420px; }
+.demo-controls p { font-size: 13px; line-height: 1.6; margin: 8px 0; }
+.demo-restore-confirmation { flex: 1 1 100%; }
+.demo-restore-actions { display: flex; flex-wrap: wrap; gap: 10px; }

@@ -17,8 +17,16 @@ export interface ConnectionStatus {
 }
 export type SubmissionAction = "confirm" | "verify" | "reconcile";
 
+export interface DemoSession {
+  readonly exampleStartDate: string;
+  readonly persistent: boolean;
+  readonly notice: string | null;
+  restoreExamples(): Promise<void>;
+}
+
 export interface WorklogDataAccess {
   readonly mode: "local" | "demo";
+  readonly demo?: DemoSession;
   readActivities(signal?: AbortSignal): Promise<ActivityCatalog>;
   // A successful save must confirm the next revision and the saved catalog.
   saveActivities(catalog: ActivityCatalog): Promise<ActivityCatalog>;
