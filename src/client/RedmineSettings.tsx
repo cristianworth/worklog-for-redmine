@@ -1,21 +1,19 @@
 import { useEffect, useState } from "react";
 import { LoaderCircle, PlugZap, X } from "lucide-react";
+import { useWorklogData } from "./WorklogDataProvider";
+import type { ConnectionStatus } from "./data-access";
 
 export function RedmineSettings({ onClose }: { onClose(): void }) {
-  const [status, setStatus] = useState<{
-    configured: boolean;
-    hasApiKey: boolean;
-    certificateException: boolean;
-  } | null>(null);
+  const data = useWorklogData();
+  const [status, setStatus] = useState<ConnectionStatus | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   useEffect(() => {
     const controller = new AbortController();
-    fetch("/api/redmine/status", { signal: controller.signal })
-      .then(async (response) => {
-        if (!response.ok) throw new Error();
-        setStatus(await response.json());
+    data.readConnectionStatus(controller.signal)
+      .then((loaded) => {
+        if (!controller.signal.aborted) setStatus(loaded);
       })
       .catch(() => {
         if (!controller.signal.aborted)
@@ -24,20 +22,17 @@ export function RedmineSettings({ onClose }: { onClose(): void }) {
           );
       });
     return () => controller.abort();
-  }, []);
+  }, [data]);
   async function check() {
     setBusy(true);
     setMessage("");
     setError("");
     try {
-      const response = await fetch("/api/redmine/check", { method: "POST" });
-      const data = await response.json();
-      if (!response.ok)
-        throw new Error(data.error || "Não foi possível testar o acesso.");
-      if (data.authenticated !== true)
-        throw new Error("O teste não confirmou a autenticação.");
+      await data.checkConnection();
       setMessage(
-        "Acesso à API confirmado. Você já pode consultar tarefas; nenhuma hora foi enviada.",
+        data.mode === "demo"
+          ? "Simulação isolada disponível. Nenhuma conexão externa foi feita."
+          : "Acesso à API confirmado. Você já pode consultar tarefas; nenhuma hora foi enviada.",
       );
     } catch (error) {
       setError(
@@ -60,6 +55,7 @@ export function RedmineSettings({ onClose }: { onClose(): void }) {
           <X size={18} />
         </button>
       </div>
+      {data.mode === "demo" ? <p>Simulação isolada, sem endereço, chave ou conexão com o Redmine.</p> : <>
       <p>
         Conexão para consultar tarefas e enviar horas após revisão e
         confirmação. Salvar rascunhos continua independente do Redmine.
@@ -108,6 +104,7 @@ export function RedmineSettings({ onClose }: { onClose(): void }) {
         certificado inválido, a exceção é configurada localmente e indicada
         acima quando ativa.
       </p>
+      </>}
       <button
         className="button secondary"
         onClick={check}
@@ -120,7 +117,7 @@ export function RedmineSettings({ onClose }: { onClose(): void }) {
             <PlugZap size={16} />
           )}
         </>
-        {busy ? "Testando acesso…" : "Testar acesso à API"}
+        {busy ? "Testando acesso…" : data.mode === "demo" ? "Conferir simulação" : "Testar acesso à API"}
       </button>
       {error && (
         <p className="field-error" role="alert">

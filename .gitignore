@@ -35,6 +35,7 @@
 # Dependencies, generated files and test artifacts.
 node_modules/
 dist/
+dist-demo/
 build/
 coverage/
 .vite/

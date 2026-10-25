@@ -4,6 +4,7 @@ import {
   validateActivityCatalog,
   type ActivityCatalog,
 } from "../shared/activities";
+import { useWorklogData } from "./WorklogDataProvider";
 
 interface Row {
   key: string;
@@ -29,6 +30,7 @@ export function ActivityCatalogEditor({
   onDirtyChange(dirty: boolean): void;
   onReload(): void;
 }) {
+  const data = useWorklogData();
   const [rows, setRows] = useState<Row[]>([]);
   const [revision, setRevision] = useState(0);
   const [dirty, setDirty] = useState(false);
@@ -86,28 +88,15 @@ export function ActivityCatalogEditor({
     setError("");
     setMessage("");
     try {
-      const response = await fetch("/api/activities", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const data = await response.json();
-      if (!response.ok)
-        throw new Error(data.error || "Não foi possível salvar o catálogo.");
-      const saved = validateActivityCatalog(data);
-      if (
-        saved.revision !== revision + 1 ||
-        JSON.stringify(saved.activities) !== JSON.stringify(payload.activities)
-      )
-        throw new Error(
-          "Não foi possível confirmar o salvamento do catálogo. Preserve suas edições e recarregue o catálogo antes de tentar novamente.",
-        );
+      const saved = await data.saveActivities(payload);
       onSaved(saved);
       setRows(rowsFrom(saved));
       setRevision(saved.revision);
       setDirty(false);
       setMessage(
-        "Catálogo salvo neste computador. Nenhum dado foi enviado ao Redmine.",
+        data.mode === "demo"
+          ? "Catálogo salvo nesta sessão de demonstração. Nenhum dado foi enviado ao Redmine."
+          : "Catálogo salvo neste computador. Nenhum dado foi enviado ao Redmine.",
       );
     } catch (error) {
       setError(

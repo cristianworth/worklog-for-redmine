@@ -9,6 +9,8 @@
   "scripts": {
     "dev": "tsx watch src/server/index.ts --dev",
     "build": "tsc --noEmit && vite build",
+    "build:demo": "tsc --noEmit && vite build --mode demo",
+    "preview:demo": "vite preview --mode demo --host 127.0.0.1 --port 4173",
     "start": "tsx src/server/index.ts",
     "test": "vitest run"
   },

@@ -100,9 +100,16 @@ The period-based editor uses Lucide icons, a highlighted daily total and separat
 
 API access checks and automatic issue lookup are implemented with synthetic tests. Real account and issue reads have been verified with the local API key; one specifically authorized real time-entry test was created and verified, with issue status unchanged. Its private record is excluded from Git and must never be replayed. Two separately authorized batch tests were subsequently completed and verified, covering nine entries with unchanged issue statuses; those authorizations are also consumed. A single local activity catalog, individual submission and period batches are implemented; issue-status changes were explicitly removed from scope; submission always preserves the card status. Saving a draft does not send anything to Redmine. This project is independent of Redmine.
 
-## Planned public demonstration
+## Isolated demo foundation — P7-A
 
-A public demo is scheduled among the final project stages, after the local workflow and integration have been consolidated. It will reuse the interface with synthetic examples, isolated browser storage and explicitly simulated submission. Visitors must never access the real SQLite database, the local API or a real Redmine service. A reset action will affect only that visitor’s demo examples. No demo build, public link or deployment exists yet.
+A separate technical demo build now reuses the interface without the local API, SQLite or Redmine. It is not yet a complete portfolio demonstration: catalog, days and template start empty and last only until the page reloads. Task **9001** is synthetic; other task IDs fail locally. Submission paths return an explicit unavailable message and never fall back to the real service. Examples, visitor persistence, simulated receipts and reset remain P7-B/C/D. No public link or deployment exists yet.
+
+```sh
+npm run build:demo
+npm run preview:demo
+```
+
+Open `http://127.0.0.1:4173/`. This preview serves `dist-demo/` without starting Express or opening the usage database. Only the demo period preference persists, under its own key. The demo build skips `.env` files, excludes the HTTP/backend modules and blocks operational network connections. The normal `npm run build` still outputs the local application to `dist/`. [Boundary, contracts and verification](docs/data-access.md).
 
 The normal local mode continues to use Node and SQLite. The public code repository and an eventual hosted demo are separate deliverables; publishing code alone does not host the Node application.
 

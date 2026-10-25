@@ -1,6 +1,6 @@
 # Roadmap — Worklog for Redmine
 
-Atualizado em 24/10/2026. Versão atual: **v0.4.0**. Código público sob MIT; demonstração pública ainda pendente. O [changelog](CHANGELOG.md) preserva o histórico; [decisões e aprendizados](docs/project-decisions.md) orientam as próximas implementações.
+Atualizado em 25/10/2026. Versão atual: **v0.4.0**. P7-A implementado sem nova versão; demonstração pública ainda pendente. O [changelog](CHANGELOG.md) preserva o histórico; [decisões e aprendizados](docs/project-decisions.md) orientam as próximas implementações.
 
 ## Estado atual validado
 
@@ -32,9 +32,13 @@ Atualizado em 24/10/2026. Versão atual: **v0.4.0**. Código público sob MIT; d
 
 **Ordem:** A → B → C → D. Manter o catálogo simples; não reintroduzir cópias por projeto, outro framework ou uma aplicação duplicada para viabilizar a demo. Testes reais anteriores não devem ser repetidos nessa etapa.
 
+**A implementado em 25/10/2026:** todos os acessos da interface passam pelo contrato substituível. O build separado da demo não carrega `.env`, adaptador HTTP, backend ou banco de uso. A simulação mínima mantém catálogo/dias/modelo em memória, consulta somente a tarefa fictícia 9001 e recusa explicitamente operações de envio ainda indisponíveis, sem fallback real. 316 testes/22 arquivos, builds local/demo e conferências manuais fictícias passaram. [Contratos, evidências e limites](docs/data-access.md). Exemplos persistidos, fluxo completo simulado e restauração permanecem em B/C/D; próxima implementação é B.
+
 ## P8 — Publicar e conferir a demo
 
 O repositório [cristianworth/worklog-for-redmine](https://github.com/cristianworth/worklog-for-redmine) e a licença MIT já estão publicados. Essa parte do P8 está concluída; falta o site demonstrativo.
+
+Direção discutida em 25/10/2026: foco em recrutadores/portfólio, com endereço `github.io` suficiente para Cristian. GitHub Pages é a recomendação atual; caminhos de publicação, workflow e publicação continuam pendentes de P8.
 
 | Chunk | Trabalho | Critério de conclusão |
 | --- | --- | --- |

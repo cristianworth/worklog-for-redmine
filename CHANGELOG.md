@@ -12,6 +12,15 @@ Histórico das versões. Criado em 23/10/2026 com a base anterior ao modelo regi
 - Antes de cada commit/merge, ler este arquivo e seguir a regra de aprovação de Cristian. A criação deste histórico, da v0.0.0 e da v0.1.0 está explicitamente autorizada no pedido de 23/10/2026; alterações futuras de versão devem seguir a autorização da entrega.
 - Nunca incluir credenciais, planilhas privadas, bancos, backups ou dados reais nos registros, tags e arquivos distribuídos.
 
+## [Unreleased]
+
+### Isolamento da demo — P7-A
+
+- Acesso substituível para catálogo, dias, modelo, tarefas, conexão, recibos e lotes. O modo local mantém contratos HTTP, revisões, erros 409, cancelamento e recuperação sem repetir envios.
+- Build separado em `dist-demo/`, sem carregar `.env`, adaptador HTTP, backend ou SQLite. A demo mínima usa estado em memória e uma tarefa fictícia; operações de envio ainda indisponíveis falham explicitamente sem fallback real. Preferência de período separada.
+- 316 testes/22 arquivos e builds local/demo aprovados. Interface conferida com dados e serviços fictícios; nenhum dado de uso alterado e nenhum envio real executado. Exemplos persistidos, envio simulado completo, restauração e publicação permanecem pendentes.
+- Cristian autorizou manter a versão 0.4.0 neste recorte e registrar P7-A em commit, sem criar ou mover tag de versão.
+
 ## [0.4.0] — 2026-10-24
 
 ### Catálogo único — P6.4

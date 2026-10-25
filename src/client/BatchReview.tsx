@@ -9,19 +9,8 @@ import {
 import { formatDuration } from "../shared/worklogs";
 import { shortDate } from "./period";
 import { submissionLabel } from "./SubmissionReview";
+import { useWorklogData } from "./WorklogDataProvider";
 
-async function readBatch(response: Response): Promise<SubmissionBatch> {
-  const data = await response.json();
-  if (!response.ok)
-    throw new Error(data.error || "Não foi possível consultar o lote.");
-  if (
-    !data.id ||
-    !Array.isArray(data.items) ||
-    !["prepared", "running", "finished", "interrupted"].includes(data.state)
-  )
-    throw new Error("O resultado do lote é inválido.");
-  return data;
-}
 export function BatchReview({
   entries,
   batchId,
@@ -33,6 +22,7 @@ export function BatchReview({
   onClose(): void;
   onBatch(batch: SubmissionBatch): void;
 }) {
+  const data = useWorklogData();
   const dialog = useRef<HTMLDialogElement>(null);
   const preparation = useRef<Promise<SubmissionBatch> | null>(null);
   const [batch, setBatch] = useState<SubmissionBatch | null>(null);
@@ -54,15 +44,9 @@ export function BatchReview({
   useEffect(() => {
     let alive = true;
     // StrictMode remounts effects; share preparation so it cannot replace its own row reviews.
-    preparation.current ??= (
-      batchId
-        ? fetch(`/api/submission-batches/${encodeURIComponent(batchId)}`)
-        : fetch("/api/submission-batches/prepare", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ entries }),
-          })
-    ).then(readBatch);
+    preparation.current ??= batchId
+      ? data.readBatch(batchId)
+      : data.prepareBatch(entries ?? []);
     preparation.current
       .then((next) => {
         if (alive) accept(next);
@@ -79,25 +63,21 @@ export function BatchReview({
     return () => {
       alive = false;
     };
-  }, [entries, batchId, accept]);
+  }, [data, entries, batchId, accept]);
   const currentId = batch?.id;
   const refresh = useCallback(async () => {
     if (!currentId) return;
-    const next = await fetch(
-      `/api/submission-batches/${encodeURIComponent(currentId)}`,
-    ).then(readBatch);
+    const next = await data.readBatch(currentId);
     accept(next);
     setError("");
-  }, [currentId, accept]);
+  }, [data, currentId, accept]);
   useEffect(() => {
     if (!currentId || batch?.state !== "running") return;
     let stopped = false;
     let timer: ReturnType<typeof setTimeout>;
     const poll = async () => {
       try {
-        const next = await fetch(
-          `/api/submission-batches/${encodeURIComponent(currentId)}`,
-        ).then(readBatch);
+        const next = await data.readBatch(currentId);
         if (!stopped) {
           accept(next);
           setError("");
@@ -115,23 +95,14 @@ export function BatchReview({
       stopped = true;
       clearTimeout(timer);
     };
-  }, [currentId, batch?.state, accept]);
+  }, [data, currentId, batch?.state, accept]);
   async function confirm() {
     if (!batch || busy || !canConfirmBatch(batch)) return;
     setBusy(true);
     setConfirmBlocked(true);
     setError("");
     try {
-      accept(
-        await fetch(
-          `/api/submission-batches/${encodeURIComponent(batch.id)}/confirm`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ confirmed: true }),
-          },
-        ).then(readBatch),
-      );
+      accept(await data.confirmBatch(batch.id));
     } catch (err) {
       // A lost local response may hide an already running worker. Read before exposing confirmation again.
       setBatch((current) =>
@@ -140,11 +111,7 @@ export function BatchReview({
       const reason =
         err instanceof Error ? err.message : "A confirmação não chegou.";
       try {
-        accept(
-          await fetch(
-            `/api/submission-batches/${encodeURIComponent(batch.id)}`,
-          ).then(readBatch),
-        );
+        accept(await data.readBatch(batch.id));
       } catch {
         /* Polling remains read-only. */
       }

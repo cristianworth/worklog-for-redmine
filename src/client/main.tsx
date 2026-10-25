@@ -1,10 +1,17 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
+import { WorklogDataProvider } from "./WorklogDataProvider";
 import "./styles.css";
+
+const data = import.meta.env.MODE === "demo"
+  ? (await import("./demo-data-access")).createDemoDataAccess()
+  : (await import("./http-data-access")).createHttpDataAccess();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <App />
+    <WorklogDataProvider value={data}>
+      <App />
+    </WorklogDataProvider>
   </StrictMode>,
 );

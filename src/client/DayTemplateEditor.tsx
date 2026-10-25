@@ -6,6 +6,7 @@ import { LoaderCircle, Plus, RotateCcw, Save, Trash2, X } from "lucide-react";
 import { validateDayTemplate, type DayTemplate } from "../shared/day-template";
 import { formatDuration, parseDurationInput } from "../shared/worklogs";
 import type { EditorEntry } from "./editor";
+import { useWorklogData } from "./WorklogDataProvider";
 
 const rowsFrom = (template: DayTemplate, ids: string[] = []): EditorEntry[] =>
   template.entries.map(({ minutes, ...entry }, index) => ({
@@ -25,6 +26,7 @@ export function DayTemplateEditor({
   onDirtyChange(dirty: boolean): void;
   onClose(): void;
 }) {
+  const data = useWorklogData();
   const [template, setTemplate] = useState<DayTemplate | null>(null);
   const [rows, setRows] = useState<EditorEntry[]>([]);
   const [lookupRequests, setLookupRequests] = useState<
@@ -44,12 +46,8 @@ export function DayTemplateEditor({
     const controller = new AbortController();
     setLoading(true);
     setError("");
-    fetch("/api/day-template", { signal: controller.signal })
-      .then(async (response) => {
-        const data = await response.json();
-        if (!response.ok)
-          throw new Error(data.error || "Não foi possível carregar o modelo.");
-        const loaded = validateDayTemplate(data);
+    data.readDayTemplate(controller.signal)
+      .then((loaded) => {
         if (!controller.signal.aborted) {
           setTemplate(loaded);
           resetRows(loaded);
@@ -70,7 +68,7 @@ export function DayTemplateEditor({
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, [retry, onTemplate]);
+  }, [data, retry, onTemplate]);
   useEffect(() => onDirtyChange(dirty), [dirty, onDirtyChange]);
   const blocked = busy || loading || !template;
   function changed() {
@@ -126,22 +124,7 @@ export function DayTemplateEditor({
     setError("");
     setMessage("");
     try {
-      const response = await fetch("/api/day-template", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const data = await response.json();
-      if (!response.ok)
-        throw new Error(data.error || "Não foi possível salvar o modelo.");
-      const saved = validateDayTemplate(data);
-      if (
-        saved.revision !== payload.revision + 1 ||
-        JSON.stringify(saved.entries) !== JSON.stringify(payload.entries)
-      )
-        throw new Error(
-          "Não foi possível confirmar o salvamento. Preserve suas edições e recarregue o modelo antes de tentar novamente.",
-        );
+      const saved = await data.saveDayTemplate(payload);
       setTemplate(saved);
       setRows(
         rowsFrom(
@@ -152,7 +135,9 @@ export function DayTemplateEditor({
       setDirty(false);
       onTemplate(saved);
       setMessage(
-        "Modelo salvo neste computador. Seus dias existentes não mudaram.",
+        data.mode === "demo"
+          ? "Modelo salvo nesta sessão de demonstração. Seus dias existentes não mudaram."
+          : "Modelo salvo neste computador. Seus dias existentes não mudaram.",
       );
     } catch (error) {
       setError(

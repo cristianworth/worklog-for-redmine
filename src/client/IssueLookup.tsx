@@ -1,12 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { LoaderCircle, Search } from "lucide-react";
 
-interface Issue {
-  id: number;
-  subject: string;
-  status: { id: number; name: string };
-  project: { id: number; name: string };
-}
+import type { IssueDetails } from "./data-access";
+import { useWorklogData } from "./WorklogDataProvider";
 export function IssueLookup({
   issue,
   automaticRequest,
@@ -18,10 +14,11 @@ export function IssueLookup({
   label: string;
   disabled: boolean;
 }) {
+  const data = useWorklogData();
   const code = issue.trim();
   const [result, setResult] = useState<{
     code: string;
-    data?: Issue;
+    data?: IssueDetails;
     error?: string;
   } | null>(null);
   const [pending, setPending] = useState<string | null>(null);
@@ -55,24 +52,9 @@ export function IssueLookup({
       latestCode.current === code &&
       request.current === controller;
     try {
-      const response = await fetch(
-        `/api/redmine/issues/${encodeURIComponent(code)}${refresh ? "?refresh=1" : ""}`,
-        { signal: controller.signal },
-      );
-      const data = await response.json();
-      if (!response.ok)
-        throw new Error(data.error || "Não foi possível consultar a tarefa.");
-      if (
-        data.id !== Number(code) ||
-        typeof data.subject !== "string" ||
-        typeof data.status?.name !== "string" ||
-        typeof data.project?.name !== "string" ||
-        !Number.isSafeInteger(data.project.id) ||
-        data.project.id <= 0
-      )
-        throw new Error("Resposta inválida para a tarefa consultada.");
+      const issue = await data.readIssue(code, refresh, controller.signal);
       if (isCurrent()) {
-        setResult({ code, data });
+        setResult({ code, data: issue });
       }
     } catch (error) {
       if (isCurrent())

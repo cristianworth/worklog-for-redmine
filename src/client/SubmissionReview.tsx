@@ -5,6 +5,7 @@ import { CheckCircle2, LoaderCircle, Upload, X, RefreshCw } from "lucide-react";
 import { formatDuration } from "../shared/worklogs";
 import { type SubmissionRecord } from "../shared/submissions";
 import { shortDate } from "./period";
+import { useWorklogData } from "./WorklogDataProvider";
 export const submissionLabel = {
   prepared: "Revisão pronta",
   sending: "Envio iniciado",
@@ -26,6 +27,7 @@ export function SubmissionReview({
   onClose(): void;
   onRecord(record: SubmissionRecord): void;
 }) {
+  const access = useWorklogData();
   const dialog = useRef<HTMLDialogElement>(null);
   const [record, setRecord] = useState<SubmissionRecord | null>(null);
   const [busy, setBusy] = useState(true);
@@ -40,16 +42,8 @@ export function SubmissionReview({
     const controller = new AbortController();
     setBusy(true);
     setError("");
-    fetch("/api/submissions/prepare", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ date, entryId, revision }),
-      signal: controller.signal,
-    })
-      .then(async (response) => {
-        const data = await response.json();
-        if (!response.ok)
-          throw new Error(data.error || "Não foi possível preparar a revisão.");
+    access.prepareSubmission({ date, entryId, revision }, controller.signal)
+      .then((data) => {
         if (
           !data.snapshot ||
           data.snapshot.date !== date ||
@@ -74,7 +68,7 @@ export function SubmissionReview({
         if (!controller.signal.aborted) setBusy(false);
       });
     return () => controller.abort();
-  }, [date, entryId, revision, retry, onRecord]);
+  }, [access, date, entryId, revision, retry, onRecord]);
   async function act(kind: "confirm" | "reconcile" | "verify") {
     if (!record || busy) return;
     setBusy(true);
@@ -90,19 +84,7 @@ export function SubmissionReview({
       onRecord(pending);
     }
     try {
-      const response = await fetch(
-        `/api/submissions/${encodeURIComponent(record.id)}/${kind}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(kind === "confirm" ? { confirmed: true } : {}),
-        },
-      );
-      const data = await response.json();
-      if (!response.ok)
-        throw new Error(
-          data.error || "Não foi possível concluir esta operação.",
-        );
+      const data = await access.actOnSubmission(record.id, kind);
       if (
         data.id !== record.id ||
         !submissionLabel[data.state as keyof typeof submissionLabel]

@@ -27,7 +27,6 @@ import {
   Upload,
   WifiOff,
 } from "lucide-react";
-import { validateDays, type DraftDay } from "../shared/worklogs";
 import {
   dateRange,
   normalizePeriod,
@@ -52,30 +51,23 @@ import {
 import { DaySection } from "./DaySection";
 import { RedmineSettings } from "./RedmineSettings";
 import { ActivityCatalogEditor } from "./ActivityCatalogEditor";
-import {
-  validateActivityCatalog,
-  type ActivityCatalog,
-} from "../shared/activities";
+import type { ActivityCatalog } from "../shared/activities";
+import { useWorklogData } from "./WorklogDataProvider";
 
-function initialPeriod(): PeriodPreference {
+function initialPeriod(storageKey: string): PeriodPreference {
   try {
     return restorePeriod(
-      JSON.parse(localStorage.getItem(periodStorageKey) ?? "null"),
+      JSON.parse(localStorage.getItem(storageKey) ?? "null"),
     );
   } catch {
     return restorePeriod(null);
   }
 }
 
-async function readDays(response: Response): Promise<DraftDay[]> {
-  const data = await response.json();
-  if (!response.ok)
-    throw new Error(data.error || "Não foi possível acessar os rascunhos.");
-  return validateDays(data.days);
-}
-
 export function App() {
-  const [period, setPeriod] = useState(initialPeriod);
+  const data = useWorklogData();
+  const storageKey = data.mode === "demo" ? "worklog.demo.period" : periodStorageKey;
+  const [period, setPeriod] = useState(() => initialPeriod(storageKey));
   const [filters, setFilters] = useState(period);
   const [today, setToday] = useState(localDate);
   const [editor, setEditor] = useState<EditorState>({
@@ -107,14 +99,9 @@ export function App() {
   useEffect(() => {
     const controller = new AbortController();
     setCatalogError("");
-    fetch("/api/activities", { signal: controller.signal })
-      .then(async (response) => {
-        const data = await response.json();
-        if (!response.ok)
-          throw new Error(
-            data.error || "Não foi possível carregar o catálogo.",
-          );
-        const loaded = validateActivityCatalog(data);
+    data
+      .readActivities(controller.signal)
+      .then((loaded) => {
         if (!controller.signal.aborted)
           setCatalog((current) =>
             !current || loaded.revision >= current.revision ? loaded : current,
@@ -127,7 +114,7 @@ export function App() {
           );
       });
     return () => controller.abort();
-  }, [catalogRetry]);
+  }, [data, catalogRetry]);
   const [retry, setRetry] = useState(0);
   const effectiveEnd = endDate(period, today);
   const [selection, setSelection] = useState<
@@ -178,34 +165,22 @@ export function App() {
     setReceiptsLoaded(false);
     setReceiptError("");
     setSelection([]);
-    const query = new URLSearchParams({ from: period.from, to: effectiveEnd });
     Promise.all([
-      fetch(`/api/submissions?${query}`, { signal: controller.signal }),
-      fetch(`/api/submission-batches?${query}`, { signal: controller.signal }),
+      data.listSubmissions(period.from, effectiveEnd, controller.signal),
+      data.listBatches(period.from, effectiveEnd, controller.signal),
     ])
-      .then(async ([response, batchResponse]) => {
-        const [data, batchData] = await Promise.all([
-          response.json(),
-          batchResponse.json(),
-        ]);
-        if (
-          !response.ok ||
-          !Array.isArray(data.submissions) ||
-          !batchResponse.ok ||
-          !Array.isArray(batchData.batches)
-        )
-          throw new Error();
+      .then(([submissions, batches]) => {
         if (controller.signal.aborted) return;
         setReceipts((current) => {
           const next = { ...current };
-          for (const record of data.submissions as SubmissionRecord[]) {
+          for (const record of submissions) {
             const key = `${record.snapshot.date}:${record.snapshot.entryId}`,
               previous = next[key];
             if (acceptReceipt(previous, record)) next[key] = record;
           }
           return next;
         });
-        setRecentBatches(batchData.batches);
+        setRecentBatches(batches);
         setReceiptsLoaded(true);
       })
       .catch(() => {
@@ -215,7 +190,7 @@ export function App() {
           );
       });
     return () => controller.abort();
-  }, [period.from, effectiveEnd, receiptRetry]);
+  }, [data, period.from, effectiveEnd, receiptRetry]);
   const canSelect = (date: string, entryId: string) => {
     const record = receipts[`${date}:${entryId}`];
     return (
@@ -320,10 +295,8 @@ export function App() {
       setError(error instanceof Error ? error.message : "Período inválido.");
       return;
     }
-    fetch(`/api/days?from=${period.from}&to=${effectiveEnd}`, {
-      signal: controller.signal,
-    })
-      .then(readDays)
+    data
+      .readDays(period.from, effectiveEnd, controller.signal)
       .then((saved) => {
         if (controller.signal.aborted) return;
         if (
@@ -344,18 +317,18 @@ export function App() {
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, [period.from, effectiveEnd, retry]);
+  }, [data, period.from, effectiveEnd, retry]);
 
   useEffect(() => {
     try {
-      localStorage.setItem(periodStorageKey, JSON.stringify(period));
+      localStorage.setItem(storageKey, JSON.stringify(period));
       setPreferenceNotice("");
     } catch {
       setPreferenceNotice(
         "Este navegador não permitiu lembrar o período. Seus rascunhos continuam no banco local.",
       );
     }
-  }, [period]);
+  }, [period, storageKey]);
 
   useEffect(() => {
     const warn = (event: BeforeUnloadEvent) => {
@@ -422,23 +395,10 @@ export function App() {
       const pending = editor.dirtyDates.map((date) =>
         toDraftDay(editor.days[date]),
       );
-      const saved = await readDays(
-        await fetch("/api/days", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ days: pending }),
-        }),
-      );
+      const saved = await data.saveDays(pending);
       const expected = new Map(
         pending.map((day) => [day.date, day.revision + 1]),
       );
-      if (
-        saved.length !== pending.length ||
-        saved.some((day) => expected.get(day.date) !== day.revision)
-      )
-        throw new Error(
-          "Não foi possível confirmar o salvamento de todos os dias. Suas edições continuam na tela.",
-        );
       setEditor((current) => ({
         days: {
           ...current.days,
@@ -447,7 +407,7 @@ export function App() {
         dirtyDates: current.dirtyDates.filter((date) => !expected.has(date)),
       }));
       setMessage(
-        `${saved.length === 1 ? "Rascunhos de 1 dia salvos" : `Rascunhos de ${saved.length} dias salvos`} neste computador.`,
+        `${saved.length === 1 ? "Rascunhos de 1 dia salvos" : `Rascunhos de ${saved.length} dias salvos`} ${data.mode === "demo" ? "nesta sessão de demonstração" : "neste computador"}.`,
       );
     } catch (error) {
       setError(
@@ -487,7 +447,7 @@ export function App() {
         <div className="header-inner">
           <a
             className="brand"
-            href="/"
+            href={import.meta.env.BASE_URL}
             onClick={(event) => {
               if (dirtyCount || catalogDirty || templateDirty)
                 event.preventDefault();
@@ -503,7 +463,7 @@ export function App() {
           <div className="header-actions">
             <span className="local-badge">
               <Database size={14} aria-hidden="true" />
-              Banco local
+              {data.mode === "demo" ? "Demo em preparação · sem conexão externa" : "Banco local"}
             </span>
             <button
               className="button quiet"
@@ -592,12 +552,16 @@ export function App() {
             <summary>
               <Database size={18} aria-hidden="true" />
               <span>
-                <strong>Modo local</strong>
-                <small>Rascunhos no banco deste computador</small>
+                <strong>{data.mode === "demo" ? "Demonstração isolada" : "Modo local"}</strong>
+                <small>{data.mode === "demo" ? "Dados temporários; recarregar descarta os rascunhos" : "Rascunhos no banco deste computador"}</small>
               </span>
               <ChevronDown size={15} aria-hidden="true" />
             </summary>
             <div className="data-description">
+              {data.mode === "demo" ? <p>
+                Demonstração em preparação: catálogo, dias e modelo começam vazios e ficam somente nesta sessão.
+                A tarefa fictícia 9001 permite conferir consultas. Envios simulados ainda estão indisponíveis.
+              </p> : <>
               <p>
                 <strong>Seus dados:</strong> salvar grava os rascunhos no banco
                 local. Eles continuam disponíveis após reiniciar a aplicação.
@@ -607,6 +571,7 @@ export function App() {
                 armazenamento no navegador de cada visitante, separado deste
                 banco. Não acessará seus apontamentos nem o Redmine real.
               </p>
+              </>}
             </div>
           </details>
           <span className="future-control demo-control">
@@ -903,7 +868,7 @@ export function App() {
                       ? "Carregando rascunhos…"
                       : loadFailed
                         ? "Não foi possível abrir o período"
-                        : message || "Tudo salvo neste computador"}
+                        : message || (data.mode === "demo" ? "Tudo salvo nesta sessão de demonstração" : "Tudo salvo neste computador")}
               </strong>
               <p>
                 {dirtyCount
