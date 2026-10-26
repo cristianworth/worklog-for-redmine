@@ -36,7 +36,7 @@ jobs:
 
   deploy:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master' && github.repository == 'cristianworth/worklog-for-redmine'
-    needs: verify
+    needs: [verify, launcher]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -54,3 +54,19 @@ jobs:
       - name: Deploy verified demo
         id: deployment
         uses: actions/deploy-pages@v5
+
+  launcher:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.20.0'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run launcher:build
+      - run: npm run launcher:check

@@ -27,4 +27,6 @@ Never create/delete real Redmine entries or modify issue statuses for routine te
 
 ## Publishing
 
+For Windows launcher changes, run `npm run launcher:build` and `npm run launcher:check` on Windows. The smoke test uses a new temporary project and fictional SQLite, never usage data or credentials. The generated root `Worklog.exe` is ignored; commit its source, not machine-generated binaries. CI verifies the launcher before demo deployment.
+
 Pull requests only verify. The established `master` workflow publishes the audited demo after all checks pass; no npm package or local backend is published. Forks must configure their own destination before enabling deployment. [Deployment instructions](docs/deployment.md) cover paths, permissions and rollback.

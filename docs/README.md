@@ -7,6 +7,7 @@ Comece pelo [README do projeto](../README.md) para experimentar a demo ou instal
 | Preciso de… | Documento |
 | --- | --- |
 | Configurar e usar minha instalação | [Uso local](local-usage.md) |
+| Abrir no Windows com dois cliques | [Lançador Worklog.exe](windows-launcher.md) |
 | Entender os módulos e as decisões técnicas | [Arquitetura](architecture.md) |
 | Publicar, conferir ou recuperar a demo | [GitHub Pages](deployment.md) |
 | Entender isolamento, armazenamento e simulação | [Contrato de acesso e demo](data-access.md) |

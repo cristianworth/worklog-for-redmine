@@ -12,6 +12,22 @@ Histórico das versões. Criado em 23/10/2026 com a base anterior ao modelo regi
 - Antes de cada commit/merge, ler este arquivo e avaliar uma versão proporcional à entrega. Em 25/10/2026, Cristian delegou ao agente a decisão de versão neste projeto e pediu push automático dos commits coesos, sem nova confirmação rotineira. Não incrementar a versão por commit da mesma entrega. Publicação e dados reais continuam sujeitos ao escopo autorizado.
 - Nunca incluir credenciais, planilhas privadas, bancos, backups ou dados reais nos registros, tags e arquivos distribuídos.
 
+## [0.7.0] — 2026-10-26
+
+### Lançador Windows
+
+- `Worklog.exe` inicia a aplicação local com `npm start` e abre o navegador padrão depois de confirmar identidade/prontidão. Janela de preparação/status, reabertura do navegador, bandeja e instância única por pasta; a interface do Worklog continua no navegador.
+- Confere Node 24.20+ da linha 24.x e npm, instala dependências ausentes/incompletas ou divergentes via `npm ci` e recompila fontes/saída alteradas. Reutiliza um serviço desta pasta antes de instalar/compilar; porta ocupada por outro programa resulta em outra porta local, sem encerrá-lo.
+- Estado e logs locais ignorados, bloqueios recuperáveis, limites de espera e falhas visíveis sem repetição automática. Credenciais do `.env` são lidas somente pelo backend; não são passadas às etapas de instalação/build.
+- Saúde retorna apenas aplicação, versão e identidade opaca da pasta. Encerramento exige token aleatório exclusivo do lançador, mantém as barreiras locais/de origem e recusa gravações/envios em andamento. Serviços externos reutilizados são preservados. Windows Job Object controla os descendentes próprios caso o lançador seja encerrado forçadamente.
+- Fonte C#/Node e compilação reproduzível com `npm run launcher:build`; binário gerado na raiz e excluído do Git. Guia Windows documenta pré-requisitos, inicialização, bandeja, recuperação e limitações; não é Electron nem pacote independente do repositório.
+
+### Verificação
+
+- 370 testes/29 arquivos aprovados, TypeScript, builds local/demo/Pages e auditorias. Novos casos protegem preparação, build obsoleto, porta ocupada, identidade, instância concorrente, bloqueio antigo, falhas, prontidão, autorização de encerramento e operações em andamento.
+- Teste completo em pasta temporária com espaços, sem configuração privada e com SQLite fictício: bootstrap nativo, instalação/build do zero, abertura em porta alternativa, reutilização, encerramento normal, reinício sem recompilar e persistência do rascunho. Janela nativa pronta e segundo clique conferidos; encerramento forçado do lançador isolado eliminou seus descendentes. Captura/input da janela pelo ambiente de automação ficaram limitados; bandeja/botões seguem os passos de conferência manual do guia.
+- CI Windows compila e verifica o lançador antes da publicação da demo. Nenhum teste abriu o SQLite de uso ou fez envio real.
+
 ## [0.6.1] — 2026-10-26
 
 ### Ajustes de visualização

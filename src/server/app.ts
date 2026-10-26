@@ -4,6 +4,7 @@ import { createBatchService } from "./batches";
 import { createSubmissionService, SubmissionError } from "./submissions";
 import { validateActivityCatalog } from "../shared/activities";
 import express from "express";
+import { timingSafeEqual } from "node:crypto";
 import {
   isWorkDate,
   validateDay,
@@ -21,6 +22,7 @@ import {
 export function createApp(
   store: ReturnType<typeof openDraftStore>,
   redmine: RedmineClient = createRedmineClient(null),
+  runtime?: { instanceId: string; version: string; shutdownToken?: string; shutdown?(): void },
 ) {
   const app = express();
   const issueLookup = createIssueLookup(redmine);
@@ -45,6 +47,34 @@ export function createApp(
     next();
   });
   app.use(express.json({ limit: "1mb" }));
+  app.get("/api/health", (_req, res) => {
+    res.set("Cache-Control", "no-store").json({
+      application: "worklog-for-redmine", instanceId: runtime?.instanceId ?? null,
+      version: runtime?.version ?? null,
+    });
+  });
+  let activeWrites = 0;
+  app.use((req, res, next) => {
+    if (!["GET", "HEAD"].includes(req.method) && req.path !== "/api/launcher/shutdown") {
+      activeWrites++;
+      res.once("close", () => { activeWrites--; });
+    }
+    next();
+  });
+  app.post("/api/launcher/shutdown", (req, res) => {
+    if (!runtime?.shutdownToken || !runtime.shutdown) { res.sendStatus(404); return; }
+    const expected = Buffer.from(`Bearer ${runtime.shutdownToken}`);
+    const supplied = Buffer.from(req.get("authorization") ?? "");
+    if (supplied.length !== expected.length || !timingSafeEqual(supplied, expected)) {
+      res.sendStatus(403); return;
+    }
+    if (activeWrites || batchService.isRunning()) {
+      res.status(409).json({ error: "Há uma gravação ou envio em andamento. Aguarde e tente encerrar novamente." });
+      return;
+    }
+    res.once("finish", runtime.shutdown);
+    res.sendStatus(202);
+  });
   app.use("/api/redmine", (_req, res, next) => {
     res.set("Cache-Control", "no-store");
     next();

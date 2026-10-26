@@ -149,6 +149,7 @@ export function createBatchService(
   }
   return {
     prepare,
+    isRunning: () => active.size > 0,
     start,
     get,
     list: (from: string, to: string) =>

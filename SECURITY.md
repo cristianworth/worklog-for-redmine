@@ -8,6 +8,7 @@ This is a personal local application and an isolated public demo, not a hosted m
 - The service binds locally and rejects non-local hosts and cross-origin writes. Do not expose it through a public proxy or remove these checks to host the demo.
 - TLS verification is enabled by default. An optional explicit exception is limited to the configured HTTPS origin and visibly identified; it must never become a process-wide bypass.
 - Submission uses review, explicit confirmation and protected receipts. Never remove receipts or automatically retry uncertain creation to recover from an error.
+- The Windows launcher verifies a service's folder identity before reuse and starts only on loopback. Its shutdown endpoint requires a random token known only to its worker, rejects active writes/batches and retains the existing origin/host guards. Health responses contain no credentials or data. The launcher does not stop an externally started service. `.env` secrets are not loaded into install/build hooks. Forced process termination can interrupt operations; use normal shutdown and keep receipt protections intact.
 
 ## Demo mode
 

@@ -58,6 +58,8 @@ Open **http://127.0.0.1:3000**. A fresh installation starts with an empty local 
 
 To run the built local interface, stop the development server, then run `npm run build` and `npm start`. Both use port 3000; `PORT` can override it. Do not expose this personal local server to the public Internet.
 
+On Windows, **Worklog.exe** starts the service and opens your default browser when it is ready. Keep it in the project root. Generate it with `npm run launcher:build` (Node and Windows .NET Framework required). It installs missing/incomplete dependencies, rebuilds changed sources, handles occupied ports and reuses this folder's existing service. The status window can be hidden to the tray; **Encerrar e sair** stops only a service it owns. [Usage, troubleshooting and verification](docs/windows-launcher.md). The generated binary stays outside Git.
+
 For a backend-free demo preview:
 
 ```sh

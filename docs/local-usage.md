@@ -2,6 +2,8 @@
 
 Requisitos e instalação estão no [README](../README.md). A aplicação serve em `http://127.0.0.1:3000`; desenvolvimento e execução compilada usam a mesma porta, então encerre um antes de iniciar o outro. `PORT` permite escolher outra porta.
 
+No Windows, o [Worklog.exe](windows-launcher.md) prepara dependências/build quando necessário, inicia com `npm start` e abre o navegador na porta efetiva. Mantenha o executável junto de `package.json`; a janela dele controla o serviço, e a interface de trabalho continua no navegador. O banco existente permanece no mesmo lugar.
+
 ## Dados e conexão
 
 Uma instalação nova começa sem exemplos e com catálogo vazio. O Node abre `data/worklog.sqlite`, criando o arquivo somente se necessário. Reiniciar reutiliza os dados. O período é preferência do navegador; rascunhos, modelo, catálogo e recibos ficam no SQLite. Faça backup com o serviço parado e preserve os recibos junto dos rascunhos. Não troque o banco por uma cópia antiga enquanto a aplicação estiver aberta.

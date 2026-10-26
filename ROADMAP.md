@@ -1,6 +1,6 @@
 # Roadmap — Worklog for Redmine
 
-Atualizado em 26/10/2026. Versão da entrega: **v0.6.1**; P8 concluída. Código público sob MIT; demo publicada no GitHub Pages. Histórico no [changelog](CHANGELOG.md), invariantes nas [decisões](docs/project-decisions.md) e detalhes técnicos no [plano](docs/development-plan.md).
+Atualizado em 26/10/2026. Versão da entrega: **v0.7.0**; P8 concluída, lançador Windows entregue. Código público sob MIT; demo publicada no GitHub Pages. Histórico no [changelog](CHANGELOG.md), invariantes nas [decisões](docs/project-decisions.md) e detalhes técnicos no [plano](docs/development-plan.md).
 
 ## Objetivo e prioridades
 
@@ -21,6 +21,7 @@ Ordem de importância: **isolamento → dados recuperáveis → fluxo completo �
 | v0.5.0 / P7-A–E | Demo isolada completa, persistência, simulação/recibos, percurso inicial e verificações de entrega |
 | v0.6.0 / P8 | Build do subdiretório, CI com deploy condicionado, atalho e documentação de uso/arquitetura/operação |
 | v0.6.1 | Visualização de segunda a sexta, dias apropriados recolhidos por padrão e atividades sem códigos nos seletores |
+| v0.7.0 | Lançador `.exe` para preparar/iniciar `npm start` e abrir o navegador, mantendo SQLite/configuração locais |
 
 O cadastro privado tem 15 atividades únicas, sem cópias por projeto. Os dois testes reais anteriores mantiveram o mesmo código em dois projetos, com readback e confirmação visual de Cristian. Não validaram todas as atividades/projetos; suas autorizações estão consumidas.
 

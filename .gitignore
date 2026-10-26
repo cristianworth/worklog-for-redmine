@@ -33,6 +33,7 @@
 *.log
 
 # Dependencies, generated files and test artifacts.
+/Worklog.exe
 node_modules/
 dist/
 dist-demo/

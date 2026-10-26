@@ -379,12 +379,14 @@ describe("batch submission", () => {
       }),
     );
     const completion = t.service.start(batch.id);
+    expect(t.service.isRunning()).toBe(true);
     await vi.waitFor(() => expect(t.posts()).toBe(1));
     expect(t.service.get(batch.id).state).toBe("running");
     expect(t.service.get(batch.id).items[0].record?.state).toBe("sending");
     expect(() => t.service.start(batch.id)).toThrow();
     release();
     await completion;
+    expect(t.service.isRunning()).toBe(false);
     expect(t.posts()).toBe(3);
   });
   it("recovers interrupted execution from the database without dispatching remaining rows", async () => {

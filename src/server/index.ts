@@ -1,11 +1,12 @@
 import { createServer as createHttpServer } from "node:http";
 import type { ViteDevServer } from "vite";
-import { existsSync, mkdirSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 import express from "express";
 import { createApp, handleErrors } from "./app";
 import { openDraftStore } from "./storage";
+import { applicationIdentity } from "./runtime-info.mjs";
 
 import {
   createRedmineClient,
@@ -52,7 +53,12 @@ await store.migrateActivities(
     `before-global-activities-${new Date().toISOString().replace(/[:.]/g, "-")}.sqlite`,
   ),
 );
-const app = createApp(store, redmine);
+const app = createApp(store, redmine, {
+  instanceId: applicationIdentity(root),
+  version: JSON.parse(readFileSync(join(root, "package.json"), "utf8")).version,
+  shutdownToken: process.env.WORKLOG_LAUNCHER_TOKEN,
+  shutdown: () => { void shutdown(); },
+});
 const server = createHttpServer(app);
 let vite: ViteDevServer | undefined;
 if (process.argv.includes("--dev")) {
