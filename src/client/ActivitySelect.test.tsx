@@ -21,8 +21,9 @@ describe("global activity selection", () => {
     const html = render();
     expect(html).toContain("<select");
     expect(html).not.toContain("<input");
-    expect(html).toContain("código 101");
-    expect(html).toContain("código 103");
+    expect(html).toContain('value="Revisão">Revisão</option>');
+    expect(html).toContain('value="Reunião">Reunião</option>');
+    expect(html).not.toContain("código");
     expect(html).not.toContain('disabled=""');
     expect(html).toMatch(/value="" selected=""/);
     expect(html).not.toContain("Consulte a tarefa");
@@ -47,9 +48,11 @@ describe("global activity selection", () => {
     );
     expect(render({ disabled: true })).toContain('disabled=""');
   });
-  it("preserves the original receipt code independently of catalog changes", () => {
+  it("shows only the original reviewed name independently of catalog changes", () => {
     const html = render({ activities: [], value: "Original", reviewedId: 909 });
-    expect(html).toContain("Original · código 909");
+    expect(html).toContain('value="Original" selected="">Original</option>');
+    expect(html).not.toContain("código");
+    expect(html).not.toContain("909");
     expect(html).toContain('disabled=""');
     expect(html).not.toContain('aria-invalid="true"');
   });

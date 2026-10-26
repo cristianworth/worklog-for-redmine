@@ -6,7 +6,7 @@ Atualizado em 25/10/2026. O checklist está no [roadmap](../ROADMAP.md), o hist�
 
 Construir uma aplicação pessoal pequena, inicialmente local e demonstrável em portfólio, preservando o fluxo útil do Excel/VBA.
 
-Cristian costuma recompor vários dias em uma sessão e enviá-los depois, frequentemente às quartas. O período é livre, com dias por scroll, cópia rápida do código, total por dia e opção de recolher tarefas. Salvar rascunhos e enviar horas são intenções distintas. Não impor uma semana de segunda a sexta.
+Cristian costuma recompor vários dias em uma sessão e enviá-los depois, frequentemente às quartas. O período é livre, com dias por scroll, cópia rápida do código, total por dia e opção de recolher tarefas. Por decisão de 26/10/2026, a visualização omite sábados e domingos, preservando dados históricos; isso não fixa o intervalo em uma semana nem impõe um total semanal. Salvar rascunhos e enviar horas são intenções distintas.
 
 ## Decisões vigentes
 

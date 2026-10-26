@@ -29,7 +29,7 @@ A preferência local permanece em `worklog.period`; a demo usa `worklog.demo.per
 
 ## Persistência e recuperação — P7-B
 
-`demo-examples.ts` cria os exemplos do zero: três dias anteriores à primeira visita, três atividades globais, três tarefas de dois projetos fictícios e um modelo incompleto permitido. O dia atual continua não iniciado, pronto para experimentar a cópia do modelo. Nenhum código ou descrição vem do banco de uso.
+`demo-examples.ts` cria os exemplos do zero: três dias úteis anteriores à primeira visita (desde v0.6.1), três atividades globais, três tarefas de dois projetos fictícios e um modelo incompleto permitido. O dia atual continua não iniciado, pronto para experimentar a cópia do modelo quando for dia útil. Nenhum código ou descrição vem do banco de uso. Exemplos antigos permanecem intactos; Restaurar exemplos aplica as novas datas somente após confirmação.
 
 `demo-store.ts` valida o formato e usa um único snapshot por gravação. Alterações recebidas por leitura são cópias: editar não salva. Catálogo, dias e modelo salvam separadamente, preservando os demais campos. Se `setItem` falhar, o snapshot anterior fica intacto e a interface mantém as edições. Revisões detectam payloads antigos entre abas. Web Locks serializam mutações, simulações e restauração no mesmo navegador/origem quando disponíveis. Sem essa API, há fila na página e aviso de usar uma aba por vez; não se promete exclusão mútua entre abas nessa alternativa. Não há coordenação entre dispositivos/perfis.
 

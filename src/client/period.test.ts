@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   dateRange,
+  workdayRange,
   endDate,
   localDate,
   restorePeriod,
@@ -9,6 +10,13 @@ import {
 } from "./period";
 
 describe("calendar period", () => {
+  it("displays weekdays across month boundaries and omits weekend-only periods", () => {
+    expect(workdayRange("2026-10-23", "2026-10-26")).toEqual(["2026-10-23", "2026-10-26"]);
+    expect(workdayRange("2026-10-24", "2026-10-25")).toEqual([]);
+    expect(workdayRange("2026-10-30", "2026-11-03")).toEqual(["2026-10-30", "2026-11-02", "2026-11-03"]);
+    expect(workdayRange("2026-10-26", "2026-10-26")).toEqual(["2026-10-26"]);
+    expect(() => workdayRange("2026-10-26", "2026-10-23")).toThrow();
+  });
   it("includes both Wednesdays and the weekend without a fixed workweek", () => {
     expect(dateRange("2026-10-14", "2026-10-21")).toEqual([
       "2026-10-14",

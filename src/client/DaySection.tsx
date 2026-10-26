@@ -40,7 +40,7 @@ interface Props {
   copied: string | null;
   onChange(entries: EditorEntry[]): void;
   onCopy(id: string, issue: string): void;
-  collapsed: boolean;
+  collapsed?: boolean;
   onCollapsedChange(collapsed: boolean): void;
   hasTemplate: boolean;
   onUseTemplate(): void;
@@ -64,7 +64,7 @@ export function DaySection({
   onCopy,
   hasTemplate,
   onUseTemplate,
-  collapsed,
+  collapsed: collapsedOverride,
   onCollapsedChange,
 }: Props) {
   const [lookupRequests, setLookupRequests] = useState<
@@ -85,6 +85,7 @@ export function DaySection({
     day.entries.map((entry) => entry.id),
     dayReceipts,
   );
+  const collapsed = collapsedOverride ?? appropriation.complete;
   const statusLabel = simulated ? appropriation.label.replaceAll("apropriadas", "simuladas") : appropriation.label;
   useEffect(() => {
     if (focusId.current && !collapsed) {

@@ -21,9 +21,10 @@ The interface is in Brazilian Portuguese. This overview is in English; the detai
 
 ## What it does
 
-- A free date range with stacked, collapsible days and a duration total per day.
+- A free date range showing Monday–Friday, with stacked days and a duration total per day. Historical weekend data stays stored.
+- Fully appropriated days start collapsed; pending or uncertain days stay expanded. You can expand/collapse any day.
 - Compact duration input: `30` → `00:30`, `130` → `01:30`; integer minutes internally.
-- One activity catalog, available before looking up a task.
+- One activity catalog, available before looking up a task; selectors show names only. IDs remain available in settings and submission review.
 - A reusable day template, copied explicitly into untouched dates.
 - Saved-row selection, review, confirmation and sequential batches with partial results.
 - Protected receipts, conservative duplicate checks and read-only recovery after uncertain results.

@@ -23,6 +23,15 @@ export function dateRange(from: string, to: string): string[] {
   }
 }
 
+export function isWeekday(date: string): boolean {
+  const weekday = new Date(`${date}T12:00:00Z`).getUTCDay();
+  return weekday >= 1 && weekday <= 5;
+}
+
+export function workdayRange(from: string, to: string): string[] {
+  return dateRange(from, to).filter(isWeekday);
+}
+
 export function endDate(period: PeriodPreference, today: string): string {
   return period.endMode === "today" ? today : period.to;
 }

@@ -16,9 +16,13 @@ Em **Configurações → Atividades**, cadastre nome/código uma vez para a inst
 
 Selecione **De** e **Até**, ou **Até hoje** para acompanhar a data atual. Datas incompletas/invertidas preservam a última visualização válida. Adicione linhas, escolha atividade, informe tarefa e saia do campo para consultar assunto/status/projeto. O ícone de cópia copia somente o código; o navegador pode limitar a área de transferência.
 
+A visualização mostra somente segunda a sexta dentro do intervalo. Sábados/domingos já salvos continuam no banco, sem exclusão ou migração; um período só de fim de semana mostra um aviso. A seleção de atividades nos dias/modelo exibe apenas o nome. Os códigos continuam no catálogo, nos recibos e na revisão do envio.
+
 Use `30`/`030` para 30 minutos, `130` para 1h30 ou `01:30`. `90`, `160`, sinais, decimais e segundos são inválidos; não há arredondamento. Linhas incompletas podem ser salvas como rascunho. Total diário inclui todos os rascunhos; uma duração malformada exige correção/limpeza antes de salvar.
 
 **Salvar rascunhos** grava todos os dias alterados, inclusive fora do período visível. Catálogo e modelo salvam separadamente. Recolher um dia preserva edições e seleções. **Modelo do dia** permite iniciar uma data ainda não tocada com uma cópia independente; nunca substitui um dia existente, inclusive um dia salvo vazio. [Guia do modelo](day-template.md).
+
+Dias totalmente apropriados iniciam com tarefas recolhidas. Dias vazios, parcialmente apropriados, pendentes ou a conferir ficam abertos. Expandir/recolher manualmente prevalece enquanto a página estiver aberta; recarregar reaplica o padrão. Adicionar linha expande o dia e leva o foco à tarefa nova.
 
 ## Envio e recuperação
 

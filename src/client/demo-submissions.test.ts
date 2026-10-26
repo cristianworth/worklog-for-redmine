@@ -57,18 +57,18 @@ describe("simulated submissions and durable browser receipts", () => {
     expect(t.state().creations).toHaveLength(4);
     const reopened = t.open();
     expect((await reopened.confirmBatch(review.id)).state).toBe("finished");
-    expect(await reopened.listBatches("2026-10-22", "2026-10-24")).toHaveLength(1);
-    expect(await reopened.listSubmissions("2026-10-22", "2026-10-24")).toHaveLength(4);
+    expect(await reopened.listBatches("2026-10-21", "2026-10-23")).toHaveLength(1);
+    expect(await reopened.listSubmissions("2026-10-21", "2026-10-23")).toHaveLength(4);
     expect(t.state().creations).toHaveLength(4);
   });
 
   it("blocks the entire selection when preparation contains an invalid task", async () => {
     const t = setup();
-    const day = (await t.data.readDays("2026-10-23", "2026-10-23"))[0];
+    const day = (await t.data.readDays("2026-10-22", "2026-10-22"))[0];
     day.entries[0].issue = "9999";
     await t.data.saveDays([day]);
     const batch = await t.data.prepareBatch(t.selections());
-    expect(batch.items.some((item) => item.error?.includes("23/10/2026"))).toBe(true);
+    expect(batch.items.some((item) => item.error?.includes("22/10/2026"))).toBe(true);
     await expect(t.data.confirmBatch(batch.id)).rejects.toMatchObject({ status: 409 });
     expect(t.state().creations).toHaveLength(0);
   });
@@ -81,13 +81,13 @@ describe("simulated submissions and durable browser receipts", () => {
     await t.data.confirmBatch(batch.id);
     const result = await finished(t.data, batch.id);
     expect(result.state).toBe("interrupted");
-    expect(result.items.at(-1)?.error).toContain("24/10/2026");
+    expect(result.items.at(-1)?.error).toContain("23/10/2026");
     expect(t.state().creations).toHaveLength(0);
   });
 
   it.each(["days", "catalog"])("rejects stale %s for the entire batch", async (kind) => {
     const t = setup(), batch = await t.data.prepareBatch(t.selections());
-    if (kind === "days") await t.data.saveDays(await t.data.readDays("2026-10-24", "2026-10-24"));
+    if (kind === "days") await t.data.saveDays(await t.data.readDays("2026-10-23", "2026-10-23"));
     else await t.data.saveActivities(await t.data.readActivities());
     await t.data.confirmBatch(batch.id);
     expect((await finished(t.data, batch.id)).state).toBe("interrupted");
@@ -117,7 +117,7 @@ describe("simulated submissions and durable browser receipts", () => {
   });
 
   it("links identical rows to the same result instead of creating them twice", async () => {
-    const t = setup(), day = (await t.data.readDays("2026-10-22", "2026-10-22"))[0];
+    const t = setup(), day = (await t.data.readDays("2026-10-21", "2026-10-21"))[0];
     day.entries[1] = { ...day.entries[0], id: day.entries[1].id };
     const [saved] = await t.data.saveDays([day]);
     const batch = await t.data.prepareBatch(saved.entries.map((entry) => ({ date: saved.date, entryId: entry.id, revision: saved.revision })));
@@ -174,7 +174,7 @@ describe("simulated submissions and durable browser receipts", () => {
     old.days[0].entries[0].comment = "Saved visitor edit";
     t.values.set(demoStorageKey, JSON.stringify(old));
     const reopened = t.open();
-    expect((await reopened.readDays("2026-10-22", "2026-10-22"))[0].entries[0].comment).toBe("Saved visitor edit");
+    expect((await reopened.readDays("2026-10-21", "2026-10-21"))[0].entries[0].comment).toBe("Saved visitor edit");
     expect(JSON.parse(t.values.get(demoStorageKey)!).schemaVersion).toBe(1);
     const review = await reopened.prepareSubmission(t.selections()[0]);
     await reopened.actOnSubmission(review.id, "confirm");

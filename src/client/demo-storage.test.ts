@@ -17,21 +17,36 @@ function setup() {
 afterEach(() => vi.unstubAllGlobals());
 
 describe("visitor demo persistence and recovery", () => {
+  it("places new examples on the previous three weekdays even on weekends", () => {
+    for (const today of ["2026-10-24", "2026-10-25", "2026-10-26"])
+      expect(createDemoExamples(today).days.map((day) => day.date)).toEqual(["2026-10-21", "2026-10-22", "2026-10-23"]);
+  });
+  it("preserves an older visitor's weekend data without rewriting the snapshot", async () => {
+    const t = setup();
+    t.open();
+    const previous = JSON.parse(t.values.get(demoStorageKey)!);
+    previous.days[2].date = "2026-10-24";
+    previous.days[2].entries[0].comment = "Saved fictional weekend history";
+    const raw = JSON.stringify(previous);
+    t.values.set(demoStorageKey, raw);
+    expect(await t.open().readDays("2026-10-24", "2026-10-24")).toEqual([previous.days[2]]);
+    expect(t.values.get(demoStorageKey)).toBe(raw);
+  });
   it("seeds recent examples once and keeps their dates and data across later visits", async () => {
     const t = setup(), first = t.open();
     const initial = JSON.parse(t.values.get(demoStorageKey)!);
-    expect(initial.days.map((day: { date: string }) => day.date)).toEqual(["2026-10-22", "2026-10-23", "2026-10-24"]);
+    expect(initial.days.map((day: { date: string }) => day.date)).toEqual(["2026-10-21", "2026-10-22", "2026-10-23"]);
     expect(new Set(initial.catalog.activities.map((activity: { activityId: number }) => activity.activityId)).size).toBe(3);
     expect(initial.catalog.activities.every((activity: object) => !("projectId" in activity))).toBe(true);
     expect(first.demo?.persistent).toBe(true);
-    expect(first.demo?.exampleStartDate).toBe("2026-10-22");
+    expect(first.demo?.exampleStartDate).toBe("2026-10-21");
     expect(await first.readIssue("9004", false)).toMatchObject({ id: 9004 });
     expect(await first.readIssue("9007", false)).toMatchObject({ id: 9007 });
     expect((await first.readDays("2026-10-25", "2026-10-25"))).toEqual([]);
     const second = t.open("2026-11-04");
-    expect(await second.readDays("2026-10-22", "2026-10-24")).toEqual(initial.days);
+    expect(await second.readDays("2026-10-21", "2026-10-23")).toEqual(initial.days);
     expect(JSON.parse(t.values.get(demoStorageKey)!).anchorDate).toBe("2026-10-25");
-    expect(second.demo?.exampleStartDate).toBe("2026-10-22");
+    expect(second.demo?.exampleStartDate).toBe("2026-10-21");
     expect(t.storage.setItem).toHaveBeenCalledTimes(1);
   });
 
@@ -44,14 +59,14 @@ describe("visitor demo persistence and recovery", () => {
     const template = await first.readDayTemplate();
     template.entries[0].minutes = 45;
     const savedTemplate = await first.saveDayTemplate(template);
-    const days = await first.readDays("2026-10-22", "2026-10-24");
+    const days = await first.readDays("2026-10-21", "2026-10-23");
     days[0].entries[0].minutes = 150;
     const savedDays = await first.saveDays([days[0]]);
     const reopened = t.open();
     expect(await reopened.readActivities()).toEqual(savedCatalog);
     expect(await reopened.readDayTemplate()).toEqual(savedTemplate);
-    expect(await reopened.readDays("2026-10-22", "2026-10-22")).toEqual(savedDays);
-    expect(await reopened.readDays("2026-10-23", "2026-10-24")).toEqual(days.slice(1));
+    expect(await reopened.readDays("2026-10-21", "2026-10-21")).toEqual(savedDays);
+    expect(await reopened.readDays("2026-10-22", "2026-10-23")).toEqual(days.slice(1));
     expect(t.storage.getItem.mock.calls.every(([key]) => key === demoStorageKey)).toBe(true);
     expect(t.storage.setItem.mock.calls.every(([key]) => key === demoStorageKey)).toBe(true);
     expect(t.values.get("worklog.period")).toBe("local-preference");
@@ -66,17 +81,17 @@ describe("visitor demo persistence and recovery", () => {
     const template = await first.readDayTemplate();
     await second.saveDayTemplate(template);
     await expect(first.saveDayTemplate(template)).rejects.toMatchObject({ status: 409 });
-    const days = await first.readDays("2026-10-22", "2026-10-24");
+    const days = await first.readDays("2026-10-21", "2026-10-23");
     await second.saveDays([days[1]]);
     const before = t.values.get(demoStorageKey);
     await expect(first.saveDays(days)).rejects.toMatchObject({ status: 409 });
     expect(t.values.get(demoStorageKey)).toBe(before);
-    expect((await first.readDays("2026-10-22", "2026-10-24")).map((day) => day.revision)).toEqual([1, 2, 1]);
+    expect((await first.readDays("2026-10-21", "2026-10-23")).map((day) => day.revision)).toEqual([1, 2, 1]);
   });
 
   it("preserves the prior snapshot and edits when the browser rejects a write", async () => {
     const t = setup(), data = t.open();
-    const pending = await data.readDays("2026-10-22", "2026-10-24");
+    const pending = await data.readDays("2026-10-21", "2026-10-23");
     pending[0].entries[0].comment = "Edição que não deve sumir";
     const before = t.values.get(demoStorageKey);
     t.storage.setItem.mockImplementation(() => { throw new DOMException("Quota exceeded", "QuotaExceededError"); });
@@ -117,9 +132,9 @@ describe("visitor demo persistence and recovery", () => {
     expect((await restored.readActivities()).activities).toHaveLength(3);
     expect((await restored.readActivities()).revision).toBeGreaterThan(changed.revision);
     await expect(first.saveActivities(previous)).rejects.toMatchObject({ status: 409 });
-    expect(await restored.readDays("2026-10-22", "2026-10-24")).toEqual([]);
-    expect(await restored.readDays("2026-10-29", "2026-10-31")).toHaveLength(3);
-    expect(restored.demo?.exampleStartDate).toBe("2026-10-29");
+    expect(await restored.readDays("2026-10-21", "2026-10-23")).toEqual([]);
+    expect(await restored.readDays("2026-10-28", "2026-10-30")).toHaveLength(3);
+    expect(restored.demo?.exampleStartDate).toBe("2026-10-28");
     expect((await restored.readDayTemplate()).entries).toHaveLength(2);
     expect(t.values.get("worklog.period")).toBe("local-preference");
     expect(t.values.get("another-app")).toBe("unrelated-data");

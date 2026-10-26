@@ -29,7 +29,7 @@ import {
   WifiOff,
 } from "lucide-react";
 import {
-  dateRange,
+  workdayRange,
   normalizePeriod,
   changeEndMode,
   endDate,
@@ -92,7 +92,7 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
     dirtyDates: [],
   });
   const [visibleDates, setVisibleDates] = useState<string[]>([]);
-  const [collapsedDates, setCollapsedDates] = useState<string[]>([]);
+  const [dayCollapseOverrides, setDayCollapseOverrides] = useState<Partial<Record<string, boolean>>>({});
   const [activeRange, setActiveRange] = useState<{
     from: string;
     to: string;
@@ -305,7 +305,7 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
     setError("");
     let dates: string[];
     try {
-      dates = dateRange(period.from, effectiveEnd);
+      dates = workdayRange(period.from, effectiveEnd);
     } catch (error) {
       setLoading(false);
       setLoadFailed(true);
@@ -622,7 +622,7 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
           <div className="period-title">
             <CalendarRange size={18} aria-hidden="true" />
             <h2>Período de trabalho</h2>
-            <span className="period-hint">Todos os dias, em sequência</span>
+            <span className="period-hint">Segunda a sexta, em sequência</span>
           </div>
           <div className="period-controls">
             <label className="date-field" htmlFor="period-start">
@@ -829,15 +829,9 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
             <DaySection
               key={date}
               simulated={data.mode === "demo"}
-              collapsed={collapsedDates.includes(date)}
+              collapsed={dayCollapseOverrides[date]}
               onCollapsedChange={(collapsed) =>
-                setCollapsedDates((current) =>
-                  collapsed
-                    ? current.includes(date)
-                      ? current
-                      : [...current, date]
-                    : current.filter((value) => value !== date),
-                )
+                setDayCollapseOverrides((current) => ({ ...current, [date]: collapsed }))
               }
               day={editor.days[date] ?? emptyDay(date)}
               activities={catalog?.activities ?? []}
@@ -876,6 +870,9 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
             <LoaderCircle className="spin" size={22} aria-hidden="true" />
             Abrindo seus dias…
           </div>
+        )}
+        {!visibleDates.length && !loading && !loadFailed && activeRange && (
+          <p className="notice" role="status">O período selecionado não contém dias de trabalho (segunda a sexta).</p>
         )}
         <div
           className={`save-bar ${dirtyCount || saving ? "has-pending" : ""}`}

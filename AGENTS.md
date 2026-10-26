@@ -21,6 +21,8 @@
 
 ## Catalog, days and templates
 
+- On 2026-10-26 Cristian requested weekday-only display (Monday–Friday), fully appropriated days initially collapsed, and names only in activity selectors. Keep calendar/storage APIs compatible with historical weekend data; never delete/migrate those rows. Explicit disclosure choices win for the current page; partial/uncertain/empty days start expanded. Preserve numeric activity IDs in configuration, receipt snapshots, review and submission; remove them only from selector labels/hints. New/restored demo examples use previous weekdays, without rewriting an existing visitor snapshot.
+
 - Use one activity catalog per configured Redmine instance: `Activity` is name + activityId, without projectId. Names and codes are unique. Days/templates allow activity selection before issue lookup. Project context remains in task/permission validation and immutable receipts.
 - The v0.4.0 migration backs up a legacy catalog and consolidates only identical name/code pairs, increasing its revision once. Conflicts/concurrent writes abort. Do not replay migration/population manually or rewrite old drafts, templates or receipt IDs to fit a catalog.
 - The private usage catalog has 15 activities; that is neither a public default nor a product limit. Prior catalog migration/population/correction completed with backups. Journals are ignored under `private/global-catalog-*.json` and `private/activity-catalog-population.json`; do not replay them.

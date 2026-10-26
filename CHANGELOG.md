@@ -12,6 +12,16 @@ Histórico das versões. Criado em 23/10/2026 com a base anterior ao modelo regi
 - Antes de cada commit/merge, ler este arquivo e avaliar uma versão proporcional à entrega. Em 25/10/2026, Cristian delegou ao agente a decisão de versão neste projeto e pediu push automático dos commits coesos, sem nova confirmação rotineira. Não incrementar a versão por commit da mesma entrega. Publicação e dados reais continuam sujeitos ao escopo autorizado.
 - Nunca incluir credenciais, planilhas privadas, bancos, backups ou dados reais nos registros, tags e arquivos distribuídos.
 
+## [0.6.1] — 2026-10-26
+
+### Ajustes de visualização
+
+- Período mostra somente segunda a sexta, sem excluir ou migrar dados históricos de sábados/domingos. Intervalos apenas de fim de semana mostram um aviso; calendário e contratos de armazenamento continuam compatíveis com todas as datas.
+- Dias totalmente apropriados iniciam com tarefas recolhidas. Dias parciais, pendentes, vazios ou a conferir continuam abertos. Expandir/recolher manualmente prevalece na página; as linhas permanecem montadas, e adicionar uma linha expande o dia.
+- Seletores de atividade dos dias/modelo exibem somente o nome, inclusive em linhas apropriadas; códigos numéricos permanecem no catálogo, revisão, recibos e envio.
+- Novos exemplos/restaurações da demo usam os três dias úteis anteriores. Snapshots existentes permanecem intactos, inclusive histórico de fim de semana.
+- 352 testes/27 arquivos aprovados, builds local/demo/Pages e auditorias. Casos de dias úteis, padrão de recolhimento, atividade sem código e preservação de snapshots antigos; conferência manual fictícia de seleção/salvamento, confirmação simulada, recarga, recolhimento e expansão. Sem acesso ao banco de uso ou novo envio real.
+
 ## [0.6.0] — 2026-10-25
 
 ### Publicação e repositório — P8

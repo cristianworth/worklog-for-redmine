@@ -20,11 +20,11 @@ export function ActivitySelect({
   const selected = resolveActivity(activities, value);
   const unmatched = !!value && !selected && !reviewedId;
   const hint = reviewedId
-    ? `Atividade revisada · código ${reviewedId}`
+    ? "Atividade revisada."
     : !activities.length
-      ? "Cadastre atividades em Configurações. Nenhum código foi escolhido automaticamente."
+      ? "Cadastre atividades em Configurações."
       : selected
-        ? `Atividade configurada · código ${selected.activityId}`
+        ? "Atividade configurada."
         : value
           ? "Atividade anterior fora do catálogo. Escolha uma opção para corrigir; o envio fica bloqueado sem cadastro."
           : "Escolha uma atividade. O rascunho pode ficar incompleto.";
@@ -43,7 +43,7 @@ export function ActivitySelect({
         </option>
         {reviewedId ? (
           <option value={value}>
-            {value} · código {reviewedId}
+            {value}
           </option>
         ) : (
           <>
@@ -54,7 +54,7 @@ export function ActivitySelect({
             )}
             {activities.map((activity) => (
               <option key={activity.activityId} value={activity.name}>
-                {activity.name} · código {activity.activityId}
+                {activity.name}
               </option>
             ))}
           </>

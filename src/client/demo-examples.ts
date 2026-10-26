@@ -1,5 +1,6 @@
 import type { IssueDetails } from "./data-access";
 import type { DemoState } from "./demo-store";
+import { isWeekday } from "./period";
 
 export const demoIssues: IssueDetails[] = [
   { id: 9001, subject: "Melhorar a busca do catálogo fictício",
@@ -10,13 +11,16 @@ export const demoIssues: IssueDetails[] = [
     status: { id: 1, name: "Em andamento" }, project: { id: 9102, name: "Painel Horizonte — fictício" } },
 ];
 
-function daysBefore(date: string, offset: number): string {
+function workdaysBefore(date: string, offset: number): string {
   const day = new Date(`${date}T12:00:00Z`);
-  day.setUTCDate(day.getUTCDate() - offset);
+  while (offset > 0) {
+    day.setUTCDate(day.getUTCDate() - 1);
+    if (isWeekday(day.toISOString().slice(0, 10))) offset--;
+  }
   return day.toISOString().slice(0, 10);
 }
 
-export const demoStartDate = (anchorDate: string) => daysBefore(anchorDate, 3);
+export const demoStartDate = (anchorDate: string) => workdaysBefore(anchorDate, 3);
 
 export function createDemoExamples(today: string): DemoState {
   return {
@@ -35,10 +39,10 @@ export function createDemoExamples(today: string): DemoState {
         { id: "demo-search", issue: "9001", minutes: 90, activity: "Desenvolvimento", comment: "Exemplo fictício: ajustar os filtros da busca." },
         { id: "demo-search-review", issue: "9004", minutes: 30, activity: "Revisão", comment: "Exemplo fictício: revisar mensagens de validação." },
       ] },
-      { date: daysBefore(today, 2), revision: 1, entries: [
+      { date: workdaysBefore(today, 2), revision: 1, entries: [
         { id: "demo-validation", issue: "9004", minutes: 60, activity: "Revisão", comment: "Exemplo fictício: conferir campos obrigatórios." },
       ] },
-      { date: daysBefore(today, 1), revision: 1, entries: [
+      { date: workdaysBefore(today, 1), revision: 1, entries: [
         { id: "demo-planning", issue: "9007", minutes: 30, activity: "Reunião", comment: "Exemplo fictício: planejar a próxima melhoria do painel." },
       ] },
     ],
