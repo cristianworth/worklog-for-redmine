@@ -124,7 +124,6 @@ export function DaySection({
     <section
       ref={section}
       className={`day-card ${day.date === today ? "is-today" : ""} ${appropriation.complete ? "is-appropriated-day" : ""} ${collapsed ? "is-collapsed" : ""}`}
-      data-weekday={new Date(`${day.date}T12:00:00Z`).getUTCDay()}
       aria-label={`Apontamentos de ${description}`}
     >
       <header className="day-heading">

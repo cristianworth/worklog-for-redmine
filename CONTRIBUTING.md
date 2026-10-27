@@ -8,7 +8,7 @@ Use Node.js 24.20 or newer within 24.x and `npm ci`. No API key or private datab
 
 Run the checks from the README before a pull request. The Pages build has a different base path; check it even if the root demo preview works. Manually verify changed interactions, including keyboard use and a narrow viewport. The test suite uses Vitest; BDD/Cucumber and tests that only mirror implementation are not required.
 
-For presentation changes, follow the [interface guide](docs/interface.md): shared color tokens, weekday identity, passive SVG brand, local font fallbacks and fictional screenshot data. Keep date colors separate from receipt status and verify both root and Pages asset paths.
+For presentation changes, follow the [interface guide](docs/interface.md): shared color tokens, alternating day bands, passive SVG brand, local font fallbacks and fictional screenshot data. Keep day grouping separate from receipt status and verify both root and Pages asset paths.
 
 ## Issues and pull requests
 

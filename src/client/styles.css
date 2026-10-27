@@ -1,22 +1,20 @@
 :root {
-  --ink: #18334a;
-  --muted: #52677d;
-  --canvas: #eaf1fb;
+  --ink: #273b46;
+  --muted: #536976;
+  --canvas: #f5f7f8;
   --paper: #fff;
-  --line: #c6d4e5;
-  --blue: #2457c5;
-  --blue-hover: #1945a3;
-  --blue-wash: #e7efff;
-  --teal: #007b73;
-  --violet: #7050b5;
-  --amber: #f4b72c;
-  --berry: #aa3e70;
-  --success: #16604b;
-  --success-wash: #e8f5ee;
-  --warning: #80500a;
-  --warning-wash: #fff3d6;
-  --danger: #ac3044;
-  --danger-wash: #fff0f1;
+  --day-surface: #edf2f4;
+  --day-surface-alternate: #dee7eb;
+  --line: #c8d3d9;
+  --accent: #486b7a;
+  --accent-hover: #365563;
+  --accent-wash: #e6eef2;
+  --success: #316859;
+  --success-wash: #eaf2ee;
+  --warning: #806037;
+  --warning-wash: #f7f0df;
+  --danger: #9a4350;
+  --danger-wash: #faecef;
   --heading-font: "Trebuchet MS", "Segoe UI", sans-serif;
   font-family: "Segoe UI", "Helvetica Neue", sans-serif;
   color: var(--ink);
@@ -53,7 +51,7 @@ button, input, textarea, select, a, summary {
   outline-offset: 4px;
 }
 :focus-visible {
-  outline: 3px solid var(--blue);
+  outline: 3px solid var(--accent);
 }
 a {
   color: inherit;
@@ -67,10 +65,10 @@ input, textarea, select {
   min-width: 0;
 }
 input[type="checkbox"] {
-  accent-color: var(--blue);
+  accent-color: var(--accent);
 }
 input::placeholder, textarea::placeholder {
-  color: #62748a;
+  color: var(--muted);
 }
 h1, h2, h3 {
   font-family: var(--heading-font);
@@ -80,7 +78,7 @@ h1, h2, h3 {
 }
 
 .app-header {
-  border-bottom: 4px solid var(--blue);
+  border-bottom: 2px solid var(--line);
   background: var(--paper);
 }
 .header-inner {
@@ -165,18 +163,18 @@ h1 {
   color: var(--ink);
 }
 .secondary:hover:not(:disabled), .quiet:hover:not(:disabled) {
-  background: var(--blue-wash);
-  border-color: #91ace0;
+  background: var(--accent-wash);
+  border-color: #99aeb8;
 }
 .primary {
-  border-color: var(--blue);
-  background: var(--blue);
+  border-color: var(--accent);
+  background: var(--accent);
   color: #fff;
   min-width: 170px;
   padding: 12px 18px;
 }
 .primary:hover:not(:disabled) {
-  background: var(--blue-hover);
+  background: var(--accent-hover);
 }
 .quiet {
   background: transparent;
@@ -186,7 +184,7 @@ h1 {
 .text-button {
   border: none;
   background: transparent;
-  color: var(--blue);
+  color: var(--accent);
   font-size: 12px;
   padding: 5px 0;
   gap: 5px;
@@ -206,8 +204,8 @@ h1 {
   flex-shrink: 0;
 }
 .icon-button:hover:not(:disabled) {
-  background: var(--blue-wash);
-  color: var(--blue);
+  background: var(--accent-wash);
+  color: var(--accent);
 }
 .icon-button:disabled {
   opacity: 0.4;
@@ -221,7 +219,7 @@ h1 {
   color: var(--danger);
 }
 
-/* Context stays quiet; the workweek carries the color. */
+/* Shared accents support actions; alternating bands separate daily groups. */
 .data-context {
   display: flex;
   align-items: flex-start;
@@ -307,7 +305,7 @@ h1 {
   display: flex;
   gap: 9px;
   align-items: center;
-  color: var(--blue);
+  color: var(--accent);
   margin-bottom: 16px;
 }
 .period-title h2 {
@@ -336,8 +334,8 @@ h1 {
   color: var(--muted);
 }
 .date-field input {
-  background: #f8faff;
-  border: 1px solid #7589a3;
+  background: #fafcfc;
+  border: 1px solid #7c919b;
   border-radius: 5px;
   padding: 9px 11px;
   color: var(--ink);
@@ -403,7 +401,7 @@ h1 {
 .draft-dot {
   width: 8px;
   height: 8px;
-  background: var(--blue);
+  background: var(--accent);
   border-radius: 2px;
   flex-shrink: 0;
 }
@@ -424,17 +422,17 @@ h1 {
   color: var(--muted);
 }
 .send-button {
-  color: var(--blue);
-  background: var(--blue-wash);
-  border-color: #9bb4e3;
+  color: var(--accent);
+  background: var(--accent-wash);
+  border-color: #9aafb9;
 }
 .send-button:hover:not(:disabled) {
-  background: #d7e4ff;
+  background: #dce7ec;
 }
 .send-button:disabled {
   opacity: 1;
   color: var(--muted);
-  background: #e1e8f2;
+  background: #e8edef;
   border-color: var(--line);
 }
 .days-caption {
@@ -452,41 +450,28 @@ h1 {
   gap: 6px;
 }
 
-/* Weekday colors identify dates, never submission status. UTC keeps colors stable. */
+/* Alternating bands separate adjacent days without assigning a color to each weekday. */
 .day-card {
-  --day-color: var(--blue);
-  --day-ink: #fff;
-  --day-rule: #ffffff66;
-  border: 1px solid #b8c9df;
+  --day-background: var(--day-surface);
+  border: 1px solid var(--line);
   border-radius: 9px;
   background: var(--paper);
   overflow: hidden;
   margin-bottom: 28px;
 }
-.day-card[data-weekday="1"] {
-  --day-color: var(--blue);
+.day-card:nth-child(even) {
+  --day-background: var(--day-surface-alternate);
 }
-.day-card[data-weekday="2"] {
-  --day-color: var(--teal);
-}
-.day-card[data-weekday="3"] {
-  --day-color: var(--violet);
-}
-.day-card[data-weekday="4"] {
-  --day-color: var(--amber);
-  --day-ink: var(--ink);
-  --day-rule: #18334a66;
-}
-.day-card[data-weekday="5"] {
-  --day-color: var(--berry);
+.is-today .day-heading {
+  box-shadow: inset 3px 0 var(--accent);
 }
 .day-heading {
   display: flex;
   gap: 14px;
   align-items: center;
   padding: 16px 18px;
-  background: var(--day-color);
-  color: var(--day-ink);
+  background: var(--day-background);
+  color: var(--ink);
 }
 .day-date-stamp {
   display: grid;
@@ -494,8 +479,9 @@ h1 {
   width: 47px;
   height: 51px;
   border-radius: 4px;
-  background: var(--day-ink);
-  color: var(--day-color);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  color: var(--accent);
   font-size: 29px;
   font-weight: 700;
   line-height: 1;
@@ -533,7 +519,7 @@ h1 {
   font-weight: 700;
   padding: 1px 7px;
   color: var(--ink);
-  background: #ffd36a;
+  background: #d5e2e8;
   border-radius: 3px;
 }
 .day-total {
@@ -545,7 +531,7 @@ h1 {
   margin-left: auto;
   min-width: 108px;
   padding: 0 18px;
-  border-left: 1px solid var(--day-rule);
+  border-left: 1px solid var(--line);
 }
 .day-total > span {
   font-size: 11px;
@@ -570,41 +556,41 @@ h1 {
   padding-block: 4px;
 }
 .day-send {
-  background: #fff;
-  border-color: #fff;
+  background: var(--paper);
+  border-color: #9aafb9;
   color: var(--ink);
   white-space: nowrap;
 }
 .day-send:hover:not(:disabled) {
-  background: #edf2fc;
+  background: var(--accent-wash);
 }
 .day-heading .add-line {
   background: transparent;
-  border-color: var(--day-rule);
-  color: var(--day-ink);
+  border-color: #9aafb9;
+  color: var(--ink);
   white-space: nowrap;
 }
 .day-heading .add-line:hover:not(:disabled) {
-  background: #ffffff22;
-  border-color: var(--day-rule);
+  background: #ffffff80;
+  border-color: var(--line);
 }
 .day-heading .button:disabled {
   opacity: 1;
-  background: #ffffff22;
-  border-color: var(--day-rule);
-  color: var(--day-ink);
+  background: transparent;
+  border-color: var(--line);
+  color: #637580;
 }
 .day-toggle {
   width: 34px;
   height: 36px;
-  color: var(--day-ink);
+  color: var(--ink);
 }
 .day-toggle:hover:not(:disabled) {
-  background: #ffffff22;
-  color: var(--day-ink);
+  background: #ffffff80;
+  color: var(--ink);
 }
 .day-heading :focus-visible {
-  outline-color: var(--day-ink);
+  outline-color: var(--accent);
 }
 .day-empty {
   display: flex;
@@ -622,7 +608,7 @@ h1 {
   overflow-x: auto;
 }
 .table-scroll:focus-visible {
-  outline: 3px solid var(--blue);
+  outline: 3px solid var(--accent);
   outline-offset: -3px;
 }
 table {
@@ -652,7 +638,7 @@ th {
   font-weight: 600;
   color: var(--muted);
   padding: 11px 9px;
-  background: #f1f5fb;
+  background: #f0f3f5;
   border-bottom: 1px solid var(--line);
 }
 td {
@@ -663,10 +649,10 @@ tbody tr + tr {
   border-top: 1px solid var(--line);
 }
 .day-card tbody tr:nth-child(even):not(.is-appropriated):not(.needs-check):not(.is-rejected) {
-  background: #f7faff;
+  background: #f7f9fa;
 }
 .day-card tbody tr:has(.entry-selector input:checked) {
-  background: #e7efff;
+  background: var(--accent-wash);
 }
 .row-number {
   text-align: center;
@@ -677,7 +663,7 @@ td.row-number {
   padding-top: 23px;
 }
 td input, td textarea, td select {
-  border: 1px solid #7589a3;
+  border: 1px solid #7c919b;
   border-radius: 5px;
   width: 100%;
   padding: 9px;
@@ -686,11 +672,11 @@ td input, td textarea, td select {
   font-size: 14px;
 }
 td input:hover, td textarea:hover, td select:hover {
-  border-color: var(--blue);
+  border-color: var(--accent);
 }
 td input:disabled, td textarea:disabled, td select:disabled {
   color: var(--muted);
-  background: #f5f8fc;
+  background: #f4f7f8;
   opacity: 1;
 }
 td textarea {
@@ -803,8 +789,8 @@ td select {
   position: static;
 }
 .save-bar.has-pending {
-  border: 2px solid var(--blue);
-  box-shadow: 0 4px 18px #18334a1a;
+  border: 2px solid var(--accent);
+  box-shadow: 0 4px 18px #273b461a;
 }
 .save-status {
   display: flex;
@@ -823,8 +809,8 @@ td select {
   flex-shrink: 0;
 }
 .save-status-icon.pending {
-  background: var(--blue-wash);
-  color: var(--blue);
+  background: var(--accent-wash);
+  color: var(--accent);
 }
 .save-status strong {
   font-size: 13px;
@@ -946,7 +932,7 @@ input[aria-invalid="true"], select[aria-invalid="true"] {
   padding-left: 22px;
 }
 .settings-panel code {
-  background: var(--blue-wash);
+  background: var(--accent-wash);
   border-radius: 3px;
   padding: 1px 4px;
   overflow-wrap: anywhere;
@@ -1022,15 +1008,15 @@ input[aria-invalid="true"], select[aria-invalid="true"] {
   max-height: 90vh;
   overflow: auto;
   border: 1px solid var(--line);
-  border-top: 5px solid var(--blue);
+  border-top: 5px solid var(--accent);
   border-radius: 10px;
   padding: 25px;
   color: var(--ink);
   background: var(--paper);
-  box-shadow: 0 15px 70px #18334a30;
+  box-shadow: 0 15px 70px #273b4630;
 }
 .submission-dialog::backdrop {
-  background: #18334a80;
+  background: #273b4680;
 }
 .submission-heading {
   display: flex;
@@ -1054,7 +1040,7 @@ input[aria-invalid="true"], select[aria-invalid="true"] {
   flex-direction: column;
   gap: 5px;
   padding: 15px;
-  background: var(--blue-wash);
+  background: var(--accent-wash);
   border-radius: 6px;
 }
 .submission-issue small {
@@ -1129,7 +1115,7 @@ input[aria-invalid="true"], select[aria-invalid="true"] {
 .batch-day h3 {
   font-size: 17px;
   margin: 24px 0 10px;
-  color: var(--blue);
+  color: var(--accent);
 }
 .batch-line {
   padding: 14px;
@@ -1253,8 +1239,8 @@ input[aria-invalid="true"], select[aria-invalid="true"] {
   flex-wrap: wrap;
   padding: 18px 20px;
   margin: 0 0 24px;
-  border-left: 4px solid var(--blue);
-  background: #dce8ff;
+  border-left: 4px solid var(--accent);
+  background: var(--accent-wash);
 }
 .demo-controls > div:first-child {
   flex: 1 1 420px;
@@ -1287,8 +1273,9 @@ input[aria-invalid="true"], select[aria-invalid="true"] {
   flex-wrap: wrap;
   gap: 4px 18px;
   padding: 8px 16px;
-  color: #fff;
-  background: var(--blue);
+  color: var(--ink);
+  background: #e2eaf0;
+  border-bottom: 1px solid var(--line);
   font-size: 12px;
 }
 .demo-steps {
@@ -1308,7 +1295,7 @@ input[aria-invalid="true"], select[aria-invalid="true"] {
 }
 .demo-guide summary {
   cursor: pointer;
-  color: var(--blue);
+  color: var(--accent);
   font-weight: 600;
   width: fit-content;
 }
@@ -1320,7 +1307,7 @@ input[aria-invalid="true"], select[aria-invalid="true"] {
   padding: 12px;
   background: var(--paper);
   color: var(--ink);
-  border: 2px solid var(--blue);
+  border: 2px solid var(--accent);
 }
 .skip-link:focus {
   top: 12px;

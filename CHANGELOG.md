@@ -12,6 +12,15 @@ Histórico das versões. Criado em 23/10/2026 com a base anterior ao modelo regi
 - Antes de cada commit/merge, ler este arquivo e avaliar uma versão proporcional à entrega. Em 25/10/2026, Cristian delegou ao agente a decisão de versão neste projeto e pediu push automático dos commits coesos, sem nova confirmação rotineira. Não incrementar a versão por commit da mesma entrega. Publicação e dados reais continuam sujeitos ao escopo autorizado.
 - Nunca incluir credenciais, planilhas privadas, bancos, backups ou dados reais nos registros, tags e arquivos distribuídos.
 
+## [0.8.1] — 2026-10-27
+
+### Paleta mais suave
+
+- Cabeçalhos alternam dois tons suaves de azul-cinza pela posição dos dias no período, inspirados em faixas de planilha. Removida a associação de uma cor saturada a cada dia da semana; texto escuro, datas, totais e espaçamento mantêm a distinção dos grupos.
+- Azul acinzentado único harmoniza ações, foco, seleção, avisos da demo e detalhes da marca/favicon. Fundos, bordas e marcador de hoje acompanham a nova paleta; cores semânticas dos resultados continuam acompanhadas de texto.
+- Guia da interface, README/captura e instruções atuais atualizados. Layout, tipografia, recolhimento, dados e fluxo de salvamento/envio preservados.
+- 372 testes/29 arquivos, builds local/demo/Pages e auditorias aprovados. Conferência fictícia em desktop e 375 px: alternância, recolhimento, foco de teclado e ausência de transbordamento da página; console sem erros. Texto dos cabeçalhos acima de 9:1 e foco acima de 4,5:1 nos dois fundos. Executável regenerado como 0.8.1, sem mudanças no lançador ou acesso ao banco de uso.
+
 ## [0.8.0] — 2026-10-27
 
 ### Interface e identidade visual

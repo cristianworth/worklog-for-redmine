@@ -4,17 +4,18 @@ A interface funciona como uma agenda de apontamentos: localizar uma data, preenc
 
 ## Cores com uma função
 
-O fundo azul-claro separa os dias; a área de edição permanece clara. Os cabeçalhos têm cores fixas por dia da semana, inclusive ao trocar o período. A data é interpretada em UTC somente para escolher essa identidade visual, sem converter a data de trabalho pelo fuso do navegador.
+A paleta usa cinzas frios e um único azul acinzentado nas ações. Os cabeçalhos alternam dois fundos suaves conforme a posição dos dias no período visível, como faixas de uma planilha. Não há mais uma cor associada a cada dia da semana.
 
-| Dia | Cabeçalho | Texto |
-| --- | --- | --- |
-| Segunda | Azul `#2457C5` | Branco |
-| Terça | Verde-petróleo `#007B73` | Branco |
-| Quarta | Violeta `#7050B5` | Branco |
-| Quinta | Amarelo `#F4B72C` | Azul-escuro `#18334A` |
-| Sexta | Amora `#AA3E70` | Branco |
+| Uso | Cor |
+| --- | --- |
+| Fundo da página | `#F5F7F8` |
+| Área de edição | `#FFFFFF` |
+| Primeiro cabeçalho e demais ímpares | `#EDF2F4` |
+| Segundo cabeçalho e demais pares | `#DEE7EB` |
+| Texto principal | `#273B46` |
+| Ações e foco | `#486B7A` |
 
-Essas cores identificam datas, não resultados. Pendência, simulação, confirmação, rejeição e resultado incerto continuam descritos em texto e nos recibos. O marcador **Hoje** complementa a data. O cabeçalho mantém sua cor quando o dia está recolhido ou apropriado.
+A alternância separa grupos, não resultados. Pendência, simulação, confirmação, rejeição e resultado incerto continuam descritos em texto e nos recibos. O marcador **Hoje** e uma linha lateral discreta identificam a data atual. Recolher ou apropriar um dia não altera a alternância; mudar o início do período pode inverter o tom de uma data.
 
 O espaçamento entre dias e as divisórias das tabelas separam os grupos. Linhas alternadas ajudam a acompanhar os campos; seleção e situação dos recibos têm tratamentos próprios. Uma duração inválida mantém a indicação textual de total parcial.
 
@@ -30,7 +31,7 @@ O espaçamento entre dias e as divisórias das tabelas separam os grupos. Linhas
 
 Use a demo e dados fictícios; nunca o banco de uso para preencher capturas. Confira desktop, tablet e 375 px, incluindo:
 
-1. Cinco dias úteis e uma segunda semana: a identidade acompanha o dia da semana, não a posição da linha.
+1. Dias adjacentes, inclusive entre semanas: os dois tons alternam pela posição visível e continuam distintos com as tarefas recolhidas.
 2. Edição, duração abreviada/inválida, atividade, total, seleção e botão de salvar. Recolher e reabrir mantém os campos e as edições.
 3. Salvar e recarregar; revisar, cancelar e confirmar uma simulação; expandir um dia apropriado e conferir o recibo.
 4. Modelo, catálogo, avisos e revisão em tela pequena. Somente tabelas largas devem rolar horizontalmente, preservando os campos editáveis.
