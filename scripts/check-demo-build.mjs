@@ -15,8 +15,12 @@ export function checkDemoBuild(folder, base = "/") {
   if (!html.includes("Content-Security-Policy") || !html.includes("connect-src &#39;none&#39;"))
     throw new Error("The demo must block operational network connections.");
   for (const file of artifact) {
-    if (!/\.(?:html|js|css)$/.test(file)) throw new Error(`Unexpected demo file: ${relative(root, file)}`);
+    if (!/\.(?:html|js|css|svg)$/.test(file)) throw new Error(`Unexpected demo file: ${relative(root, file)}`);
     const source = readFileSync(file, "utf8");
+    // The brand is a passive vector asset, with no scripts, embedded content or external references.
+    if (file.endsWith(".svg") && (!/^<svg\b/.test(source) ||
+      /<(?!\/?(?:svg|rect|path)\b)|\b(?:href|src|style|on\w+)\s*=|url\s*\(/i.test(source)))
+      throw new Error(`Unexpected active SVG content: ${relative(root, file)}`);
     if (/\/api\/|node:sqlite|http-data-access|REDMINE_API_KEY=|REDMINE_URL=|BEGIN (?:RSA |EC )?PRIVATE KEY/.test(source))
       throw new Error(`Forbidden local reference in demo artifact: ${relative(root, file)}`);
   }

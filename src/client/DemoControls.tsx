@@ -31,12 +31,15 @@ export function DemoControls({ session, onRestored }: {
   return <section className="demo-controls" aria-label="Exemplos e dados da demonstração">
     <div>
       <strong>Vários dias de horas, um fluxo organizado</strong>
-      <p>Recomponha seus apontamentos, confira os totais e revise o envio sem depender de uma planilha. Experimente em poucos minutos com exemplos fictícios.</p>
-      <ol className="demo-steps">
-        <li>Edite um dia ou crie o dia de hoje com o modelo. Tarefas disponíveis: 9001, 9004 e 9007.</li>
-        <li>Use <strong>Salvar rascunhos</strong> para guardar as alterações.</li>
-        <li>Selecione uma linha, um dia ou várias datas e confirme a <strong>simulação</strong>. Confira os recibos e restaure os exemplos quando quiser.</li>
-      </ol>
+      <p>Edite os exemplos, salve e revise uma simulação de envio. As tarefas são fictícias.</p>
+      <details className="demo-guide">
+        <summary>Como experimentar</summary>
+        <ol className="demo-steps">
+          <li>Edite um dia ou crie o dia de hoje com o modelo. Tarefas disponíveis: 9001, 9004 e 9007.</li>
+          <li>Use <strong>Salvar rascunhos</strong> para guardar as alterações.</li>
+          <li>Selecione uma linha, um dia ou várias datas e confirme a <strong>simulação</strong>. Confira os recibos e restaure os exemplos quando quiser.</li>
+        </ol>
+      </details>
       <p>{session.persistent
         ? "Salvar guarda os dados somente neste navegador. Recarregar recupera o que foi salvo."
         : "Os dados desta página são temporários; confira o aviso de armazenamento abaixo."}</p>

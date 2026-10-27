@@ -87,6 +87,9 @@ describe("Windows launcher preparation and ownership", () => {
     t.reset(); t.put("src/entry.ts", "changed source");
     await (await launchWorklog(t.root, t.options)).stop();
     expect(t.runNpm.mock.calls.map(([args]) => args)).toEqual([["run", "build"], ["start"]]);
+    t.reset(); t.put("src/mark.svg", '<svg xmlns="http://www.w3.org/2000/svg"/>');
+    await (await launchWorklog(t.root, t.options)).stop();
+    expect(t.runNpm.mock.calls.map(([args]) => args)).toEqual([["run", "build"], ["start"]]);
     t.reset(); t.put("dist/index.html", "damaged artifact");
     await (await launchWorklog(t.root, t.options)).stop();
     expect(t.runNpm.mock.calls[0][0]).toEqual(["run", "build"]);

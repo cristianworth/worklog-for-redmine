@@ -110,7 +110,7 @@ export function SubmissionReview({
     >
       <div className="submission-heading">
         <div>
-          <p className="eyebrow">{access.mode === "demo" ? "RESULTADO INDIVIDUAL SIMULADO" : "ENVIO INDIVIDUAL"}</p>
+          <p className="review-context">{access.mode === "demo" ? "Resultado individual simulado" : "Envio individual"}</p>
           <h2 id="submission-title">
             {record?.state === "prepared"
               ? "Revise antes de enviar"

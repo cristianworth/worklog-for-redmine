@@ -138,7 +138,7 @@ export function BatchReview({
     >
       <div className="submission-heading">
         <div>
-          <p className="eyebrow">{data.mode === "demo" ? "SIMULAÇÃO POR DIA OU PERÍODO" : "ENVIO POR DIA OU PERÍODO"}</p>
+          <p className="review-context">{data.mode === "demo" ? "Simulação por dia ou período" : "Envio por dia ou período"}</p>
           <h2 id="batch-title">
             {batch?.state === "prepared"
               ? data.mode === "demo" ? "Revise antes de simular" : "Revise o lote antes de enviar"

@@ -12,6 +12,22 @@ Histórico das versões. Criado em 23/10/2026 com a base anterior ao modelo regi
 - Antes de cada commit/merge, ler este arquivo e avaliar uma versão proporcional à entrega. Em 25/10/2026, Cristian delegou ao agente a decisão de versão neste projeto e pediu push automático dos commits coesos, sem nova confirmação rotineira. Não incrementar a versão por commit da mesma entrega. Publicação e dados reais continuam sujeitos ao escopo autorizado.
 - Nunca incluir credenciais, planilhas privadas, bancos, backups ou dados reais nos registros, tags e arquivos distribuídos.
 
+## [0.8.0] — 2026-10-27
+
+### Interface e identidade visual
+
+- Nova marca vetorial original, com cinco colunas de horas, compartilhada pelo cabeçalho e pelo favicon. Recursos resolvidos pelo Vite tanto na raiz quanto no subdiretório do Pages, sem fontes externas ou novas dependências.
+- Cabeçalhos fixos por dia útil: segunda azul, terça verde-petróleo, quarta violeta, quinta amarelo com texto escuro e sexta amora. A cor acompanha a data, inclusive entre semanas, sem substituir os textos de situação dos recibos ou o marcador de hoje.
+- Maior separação entre dias, divisórias e alternância nas linhas, campos mais legíveis e hierarquia de totais/títulos. Configurações, modelo e revisões seguem os mesmos tokens e controles; foco visível e disposição própria para telas menores.
+- Introdução da demo compacta, com passo a passo em **Como experimentar**; instruções permanecem disponíveis por teclado. Removidos rótulos decorativos em maiúsculas. README recebeu captura fictícia atualizada; guia da interface documenta cores, marca, fontes locais e conferência visual.
+
+### Verificação e manutenção
+
+- 372 testes/29 arquivos, TypeScript, builds local/demo/Pages e auditorias aprovados. A auditoria permite o vetor passivo e recusa scripts/eventos/recursos externos em SVG; novos casos verificam também favicon ausente e caminho do Pages.
+- O lançador reconhece alterações de SVG ao decidir recompilar; teste de preparação cobre esse caso. Executável regenerado como 0.8.0 e smoke test completo aprovado em pasta temporária com SQLite fictício: instalação/build, porta ocupada, identidade, reutilização, encerramento e persistência.
+- Conferência no navegador em desktop, 768 px e 375 px: cinco cores, teclado/foco, tabelas sem transbordamento da página, modelo/configurações, edição/recolhimento, salvamento/recarga e revisão/cancelamento/confirmação simulada com recibo protegido. Marca e favicon conferidos na raiz e sob `/worklog-for-redmine/`, sem erros de console. Contraste dos textos dos cinco cabeçalhos acima de 5:1; não equivale a uma auditoria completa de acessibilidade.
+- Corrigida a data de um cenário fictício que dependia do relógio do computador e falhou na virada do dia. Nenhum contrato de dados, catálogo de uso, banco ou envio real foi alterado.
+
 ## [0.7.0] — 2026-10-26
 
 ### Lançador Windows

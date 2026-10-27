@@ -55,6 +55,7 @@ import { ActivityCatalogEditor } from "./ActivityCatalogEditor";
 import type { ActivityCatalog } from "../shared/activities";
 import { useWorklogData } from "./WorklogDataProvider";
 import { DemoControls } from "./DemoControls";
+import worklogMark from "./assets/worklog-mark.svg?no-inline";
 
 function initialPeriod(storageKey: string, exampleStartDate?: string, reset = false): PeriodPreference {
   const fallback = exampleStartDate
@@ -477,9 +478,7 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
                 event.preventDefault();
             }}
           >
-            <span className="brand-mark" aria-hidden="true">
-              w.
-            </span>
+            <img className="brand-mark" src={worklogMark} width="44" height="44" alt="" />
             <span>
               Worklog <small>for Redmine</small>
             </span>
@@ -539,7 +538,6 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
         </div>
         <div className="page-heading">
           <div>
-            <p className="eyebrow">SEUS DIAS, EM ORDEM</p>
             <h1>Apontamentos</h1>
             <p className="intro">
               Preencha no seu ritmo. Salve agora, envie depois.

@@ -34,7 +34,7 @@ describe("replaceable worklog data access", () => {
       throw new Error("HTTP must not be called");
     });
     vi.stubGlobal("fetch", http);
-    const memory = createDemoDataAccess();
+    const memory = createDemoDataAccess({ today: "2026-10-26" });
     let received: WorklogDataAccess | undefined;
     function Consumer() {
       received = useWorklogData();

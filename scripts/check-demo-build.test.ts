@@ -1,4 +1,4 @@
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -33,5 +33,29 @@ describe("static demo delivery audit", () => {
     const root = fixture();
     writeFileSync(join(root, "worklog.sqlite"), "synthetic private data");
     expect(() => checkDemoBuild(root)).toThrow("Unexpected demo file");
+  });
+  it("includes the passive brand and favicon under both deployment paths", () => {
+    const mark = readFileSync(new URL("../src/client/assets/worklog-mark.svg", import.meta.url), "utf8");
+    for (const base of ["/", "/worklog-for-redmine/"]) {
+      const root = fixture(base);
+      writeFileSync(join(root, "assets/mark.svg"), mark);
+      const html = readFileSync(join(root, "index.html"), "utf8");
+      writeFileSync(join(root, "index.html"), `${html}<link rel="icon" href="${base}assets/mark.svg">`);
+      expect(checkDemoBuild(root, base)).toBe(3);
+      rmSync(join(root, "assets/mark.svg"));
+      expect(() => checkDemoBuild(root, base)).toThrow("Missing demo asset");
+    }
+  });
+  it("rejects SVG scripts, events and external resources", () => {
+    for (const content of [
+      '<svg><script>alert(1)</script></svg>',
+      '<svg onload="alert(1)"><path/></svg>',
+      '<svg><image href="https://example.invalid/test.png"/></svg>',
+      '<svg><path style="fill: url(https://example.invalid/test.svg)"/></svg>',
+    ]) {
+      const root = fixture();
+      writeFileSync(join(root, "assets/mark.svg"), content);
+      expect(() => checkDemoBuild(root)).toThrow("Unexpected active SVG content");
+    }
   });
 });

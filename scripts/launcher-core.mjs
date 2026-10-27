@@ -51,7 +51,7 @@ function treeFiles(root, folder, include) {
 
 export function sourceFingerprint(root) {
   const files = ["package.json", "package-lock.json", "vite.config.ts", "tsconfig.json", "index.html",
-    ...treeFiles(root, "src", (file) => !file.includes(".test.") && /\.(?:ts|tsx|css|mjs|mts)$/.test(file))];
+    ...treeFiles(root, "src", (file) => !file.includes(".test.") && /\.(?:ts|tsx|css|mjs|mts|svg)$/.test(file))];
   return digest(files.flatMap((file) => [file, readFileSync(join(root, file), "utf8")]));
 }
 
