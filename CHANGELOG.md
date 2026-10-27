@@ -12,6 +12,14 @@ Histórico das versões. Criado em 23/10/2026 com a base anterior ao modelo regi
 - Antes de cada commit/merge, ler este arquivo e avaliar uma versão proporcional à entrega. Em 25/10/2026, Cristian delegou ao agente a decisão de versão neste projeto e pediu push automático dos commits coesos, sem nova confirmação rotineira. Não incrementar a versão por commit da mesma entrega. Publicação e dados reais continuam sujeitos ao escopo autorizado.
 - Nunca incluir credenciais, planilhas privadas, bancos, backups ou dados reais nos registros, tags e arquivos distribuídos.
 
+## [0.8.3] — 2026-10-27
+
+### Paleta Oceano escolhida
+
+- Aplicadas as cinco cores exatas da alternativa **Oceano**, escolhida por Cristian: segunda `#A5C7E8`, terça `#A4D2E0`, quarta `#A1D6CD`, quinta `#B6D8BD` e sexta `#D0DDAF`. Marca/favicon acompanham o detalhe da nova paleta; petróleo e tons profundos das datas mantêm a unidade das ações.
+- Cores continuam vinculadas aos dias da semana, inclusive em períodos parciais. Guia da interface, captura/README, roadmap e instruções atuais registram a escolha.
+- 372 testes/29 arquivos, builds local/demo/Pages e auditorias aprovados. Cores exatas conferidas no navegador, inclusive no recorte quarta–sexta; foco, recolhimento e 375 px sem transbordamento da página ou erros de console. Executável regenerado como 0.8.3; sem mudanças nos fluxos, no banco de uso ou em envios reais.
+
 ## [0.8.2] — 2026-10-27
 
 ### Cor com unidade visual

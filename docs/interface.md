@@ -4,15 +4,15 @@ A interface funciona como uma agenda de apontamentos: localizar uma data, preenc
 
 ## Cores com uma função
 
-A identidade usa uma família de cores vizinhas, do azul ao verde, com fundos de intensidade moderada e texto escuro. A preferência de Cristian é manter cor e personalidade sem grandes blocos saturados ou uma interface monocromática. A referência a planilhas indicava facilidade para distinguir grupos, não uma exigência de branco e cinza.
+A paleta **Oceano**, escolhida por Cristian após comparar cinco alternativas, usa cores vizinhas do azul ao verde, com fundos suaves e texto escuro. A preferência de Cristian é manter cor e personalidade sem grandes blocos saturados ou uma interface monocromática. A referência a planilhas indicava facilidade para distinguir grupos, não uma exigência de branco e cinza.
 
 | Dia | Cabeçalho | Detalhe da data |
 | --- | --- | --- |
-| Segunda | Azul `#A8C8EB` | `#416EA1` |
-| Terça | Azul-piscina `#AAD8E6` | `#317B93` |
-| Quarta | Verde-mar `#A4D6C9` | `#2F7D6C` |
-| Quinta | Sálvia `#B5D8B7` | `#537B52` |
-| Sexta | Verde-folha `#C9D9A6` | `#6B7D3B` |
+| Segunda | Azul `#A5C7E8` | `#416EA1` |
+| Terça | Azul-piscina `#A4D2E0` | `#317B93` |
+| Quarta | Verde-mar `#A1D6CD` | `#2F7D6C` |
+| Quinta | Sálvia `#B6D8BD` | `#537B52` |
+| Sexta | Verde-folha `#D0DDAF` | `#6B7D3B` |
 
 O petróleo `#2F6B66` conecta marca, ações, foco e avisos da demo; o fundo claro `#F1F6F3` e as bordas esverdeadas sustentam o conjunto. Os cabeçalhos são avaliados lado a lado, com luminosidade próxima, em vez de escolher cada cor isoladamente. A área de edição clara conserva a legibilidade dos campos.
 
