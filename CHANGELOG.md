@@ -12,6 +12,15 @@ Histórico das versões. Criado em 23/10/2026 com a base anterior ao modelo regi
 - Antes de cada commit/merge, ler este arquivo e avaliar uma versão proporcional à entrega. Em 25/10/2026, Cristian delegou ao agente a decisão de versão neste projeto e pediu push automático dos commits coesos, sem nova confirmação rotineira. Não incrementar a versão por commit da mesma entrega. Publicação e dados reais continuam sujeitos ao escopo autorizado.
 - Nunca incluir credenciais, planilhas privadas, bancos, backups ou dados reais nos registros, tags e arquivos distribuídos.
 
+## [0.8.2] — 2026-10-27
+
+### Cor com unidade visual
+
+- Paleta semanal coordenada, do azul ao verde, com cabeçalhos de intensidade moderada e texto escuro. Substitui a alternância monocromática da v0.8.1 e os tons saturados sem relação entre si da v0.8.0. Cada dia mantém sua cor ao mudar o período.
+- Petróleo conecta marca/favicon, navegação, ações, foco e avisos. A data ganha um detalhe mais profundo da mesma família do cabeçalho; campos claros e divisórias preservam a leitura das tarefas. Estados dos recibos continuam explícitos e separados da identidade semanal.
+- Preferência visual documentada: cor e personalidade com tons relacionados e intensidade próxima; a referência a planilhas significava distinguir grupos, sem prescrever branco e cinza. README/captura, guia e instruções atuais acompanham essa direção.
+- 372 testes/29 arquivos, TypeScript, builds local/demo/Pages e auditorias aprovados. Semana completa comparada lado a lado, períodos conferidos e revisão/cancelamento fictícios, teclado/foco e 375 px sem transbordamento da página ou erros de console. Contraste do texto nos cinco cabeçalhos acima de 6:1; executável regenerado como 0.8.2. Sem acesso ao banco de uso ou envio real.
+
 ## [0.8.1] — 2026-10-27
 
 ### Paleta mais suave

@@ -9,7 +9,7 @@ Organize several days of time-entry drafts, check daily totals, and explicitly r
 
 The interface is in Brazilian Portuguese. This overview is in English; the detailed product guides are in Portuguese. The demo uses fictional data and simulated submissions. No account, Redmine key or installation is required.
 
-![Worklog with soft alternating day headers and fictional time-entry drafts](docs/images/demo.png)
+![Worklog with coordinated blue-green weekday headers and fictional time-entry drafts](docs/images/demo.png)
 
 ## Try it in a few minutes
 
@@ -22,7 +22,7 @@ The interface is in Brazilian Portuguese. This overview is in English; the detai
 ## What it does
 
 - A free date range showing Monday–Friday, with stacked days and a duration total per day. Historical weekend data stays stored.
-- Soft alternating day headers, clear row separation and a shared vector brand/favicon. Dates and receipt states remain readable without relying on color. [Interface decisions](docs/interface.md).
+- Coordinated blue-green weekday headers, clear row separation and a shared vector brand/favicon. Dates and receipt states remain readable without relying on color. [Interface decisions](docs/interface.md).
 - Fully appropriated days start collapsed; pending or uncertain days stay expanded. You can expand/collapse any day.
 - Compact duration input: `30` → `00:30`, `130` → `01:30`; integer minutes internally.
 - One activity catalog, available before looking up a task; selectors show names only. IDs remain available in settings and submission review.

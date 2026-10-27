@@ -1,14 +1,17 @@
 :root {
-  --ink: #273b46;
-  --muted: #536976;
-  --canvas: #f5f7f8;
+  --ink: #223f45;
+  --muted: #4d6869;
+  --canvas: #f1f6f3;
   --paper: #fff;
-  --day-surface: #edf2f4;
-  --day-surface-alternate: #dee7eb;
-  --line: #c8d3d9;
-  --accent: #486b7a;
-  --accent-hover: #365563;
-  --accent-wash: #e6eef2;
+  --monday: #a8c8eb;
+  --tuesday: #aad8e6;
+  --wednesday: #a4d6c9;
+  --thursday: #b5d8b7;
+  --friday: #c9d9a6;
+  --line: #b8cec7;
+  --accent: #2f6b66;
+  --accent-hover: #245550;
+  --accent-wash: #deeee7;
   --success: #316859;
   --success-wash: #eaf2ee;
   --warning: #806037;
@@ -78,8 +81,8 @@ h1, h2, h3 {
 }
 
 .app-header {
-  border-bottom: 2px solid var(--line);
-  background: var(--paper);
+  border-bottom: 3px solid var(--accent);
+  background: #f8fcf9;
 }
 .header-inner {
   max-width: 1280px;
@@ -164,7 +167,7 @@ h1 {
 }
 .secondary:hover:not(:disabled), .quiet:hover:not(:disabled) {
   background: var(--accent-wash);
-  border-color: #99aeb8;
+  border-color: #92b4a9;
 }
 .primary {
   border-color: var(--accent);
@@ -219,7 +222,7 @@ h1 {
   color: var(--danger);
 }
 
-/* Shared accents support actions; alternating bands separate daily groups. */
+/* A shared sea-green accent connects navigation, actions and daily colors. */
 .data-context {
   display: flex;
   align-items: flex-start;
@@ -334,8 +337,8 @@ h1 {
   color: var(--muted);
 }
 .date-field input {
-  background: #fafcfc;
-  border: 1px solid #7c919b;
+  background: #f9fcfa;
+  border: 1px solid #718f86;
   border-radius: 5px;
   padding: 9px 11px;
   color: var(--ink);
@@ -424,15 +427,15 @@ h1 {
 .send-button {
   color: var(--accent);
   background: var(--accent-wash);
-  border-color: #9aafb9;
+  border-color: #8eafa6;
 }
 .send-button:hover:not(:disabled) {
-  background: #dce7ec;
+  background: #d0e6dc;
 }
 .send-button:disabled {
   opacity: 1;
   color: var(--muted);
-  background: #e8edef;
+  background: #e0ebe4;
   border-color: var(--line);
 }
 .days-caption {
@@ -450,17 +453,35 @@ h1 {
   gap: 6px;
 }
 
-/* Alternating bands separate adjacent days without assigning a color to each weekday. */
+/* Neighboring blue/green hues share a similar lightness across the workweek. */
 .day-card {
-  --day-background: var(--day-surface);
+  --day-background: var(--monday);
+  --day-accent: #416ea1;
   border: 1px solid var(--line);
   border-radius: 9px;
   background: var(--paper);
   overflow: hidden;
   margin-bottom: 28px;
 }
-.day-card:nth-child(even) {
-  --day-background: var(--day-surface-alternate);
+.day-card[data-weekday="1"] {
+  --day-background: var(--monday);
+  --day-accent: #416ea1;
+}
+.day-card[data-weekday="2"] {
+  --day-background: var(--tuesday);
+  --day-accent: #317b93;
+}
+.day-card[data-weekday="3"] {
+  --day-background: var(--wednesday);
+  --day-accent: #2f7d6c;
+}
+.day-card[data-weekday="4"] {
+  --day-background: var(--thursday);
+  --day-accent: #537b52;
+}
+.day-card[data-weekday="5"] {
+  --day-background: var(--friday);
+  --day-accent: #6b7d3b;
 }
 .is-today .day-heading {
   box-shadow: inset 3px 0 var(--accent);
@@ -472,6 +493,7 @@ h1 {
   padding: 16px 18px;
   background: var(--day-background);
   color: var(--ink);
+  border-bottom: 1px solid #223f4526;
 }
 .day-date-stamp {
   display: grid;
@@ -479,9 +501,9 @@ h1 {
   width: 47px;
   height: 51px;
   border-radius: 4px;
-  background: var(--paper);
-  border: 1px solid var(--line);
-  color: var(--accent);
+  background: var(--day-accent);
+  border: 1px solid transparent;
+  color: #fff;
   font-size: 29px;
   font-weight: 700;
   line-height: 1;
@@ -518,8 +540,8 @@ h1 {
   font-size: 11px;
   font-weight: 700;
   padding: 1px 7px;
-  color: var(--ink);
-  background: #d5e2e8;
+  color: #fff;
+  background: var(--accent);
   border-radius: 3px;
 }
 .day-total {
@@ -531,7 +553,7 @@ h1 {
   margin-left: auto;
   min-width: 108px;
   padding: 0 18px;
-  border-left: 1px solid var(--line);
+  border-left: 1px solid #223f4533;
 }
 .day-total > span {
   font-size: 11px;
@@ -549,6 +571,9 @@ h1 {
   margin-left: 4px;
   font-weight: 400;
 }
+.is-collapsed .day-heading {
+  border-bottom: 0;
+}
 .day-total.is-partial {
   background: var(--warning-wash);
   color: var(--warning);
@@ -557,7 +582,7 @@ h1 {
 }
 .day-send {
   background: var(--paper);
-  border-color: #9aafb9;
+  border-color: #8eafa6;
   color: var(--ink);
   white-space: nowrap;
 }
@@ -566,7 +591,7 @@ h1 {
 }
 .day-heading .add-line {
   background: transparent;
-  border-color: #9aafb9;
+  border-color: #8eafa6;
   color: var(--ink);
   white-space: nowrap;
 }
@@ -578,7 +603,7 @@ h1 {
   opacity: 1;
   background: transparent;
   border-color: var(--line);
-  color: #637580;
+  color: #526e68;
 }
 .day-toggle {
   width: 34px;
@@ -638,7 +663,7 @@ th {
   font-weight: 600;
   color: var(--muted);
   padding: 11px 9px;
-  background: #f0f3f5;
+  background: #eff5f1;
   border-bottom: 1px solid var(--line);
 }
 td {
@@ -649,7 +674,7 @@ tbody tr + tr {
   border-top: 1px solid var(--line);
 }
 .day-card tbody tr:nth-child(even):not(.is-appropriated):not(.needs-check):not(.is-rejected) {
-  background: #f7f9fa;
+  background: #f5faf7;
 }
 .day-card tbody tr:has(.entry-selector input:checked) {
   background: var(--accent-wash);
@@ -663,7 +688,7 @@ td.row-number {
   padding-top: 23px;
 }
 td input, td textarea, td select {
-  border: 1px solid #7c919b;
+  border: 1px solid #718f86;
   border-radius: 5px;
   width: 100%;
   padding: 9px;
@@ -676,7 +701,7 @@ td input:hover, td textarea:hover, td select:hover {
 }
 td input:disabled, td textarea:disabled, td select:disabled {
   color: var(--muted);
-  background: #f4f7f8;
+  background: #f1f6f3;
   opacity: 1;
 }
 td textarea {
@@ -790,7 +815,7 @@ td select {
 }
 .save-bar.has-pending {
   border: 2px solid var(--accent);
-  box-shadow: 0 4px 18px #273b461a;
+  box-shadow: 0 4px 18px #223f451a;
 }
 .save-status {
   display: flex;
@@ -1013,10 +1038,10 @@ input[aria-invalid="true"], select[aria-invalid="true"] {
   padding: 25px;
   color: var(--ink);
   background: var(--paper);
-  box-shadow: 0 15px 70px #273b4630;
+  box-shadow: 0 15px 70px #223f4530;
 }
 .submission-dialog::backdrop {
-  background: #273b4680;
+  background: #223f4580;
 }
 .submission-heading {
   display: flex;
@@ -1273,9 +1298,9 @@ input[aria-invalid="true"], select[aria-invalid="true"] {
   flex-wrap: wrap;
   gap: 4px 18px;
   padding: 8px 16px;
-  color: var(--ink);
-  background: #e2eaf0;
-  border-bottom: 1px solid var(--line);
+  color: #fff;
+  background: #38675f;
+  border-bottom: 1px solid #38675f;
   font-size: 12px;
 }
 .demo-steps {

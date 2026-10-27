@@ -1,6 +1,6 @@
 # Roadmap — Worklog for Redmine
 
-Atualizado em 27/10/2026. Versão da entrega: **v0.8.1**; P8 concluída, lançador Windows entregue e interface com paleta suavizada. Código público sob MIT; demo publicada no GitHub Pages. Histórico no [changelog](CHANGELOG.md), invariantes nas [decisões](docs/project-decisions.md) e detalhes técnicos no [plano](docs/development-plan.md).
+Atualizado em 27/10/2026. Versão da entrega: **v0.8.2**; P8 concluída, lançador Windows entregue e interface com paleta azul-verde harmonizada. Código público sob MIT; demo publicada no GitHub Pages. Histórico no [changelog](CHANGELOG.md), invariantes nas [decisões](docs/project-decisions.md) e detalhes técnicos no [plano](docs/development-plan.md).
 
 ## Objetivo e prioridades
 
@@ -23,7 +23,8 @@ Ordem de importância: **isolamento → dados recuperáveis → fluxo completo �
 | v0.6.1 | Visualização de segunda a sexta, dias apropriados recolhidos por padrão e atividades sem códigos nos seletores |
 | v0.7.0 | Lançador `.exe` para preparar/iniciar `npm start` e abrir o navegador, mantendo SQLite/configuração locais |
 | v0.8.0 | Identidade visual própria, marca/favicon vetoriais e maior distinção entre dias e linhas |
-| v0.8.1 | Paleta suave com dois tons alternados nos cabeçalhos e uma cor de ação harmonizada em toda a interface |
+| v0.8.1 | Paleta suave com dois tons alternados nos cabeçalhos |
+| v0.8.2 | Paleta azul-verde de intensidade moderada, identidade por dia útil e cores coordenadas em toda a interface |
 
 O cadastro privado tem 15 atividades únicas, sem cópias por projeto. Os dois testes reais anteriores mantiveram o mesmo código em dois projetos, com readback e confirmação visual de Cristian. Não validaram todas as atividades/projetos; suas autorizações estão consumidas.
 

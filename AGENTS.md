@@ -22,7 +22,7 @@
 
 ## Catalog, days and templates
 
-- v0.8.1 supersedes the saturated weekday colors: use two soft alternating header backgrounds by visible position and one muted accent throughout the interface, independent of receipt status. Preserve textual dates/status, today's marker and disclosure behavior. Shared brand/favicon is a passive SVG; include it in artifact auditing and launcher build fingerprints. System font fallbacks require no network. See `docs/interface.md` for tokens and visual checks.
+- v0.8.2 uses a coordinated blue-to-green weekday palette with medium-light colored headers and a shared sea-green accent. Cristian wants visible color/personality with related hues and moderate intensity; the spreadsheet reference meant easy day separation, not monochrome gray. Keep weekday colors stable across periods and independent of receipt status. Preserve textual dates/status, today's marker and disclosure behavior. Shared brand/favicon is a passive SVG; include it in artifact auditing and launcher build fingerprints. System font fallbacks require no network. See `docs/interface.md` for tokens and visual checks.
 
 - On 2026-10-26 Cristian requested weekday-only display (Monday–Friday), fully appropriated days initially collapsed, and names only in activity selectors. Keep calendar/storage APIs compatible with historical weekend data; never delete/migrate those rows. Explicit disclosure choices win for the current page; partial/uncertain/empty days start expanded. Preserve numeric activity IDs in configuration, receipt snapshots, review and submission; remove them only from selector labels/hints. New/restored demo examples use previous weekdays, without rewriting an existing visitor snapshot.
 
