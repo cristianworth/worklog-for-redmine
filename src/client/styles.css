@@ -3,11 +3,11 @@
   --muted: #4d6869;
   --canvas: #f1f6f3;
   --paper: #fff;
-  --monday: #a5c7e8;
-  --tuesday: #a4d2e0;
-  --wednesday: #a1d6cd;
-  --thursday: #b6d8bd;
-  --friday: #d0ddaf;
+  --monday: #a9cbe2;
+  --tuesday: #b4c1e1;
+  --wednesday: #c7bde0;
+  --thursday: #a7d4d1;
+  --friday: #c3d8bc;
   --line: #b8cec7;
   --accent: #2f6b66;
   --accent-hover: #245550;
@@ -453,10 +453,10 @@ h1 {
   gap: 6px;
 }
 
-/* Neighboring blue/green hues share a similar lightness across the workweek. */
+/* Coordinated cool hues retain a similar lightness across the workweek. */
 .day-card {
   --day-background: var(--monday);
-  --day-accent: #416ea1;
+  --day-accent: #416d91;
   border: 1px solid var(--line);
   border-radius: 9px;
   background: var(--paper);
@@ -465,23 +465,23 @@ h1 {
 }
 .day-card[data-weekday="1"] {
   --day-background: var(--monday);
-  --day-accent: #416ea1;
+  --day-accent: #416d91;
 }
 .day-card[data-weekday="2"] {
   --day-background: var(--tuesday);
-  --day-accent: #317b93;
+  --day-accent: #596b9e;
 }
 .day-card[data-weekday="3"] {
   --day-background: var(--wednesday);
-  --day-accent: #2f7d6c;
+  --day-accent: #76649b;
 }
 .day-card[data-weekday="4"] {
   --day-background: var(--thursday);
-  --day-accent: #537b52;
+  --day-accent: #377b78;
 }
 .day-card[data-weekday="5"] {
   --day-background: var(--friday);
-  --day-accent: #6b7d3b;
+  --day-accent: #587951;
 }
 .is-today .day-heading {
   box-shadow: inset 3px 0 var(--accent);

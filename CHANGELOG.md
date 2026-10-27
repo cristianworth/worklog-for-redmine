@@ -12,6 +12,13 @@ Histórico das versões. Criado em 23/10/2026 com a base anterior ao modelo regi
 - Antes de cada commit/merge, ler este arquivo e avaliar uma versão proporcional à entrega. Em 25/10/2026, Cristian delegou ao agente a decisão de versão neste projeto e pediu push automático dos commits coesos, sem nova confirmação rotineira. Não incrementar a versão por commit da mesma entrega. Publicação e dados reais continuam sujeitos ao escopo autorizado.
 - Nunca incluir credenciais, planilhas privadas, bancos, backups ou dados reais nos registros, tags e arquivos distribuídos.
 
+## [0.8.4] — 2026-10-27
+
+### Paleta Azulejos
+
+- Troca para a alternativa **Azulejos**, conforme escolha de Cristian: segunda `#A9CBE2`, terça `#B4C1E1`, quarta `#C7BDE0`, quinta `#A7D4D1` e sexta `#C3D8BC`. Detalhes das datas e marca/favicon acompanham a nova combinação; os tons permanecem fixos por dia da semana.
+- Documentação atual, captura do README e versão sincronizadas. 372 testes/29 arquivos, builds local/demo/Pages e auditorias aprovados; conferência fictícia dos cinco tons, recorte quarta–sexta, foco e 375 px sem transbordamento da página ou erros de console. Contraste dos textos nos cabeçalhos acima de 6:1; executável regenerado como 0.8.4. Dados e fluxos preservados, sem acesso ao banco de uso ou envio real.
+
 ## [0.8.3] — 2026-10-27
 
 ### Paleta Oceano escolhida
