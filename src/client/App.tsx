@@ -4,11 +4,11 @@ import {
   type DayTemplate,
 } from "../shared/day-template";
 import { BatchReview } from "./BatchReview";
+import { canSelectEntry, pendingEntries } from "./submission-selection";
 import type { BatchSelection, SubmissionBatch } from "../shared/batches";
 import { SubmissionReview } from "./SubmissionReview";
 import { publicDemoUrl, repositoryUrl } from "./app-links";
 import {
-  isSubmissionLocked,
   acceptReceipt,
   type SubmissionRecord,
 } from "../shared/submissions";
@@ -209,28 +209,22 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
       });
     return () => controller.abort();
   }, [data, period.from, effectiveEnd, receiptRetry]);
-  const canSelect = (date: string, entryId: string) => {
-    const record = receipts[`${date}:${entryId}`];
-    return (
-      !!editor.days[date]?.entries.some((entry) => entry.id === entryId) &&
-      !editor.dirtyDates.includes(date) &&
-      !(record && isSubmissionLocked(record.state))
-    );
-  };
+  const canSelect = (date: string, entryId: string) => canSelectEntry(editor, receipts, date, entryId);
+  const visiblePending = pendingEntries(visibleDates, editor, receipts);
   const canReview =
     !!selection.length &&
+    selection.length <= 100 &&
     receiptsLoaded &&
     !loading &&
     !saving &&
     selection.every((item) => canSelect(item.date, item.entryId));
   function pendingDay(date: string) {
-    return (editor.days[date]?.entries ?? [])
-      .filter((entry) => canSelect(date, entry.id))
-      .map((entry) => ({ date, entryId: entry.id }));
+    return pendingEntries([date], editor, receipts);
   }
   function openBatch(entries: { date: string; entryId: string }[]) {
     if (
       !entries.length ||
+      entries.length > 100 ||
       !receiptsLoaded ||
       loading ||
       saving ||
@@ -697,6 +691,14 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
             </span>
           </span>
           <div className="send-control">
+            <button
+              className="button secondary"
+              disabled={loading || saving || loadFailed || !receiptsLoaded || !visiblePending.length}
+              onClick={() => setSelection(visiblePending)}
+              aria-describedby="send-status"
+            >
+              Selecionar todos
+            </button>
             {!!selection.length && (
               <button className="text-button" onClick={() => setSelection([])}>
                 Limpar seleção
@@ -713,7 +715,9 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
               {selection.length ? ` (${selection.length})` : ""}
             </button>
             <span id="send-status">
-              Selecione linhas ou dias salvos · revisão antes do envio
+              {selection.length > 100
+                ? "O limite é de 100 linhas por lote. Reduza a seleção ou o período."
+                : "Selecionar todos inclui apenas pendentes salvos deste período. Revise antes de enviar."}
             </span>
           </div>
         </div>

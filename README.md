@@ -15,7 +15,7 @@ The interface is in Brazilian Portuguese. This overview is in English; the detai
 
 1. Edit one of the three example days. Fictional task IDs: **9001**, **9004**, **9007**.
 2. Use **Salvar rascunhos** to persist your changes in this browser.
-3. Choose **Simular dia**, or select rows across several dates and use **Simular selecionados**.
+3. Choose **Simular dia** below that day's tasks, or use **Selecionar todos** for saved pending rows in the visible period and **Simular selecionados**.
 4. Review and confirm. Results are labeled **Simulado**; **Ver resultado** lets you check a saved receipt without creating another.
 5. Reload to recover saved work. **Restaurar exemplos** asks before discarding the demo's saved data and open edits.
 
@@ -25,9 +25,9 @@ The interface is in Brazilian Portuguese. This overview is in English; the detai
 - The Azulejos cool weekday palette, clear row separation and a shared vector brand/favicon. Dates and receipt states remain readable without relying on color. [Interface decisions](docs/interface.md).
 - Fully appropriated days start collapsed; pending or uncertain days stay expanded. You can expand/collapse any day.
 - Compact duration input: `30` → `00:30`, `130` → `01:30`; integer minutes internally.
-- One activity catalog, available before looking up a task; selectors show names only. IDs remain available in settings and submission review.
+- One activity catalog, available before looking up a task; selectors show alphabetically ordered names only. IDs remain available in settings and submission review.
 - A reusable day template, copied explicitly into untouched dates.
-- Saved-row selection, review, confirmation and sequential batches with partial results.
+- Saved-row selection, review, confirmation and sequential batches with visible progress, partial results and explicit completion feedback.
 - Protected receipts, conservative duplicate checks and read-only recovery after uncertain results.
 
 Saving and submitting are separate actions. Issue statuses stay unchanged. This project is independent of Redmine.

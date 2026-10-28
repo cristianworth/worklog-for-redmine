@@ -12,6 +12,20 @@ Histórico das versões. Criado em 23/10/2026 com a base anterior ao modelo regi
 - Antes de cada commit/merge, ler este arquivo e avaliar uma versão proporcional à entrega. Em 25/10/2026, Cristian delegou ao agente a decisão de versão neste projeto e pediu push automático dos commits coesos, sem nova confirmação rotineira. Não incrementar a versão por commit da mesma entrega. Publicação e dados reais continuam sujeitos ao escopo autorizado.
 - Nunca incluir credenciais, planilhas privadas, bancos, backups ou dados reais nos registros, tags e arquivos distribuídos.
 
+## [0.9.0] — 2026-10-28
+
+### Seleção e acompanhamento de envios
+
+- **Selecionar todos** reúne os pendentes salvos do período visível, inclusive dias parcialmente apropriados, sem incluir recibos protegidos ou alterações não salvas. Seleções acima de 100 linhas recebem orientação para reduzir o lote, sem truncamento silencioso.
+- Atividades em ordem alfabética brasileira nos seletores de dias/modelo e na abertura do catálogo em Configurações; IDs, valores históricos e edições continuam preservados.
+- **Enviar dia** passa para o rodapé das tarefas, acompanhado da quantidade pendente e da indicação de revisão. Cabeçalhos mantêm data, total, adicionar e recolher, com a paleta Azulejos.
+- Preparação, confirmação e execução de um dia ou lote exibem espera/progresso, contagem de linhas, tarefa/data atual quando disponíveis e resultado explícito. O painel permanece visível durante a rolagem; sucesso exige recibos confirmados, e falhas/incertezas preservam o resultado parcial. Atualizar resultados também indica sua leitura, sem repetir envios.
+
+### Verificação
+
+- 383 testes/31 arquivos, builds local/demo/Pages e auditorias aprovados; lançador regenerado como 0.9.0. Testes novos protegem seleção elegível, ordenação sem mutação do catálogo, envio desabilitado com alterações e ausência de falso sucesso.
+- Conferência com dados fictícios: dia e lote, teclado, espera deliberada na preparação/confirmação/por linha, contagem parcial, resultado incerto, proteção contra reenvio, salvar/recarga e 375 px sem transbordamento da página. Build final sem erros de console; documentação e captura do README atualizadas. Sem acesso ao banco de uso ou envio real. A barra representa resultados recebidos, sem estimativa de tempo; fechar a revisão exige reabrir o lote para acompanhar as atualizações.
+
 ## [0.8.4] — 2026-10-27
 
 ### Paleta Azulejos

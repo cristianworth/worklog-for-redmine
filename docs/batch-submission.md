@@ -2,11 +2,17 @@
 
 ## Uso
 
-Salvar continua apenas local. **Enviar dia**, com ícone de sincronização, abre a revisão das linhas pendentes salvas daquele dia. Os checkboxes das linhas e do cabeçalho do dia permitem selecionar vários dias e usar **Enviar selecionados**. A revisão mostra exatamente a seleção, agrupada por data, e os impedimentos por linha. Nenhuma criação ocorre até a confirmação. Dias com edições não salvas exigem salvar primeiro; resultados confirmados, existentes, iniciados ou incertos não entram em uma nova seleção.
+Salvar continua apenas local. **Enviar dia**, no rodapé das tarefas do dia, abre a revisão das linhas pendentes salvas daquela data. Os checkboxes das linhas e do cabeçalho do dia permitem selecionar vários dias e usar **Enviar selecionados**. **Selecionar todos** substitui a seleção pelos pendentes salvos do período visível, inclusive os pendentes de dias parcialmente apropriados; não inclui dias vazios, alterados sem salvar ou fora do período. Resultados confirmados, existentes, iniciados ou incertos continuam protegidos. **Limpar seleção** desmarca as linhas sem alterar rascunhos.
+
+A revisão mostra exatamente a seleção, agrupada por data, e os impedimentos por linha. Nenhuma criação ocorre até a confirmação. Dias com edições não salvas exigem salvar primeiro. Acima de 100 linhas, o envio fica desabilitado com orientação para reduzir a seleção ou o período; a seleção nunca é truncada silenciosamente.
 
 O limite é de 100 linhas por lote; a ordem é a ordem da seleção. A revisão expira após 15 minutos. Impedimentos de preparação bloqueiam a confirmação de todo o lote; corrija e abra outra revisão. As revisões locais de todos os dias e do catálogo são conferidas antes da primeira criação. Antes do primeiro POST, o backend confere conta, tarefa/projeto e atividade de **todas as linhas pendentes selecionadas**, usando consultas atuais independentes do cache de preenchimento. Códigos/projetos repetidos compartilham leituras somente nessa validação. Se uma tarefa estiver inválida/inacessível ou houver outro impedimento, **nenhuma hora de nenhum dia do lote é enviada**: o resultado identifica data, linha, código e motivo, e exige corrigir/preparar uma nova revisão. As revisões locais são conferidas novamente após as consultas. A conferência individual de contexto e equivalentes remotos continua antes de cada criação.
 
 ## Execução e recuperação
+
+A preparação exibe um indicador de espera. Depois da confirmação, um painel visível durante a rolagem mostra início/validação, processamento e resultado, tanto para um dia quanto para várias datas. A barra conta linhas processadas conforme os recibos recebidos, não o tempo estimado nem o avanço interno das consultas ao Redmine. Quando disponível, identifica a data e a tarefa em processamento. **Atualizar resultados** indica sua própria leitura em andamento e nunca repete o envio.
+
+Sucesso exige recibos confirmados ou já existentes para todas as linhas, sem divergência de conferência. Interrupções, impedimentos e resultados incertos exibem pendências e preservam a contagem parcial; linhas aguardando ou não enviadas não contam como processadas. Na demo, os mesmos indicadores e recibos são explicitamente simulados. A atualização automática ocorre enquanto a revisão está aberta; depois de fechar, reabra **Ver lote** para acompanhar os resultados atuais.
 
 O backend grava o lote como iniciado antes de executar sequencialmente. Cada linha usa o serviço de envio individual e seu recibo durável; não existe POST remoto coletivo nem garantia de transação entre vários lançamentos. A primeira rejeição, incerteza ou falha interrompe o lote. As anteriores ficam confirmadas; as seguintes ficam **Não enviado**. Esse comportamento preserva o laço coletivo conferido diretamente em `ApropriacaoColetiva`, que ignora apropriados e interrompe na primeira falha.
 
@@ -16,7 +22,7 @@ Fechar/recarregar a página após confirmar não cancela o trabalho no backend. 
 
 Um resultado incerto continua bloqueado. **Ver resultado → Conferir resultado** consulta o Redmine sem POST e pode confirmar a linha; isso não retoma o restante do lote. Equivalentes idênticos continuam bloqueados conservadoramente; não há chave de idempotência remota ou proteção contra outro aplicativo criando horas simultaneamente. Não restaurar um backup antigo para forçar reenvio, nem apagar recibos após excluir um lançamento remoto.
 
-Status dos cards permanece **Manter**; a movimentação foi cancelada por Cristian em 23/10/2026. O modelo do dia foi entregue no P5 e a demo pública continua planejada para P7/P8.
+Status dos cards permanece **Manter**; a movimentação foi cancelada por Cristian em 23/10/2026. O modelo do dia foi entregue no P5 e a demo pública foi publicada no P8.
 
 ## P4.2 — consulta e validação antecipada
 

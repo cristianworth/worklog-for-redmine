@@ -17,6 +17,19 @@ const render = (props: Partial<Parameters<typeof ActivitySelect>[0]> = {}) =>
     />,
   );
 describe("global activity selection", () => {
+  it("sorts names alphabetically in Portuguese without reordering the catalog or changing the selected value", () => {
+    const catalog = [
+      { activityId: 4, name: "Zeladoria" },
+      { activityId: 2, name: "reunião" },
+      { activityId: 1, name: "Análise" },
+      { activityId: 3, name: "Desenvolvimento" },
+    ];
+    const html = render({ activities: catalog, value: "reunião" });
+    const labels = [...html.matchAll(/<option value="[^"]*"[^>]*>([^<]+)<\/option>/g)].map((match) => match[1]);
+    expect(labels).toEqual(["Selecione uma atividade", "Análise", "Desenvolvimento", "reunião", "Zeladoria"]);
+    expect(catalog.map((activity) => activity.activityId)).toEqual([4, 2, 1, 3]);
+    expect(html).toContain('value="reunião" selected=""');
+  });
   it("offers the full catalog before any task lookup, without selecting a default", () => {
     const html = render();
     expect(html).toContain("<select");

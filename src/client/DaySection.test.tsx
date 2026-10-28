@@ -28,6 +28,15 @@ async function fixture() {
 }
 
 describe("default day disclosure", () => {
+  it("keeps the send action next to pending tasks and disables it for unsaved edits", async () => {
+    const { render } = await fixture();
+    const html = render({ submissions: {} });
+    const header = html.slice(html.indexOf("<header"), html.indexOf("</header>"));
+    expect(header).not.toContain("Enviar dia");
+    expect(html).toMatch(/<footer class="day-actions">[\s\S]*aria-label="Enviar dia 21\/10\/2026"/);
+    expect(render()).not.toContain('class="day-actions"');
+    expect(render({ submissions: {}, dirty: true })).toMatch(/<footer[\s\S]*disabled="" aria-label="Enviar dia/);
+  });
   it("collapses a fully appropriated day while keeping rows mounted", async () => {
     const { render } = await fixture();
     const html = render();

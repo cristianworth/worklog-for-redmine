@@ -13,7 +13,7 @@ import {
   Copy,
   Plus,
   Trash2,
-  RefreshCw,
+  Upload,
   FilePlus2,
   ChevronDown,
   ChevronRight,
@@ -147,19 +147,6 @@ export function DaySection({
             <small>h</small>
           </strong>
         </div>
-        <button
-          className="button day-send"
-          onClick={onSendDay}
-          disabled={disabled || dirty || !pending.length}
-          aria-label={`${simulated ? "Simular dia" : "Enviar dia"} ${description}`}
-          title={
-            dirty
-              ? "Salve o dia antes de enviar"
-              : "Revisar as linhas pendentes deste dia"
-          }
-        >
-          <RefreshCw size={16} aria-hidden="true" /> {simulated ? "Simular dia" : "Enviar dia"}
-        </button>
         <button
           className="button secondary add-line"
           onClick={add}
@@ -435,6 +422,22 @@ export function DaySection({
           </div>
         )}
       </div>
+      {pending.length > 0 && (
+        <footer className="day-actions">
+          <span>{dirty ? "Salve as alterações antes de enviar."
+            : pending.length > 100 ? "O limite é de 100 linhas por lote. Selecione menos linhas."
+              : `${pending.length} ${pending.length === 1 ? "linha pendente" : "linhas pendentes"} · revisão antes do envio`}</span>
+          <button
+            className="button day-send"
+            onClick={onSendDay}
+            disabled={disabled || dirty || day.revision < 1 || pending.length > 100}
+            aria-label={`${simulated ? "Simular dia" : "Enviar dia"} ${description}`}
+            title={pending.length > 100 ? "O limite é de 100 linhas por lote. Selecione menos linhas." : "Revisar as linhas pendentes deste dia"}
+          >
+            <Upload size={16} aria-hidden="true" /> {simulated ? "Simular dia" : "Enviar dia"}
+          </button>
+        </footer>
+      )}
     </section>
   );
 }

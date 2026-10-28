@@ -5,6 +5,7 @@ import {
   type ActivityCatalog,
 } from "../shared/activities";
 import { useWorklogData } from "./WorklogDataProvider";
+import { alphabeticalActivities } from "./activity-order";
 
 interface Row {
   key: string;
@@ -12,7 +13,7 @@ interface Row {
   name: string;
 }
 const rowsFrom = (catalog: ActivityCatalog): Row[] =>
-  catalog.activities.map((activity) => ({
+  alphabeticalActivities(catalog.activities).map((activity) => ({
     key: crypto.randomUUID(),
     activityId: String(activity.activityId),
     name: activity.name,

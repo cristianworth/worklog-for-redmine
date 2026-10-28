@@ -28,6 +28,14 @@ O espaçamento entre dias e as divisórias das tabelas separam os grupos. Linhas
 - Tokens e regras ficam em `src/client/styles.css`. Altere os tokens existentes antes de criar novos tons; mantenha o contraste do texto e do foco em cada cabeçalho. A aparência exata da tipografia varia com as fontes instaladas.
 - Configurações, modelo e revisões compartilham os campos e botões do editor. A apresentação não altera contratos de dados, revisões, seleção ou confirmação de envios.
 
+## Seleção e retorno do envio
+
+**Selecionar todos** reúne apenas pendentes salvos do período visível; salvar e enviar continuam separados. O botão de envio de cada dia fica no rodapé das suas tarefas, acompanhado da quantidade pendente e da indicação de revisão. Datas, totais, adicionar linha e recolher ficam no cabeçalho. Dias integralmente apropriados não exibem uma ação de reenvio.
+
+Seletores de atividades dos dias/modelo e o catálogo em Configurações apresentam os nomes em ordem alfabética brasileira, sem distinguir maiúsculas ou acentos para ordenar. A apresentação não altera IDs nem substitui valores antigos; o catálogo não muda de posição a cada tecla durante a edição.
+
+A revisão exibe espera na preparação e um painel de progresso após confirmar. O painel permanece visível durante a rolagem, informa quantidades, data/tarefa atual quando disponíveis e distingue sucesso de pendências. Não estima duração nem anuncia confirmação antes dos recibos. Usa texto, ícones, `role="status"` e uma barra nativa; a preferência por movimento reduzido desativa a rotação do indicador.
+
 ## Conferência de mudanças visuais
 
 Use a demo e dados fictícios; nunca o banco de uso para preencher capturas. Confira desktop, tablet e 375 px, incluindo:

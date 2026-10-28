@@ -1,5 +1,6 @@
 import { useId } from "react";
 import { resolveActivity, type Activity } from "../shared/activities";
+import { alphabeticalActivities } from "./activity-order";
 
 export function ActivitySelect({
   activities,
@@ -52,7 +53,7 @@ export function ActivitySelect({
                 {value} · fora do catálogo
               </option>
             )}
-            {activities.map((activity) => (
+            {alphabeticalActivities(activities).map((activity) => (
               <option key={activity.activityId} value={activity.name}>
                 {activity.name}
               </option>

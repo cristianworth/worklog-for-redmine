@@ -10,6 +10,7 @@ import { formatDuration } from "../shared/worklogs";
 import { shortDate } from "./period";
 import { demoSubmissionLabel, submissionLabel } from "./submission-labels";
 import { useWorklogData } from "./WorklogDataProvider";
+import { BatchProgress } from "./BatchProgress";
 
 export function BatchReview({
   entries,
@@ -26,7 +27,8 @@ export function BatchReview({
   const dialog = useRef<HTMLDialogElement>(null);
   const preparation = useRef<Promise<SubmissionBatch> | null>(null);
   const [batch, setBatch] = useState<SubmissionBatch | null>(null);
-  const [busy, setBusy] = useState(true);
+  const [operation, setOperation] = useState<"preparing" | "confirming" | "refreshing" | null>("preparing");
+  const busy = operation !== null;
   const [confirmBlocked, setConfirmBlocked] = useState(false);
   const [error, setError] = useState("");
   const pendingCount = batch?.items.filter((item) => item.record?.state === "prepared").length ?? 0;
@@ -59,7 +61,7 @@ export function BatchReview({
           );
       })
       .finally(() => {
-        if (alive) setBusy(false);
+        if (alive) setOperation(null);
       });
     return () => {
       alive = false;
@@ -68,9 +70,14 @@ export function BatchReview({
   const currentId = batch?.id;
   const refresh = useCallback(async () => {
     if (!currentId) return;
-    const next = await data.readBatch(currentId);
-    accept(next);
-    setError("");
+    setOperation("refreshing");
+    try {
+      const next = await data.readBatch(currentId);
+      accept(next);
+      setError("");
+    } finally {
+      setOperation(null);
+    }
   }, [data, currentId, accept]);
   useEffect(() => {
     if (!currentId || batch?.state !== "running") return;
@@ -98,8 +105,8 @@ export function BatchReview({
     };
   }, [data, currentId, batch?.state, accept]);
   async function confirm() {
-    if (!batch || busy || !canConfirmBatch(batch)) return;
-    setBusy(true);
+    if (!batch || busy || confirmBlocked || !canConfirmBatch(batch)) return;
+    setOperation("confirming");
     setConfirmBlocked(true);
     setError("");
     try {
@@ -120,12 +127,13 @@ export function BatchReview({
         `${reason} Confira os resultados. Se o lote não iniciou, feche e prepare uma nova revisão.`,
       );
     } finally {
-      setBusy(false);
+      setOperation(null);
     }
   }
   const dates = [
     ...new Set(batch?.items.map((item) => item.selection.date) ?? []),
   ];
+  const running = operation === "confirming" || batch?.state === "running";
   return (
     <dialog
       ref={dialog}
@@ -140,7 +148,9 @@ export function BatchReview({
         <div>
           <p className="review-context">{data.mode === "demo" ? "Simulação por dia ou período" : "Envio por dia ou período"}</p>
           <h2 id="batch-title">
-            {batch?.state === "prepared"
+            {running
+              ? data.mode === "demo" ? "Acompanhe a simulação" : "Acompanhe o envio"
+              : !batch || batch.state === "prepared"
               ? data.mode === "demo" ? "Revise antes de simular" : "Revise o lote antes de enviar"
               : data.mode === "demo" ? "Resultados simulados" : "Resultados do lote"}
           </h2>
@@ -162,9 +172,10 @@ export function BatchReview({
       )}
       {batch && (
         <>
+          <BatchProgress batch={batch} confirming={operation === "confirming"} simulated={data.mode === "demo"} />
           <p className="batch-summary" role="status">
             {batch.items.length} {batch.items.length === 1 ? "linha" : "linhas"} · {dates.length}{" "}
-            {dates.length === 1 ? "dia" : "dias"}. {batch.message}
+            {dates.length === 1 ? "dia" : "dias"}. {operation === "confirming" ? "Solicitando o início da execução. Aguarde a confirmação." : batch.message}
           </p>
           <p className="settings-note">
             {data.mode === "demo" ? <>
@@ -279,7 +290,8 @@ export function BatchReview({
               );
             }}
           >
-            <RefreshCw size={16} /> Atualizar resultados
+            {operation === "refreshing" ? <LoaderCircle className="spin" size={16} aria-hidden="true" /> : <RefreshCw size={16} aria-hidden="true" />}
+            {operation === "refreshing" ? "Atualizando resultados…" : "Atualizar resultados"}
           </button>
         )}
         {batch && canConfirmBatch(batch) && !confirmBlocked && (
