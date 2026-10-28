@@ -1,15 +1,16 @@
 # Worklog for Redmine
 
-[![Verify and deploy](https://github.com/cristianworth/worklog-for-redmine/actions/workflows/verify.yml/badge.svg)](https://github.com/cristianworth/worklog-for-redmine/actions/workflows/verify.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+Prepare several days of time-entry drafts, check daily totals and review what will be sent to Redmine. Built for a personal workflow where hours are reconstructed together and submitted later.
 
-Organize several days of time-entry drafts, check daily totals, and explicitly review before submitting to Redmine. Built from a personal spreadsheet workflow where hours are reconstructed together and submitted later.
+## Try the live demo
 
-**[Try the live demo](https://cristianworth.github.io/worklog-for-redmine/)** · [Local usage](docs/local-usage.md) · [Architecture](docs/architecture.md) · [Contributing](CONTRIBUTING.md)
+[![Try the live demo](docs/assets/try-demo.svg)](https://cristianworth.github.io/worklog-for-redmine/)
 
-The interface is in Brazilian Portuguese. This overview is in English; the detailed product guides are in Portuguese. The demo uses fictional data and simulated submissions. No account, Redmine key or installation is required.
+**[Open the demo in your browser](https://cristianworth.github.io/worklog-for-redmine/)** — no account, installation or Redmine key. Edit fictional entries, simulate submission and inspect the saved results. The interface is in Brazilian Portuguese; submissions never reach a real Redmine.
 
-![Worklog with the Azulejos weekday palette and fictional time-entry drafts](docs/images/demo.png)
+![Worklog with weekday colors, fictional drafts and per-day totals](docs/images/demo.png)
+
+[Local usage](docs/local-usage.md) · [Architecture](docs/architecture.md) · [Documentation](docs/README.md)
 
 ## Try it in a few minutes
 
@@ -34,13 +35,13 @@ Saving and submitting are separate actions. Issue statuses stay unchanged. This 
 
 ## Two modes, one interface
 
-| | Public demo | Local application |
-| --- | --- | --- |
-| Runs on | GitHub Pages, static files | Node.js on your computer |
-| Data | Fictional examples; this browser's storage | Your drafts and receipts in SQLite |
-| Submission | Simulated; no operational network access | Redmine API after review and confirmation |
-| Credentials | None | Optional private `.env`, read only by Node |
-| Recovery | Reload saved data or restore examples | Preserve receipts and back up SQLite |
+|             | Public demo                                | Local application                          |
+| ----------- | ------------------------------------------ | ------------------------------------------ |
+| Runs on     | GitHub Pages, static files                 | Node.js on your computer                   |
+| Data        | Fictional examples; this browser's storage | Your drafts and receipts in SQLite         |
+| Submission  | Simulated; no operational network access   | Redmine API after review and confirmation  |
+| Credentials | None                                       | Optional private `.env`, read only by Node |
+| Recovery    | Reload saved data or restore examples      | Preserve receipts and back up SQLite       |
 
 Clearing site data loses demo history. Browsers without Web Locks show a one-tab-at-a-time notice. Reloading never resumes an interrupted batch automatically. The demo illustrates the workflow; it does not validate real Redmine permissions or availability.
 
