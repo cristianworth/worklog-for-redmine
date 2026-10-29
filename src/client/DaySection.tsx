@@ -18,7 +18,7 @@ import {
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
-import { formatDuration, parseDurationInput } from "../shared/worklogs";
+import { DurationField } from "./DurationField";
 import { IssueLookup } from "./IssueLookup";
 import { dayLabel, shortDate } from "./period";
 import { daySummary, type EditorDay, type EditorEntry } from "./editor";
@@ -127,7 +127,11 @@ export function DaySection({
       data-weekday={new Date(`${day.date}T12:00:00Z`).getUTCDay()}
       aria-label={`Apontamentos de ${description}`}
     >
-      <header className="day-heading">
+      <header className="day-heading" onClick={(event) => {
+        if ((event.target as Element).closest("button, a, input, select, textarea")) return;
+        if (window.getSelection()?.isCollapsed === false) return;
+        onCollapsedChange(!collapsed);
+      }}>
         <span className="day-date-stamp" aria-hidden="true">{day.date.slice(-2)}</span>
         <div className="day-name">
           <h2>
@@ -213,9 +217,6 @@ export function DaySection({
               </thead>
               <tbody>
                 {day.entries.map((entry, index) => {
-                  const invalid =
-                    entry.duration !== "" &&
-                    parseDurationInput(entry.duration) === null;
                   const label = `da linha ${index + 1} em ${description}`;
                   const key = `${day.date}:${entry.id}`;
                   const receipt = submissions[key];
@@ -304,53 +305,9 @@ export function DaySection({
                         />
                       </td>
                       <td>
-                        <input
-                          className="duration-input"
-                          aria-label={`Duração ${label}`}
-                          aria-invalid={invalid}
-                          aria-describedby={
-                            invalid
-                              ? `duration-${day.date}-${index}`
-                              : rowLocked
-                                ? undefined
-                                : `duration-hint-${day.date}-${index}`
-                          }
-                          placeholder="30 ou 1:30"
-                          inputMode="numeric"
-                          value={entry.duration}
-                          disabled={rowDisabled}
-                          onChange={(event) =>
-                            update(entry.id, "duration", event.target.value)
-                          }
-                          onBlur={() => {
-                            const minutes = parseDurationInput(entry.duration);
-                            if (
-                              minutes !== null &&
-                              entry.duration !== formatDuration(minutes)
-                            )
-                              update(
-                                entry.id,
-                                "duration",
-                                formatDuration(minutes),
-                              );
-                          }}
-                        />
-                        {invalid && (
-                          <small
-                            className="field-error"
-                            id={`duration-${day.date}-${index}`}
-                          >
-                            Use 30, 130 ou HH:MM; minutos de 00 a 59.
-                          </small>
-                        )}
-                        {!rowLocked && !invalid && (
-                          <small
-                            className="duration-hint"
-                            id={`duration-hint-${day.date}-${index}`}
-                          >
-                            30 → 00:30 · 130 → 01:30
-                          </small>
-                        )}
+                        <DurationField value={entry.duration} label={label}
+                          disabled={rowDisabled} locked={rowLocked}
+                          onChange={(value) => update(entry.id, "duration", value)} />
                       </td>
                       <td>
                         <ActivitySelect

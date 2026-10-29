@@ -12,6 +12,20 @@ Histórico das versões. Criado em 23/10/2026 com a base anterior ao modelo regi
 - Antes de cada commit/merge, ler este arquivo e avaliar uma versão proporcional à entrega. Em 25/10/2026, Cristian delegou ao agente a decisão de versão neste projeto e pediu push automático dos commits coesos, sem nova confirmação rotineira. Não incrementar a versão por commit da mesma entrega. Publicação e dados reais continuam sujeitos ao escopo autorizado.
 - Nunca incluir credenciais, planilhas privadas, bancos, backups ou dados reais nos registros, tags e arquivos distribuídos.
 
+## [0.10.0] — 2026-10-29
+
+### Cabeçalhos e soma rápida de duração
+
+- Clique nas áreas livres do cabeçalho para recolher/expandir as tarefas. A seta continua acessível por teclado; botões e seleção de texto não disparam uma segunda alternância. Linhas e edições permanecem montadas.
+- **+** verde à esquerda da duração abre um acréscimo separado, mantendo o valor original visível e mostrando a prévia do novo total. `01:00` + `30`/`030` resulta em `01:30`; **Enter/Somar** aplica uma vez e devolve o foco, **Esc/×/+** cancela sem alterar o valor.
+- Edição direta continua substituindo a duração. A soma aceita o formato compacto existente, parte de zero em campos vazios, recusa base/acréscimo inválidos e overflow, e respeita recibos protegidos. Salvar continua explícito e o transporte permanece em minutos inteiros.
+- Guia local, decisões da interface, README/captura e instruções atuais atualizados. A coluna de duração acomoda o novo controle sem transbordar a página em telas estreitas.
+
+### Verificação
+
+- 395 testes/32 arquivos, TypeScript, builds local/demo/Pages e auditorias aprovados. Casos novos verificam soma abreviada, virada de hora, mais de 24 horas, entradas inválidas, overflow e controles bloqueados.
+- Conferência fictícia no navegador: cabeçalho/seta/adicionar linha, foco por teclado, Enter/Esc, soma repetida, prévia preservada ao recolher, salvamento/recarga e bloqueio após recibo simulado. 375 px sem transbordamento da página; console sem erros. Sem acesso ao banco de uso ou envio real.
+
 ## [0.9.0] — 2026-10-28
 
 ### Seleção e acompanhamento de envios

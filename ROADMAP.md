@@ -1,6 +1,6 @@
 # Roadmap — Worklog for Redmine
 
-Atualizado em 28/10/2026. Versão da entrega: **v0.9.0**; P8 concluída, lançador Windows entregue e interface Azulejos com seleção de pendentes e progresso de envio. Código público sob MIT; demo publicada no GitHub Pages. Histórico no [changelog](CHANGELOG.md), invariantes nas [decisões](docs/project-decisions.md) e detalhes técnicos no [plano](docs/development-plan.md).
+Atualizado em 29/10/2026. Versão da entrega: **v0.10.0**; P8 concluída, lançador Windows entregue e interface Azulejos com cabeçalhos clicáveis e soma rápida de duração. Código público sob MIT; demo publicada no GitHub Pages. Histórico no [changelog](CHANGELOG.md), invariantes nas [decisões](docs/project-decisions.md) e detalhes técnicos no [plano](docs/development-plan.md).
 
 ## Objetivo e prioridades
 
@@ -28,6 +28,7 @@ Ordem de importância: **isolamento → dados recuperáveis → fluxo completo �
 | v0.8.3 | Paleta Oceano aplicada conforme escolha de Cristian entre cinco alternativas |
 | v0.8.4 | Troca para a alternativa Azulejos, conforme nova escolha de Cristian |
 | v0.9.0 | Selecionar todos os pendentes salvos do período, atividades alfabéticas, envio do dia no rodapé e progresso/resultado explícitos |
+| v0.10.0 | Recolher/expandir pelo cabeçalho do dia e somar tempo à duração com prévia, confirmação e cancelamento |
 
 O cadastro privado tem 15 atividades únicas, sem cópias por projeto. Os dois testes reais anteriores mantiveram o mesmo código em dois projetos, com readback e confirmação visual de Cristian. Não validaram todas as atividades/projetos; suas autorizações estão consumidas.
 

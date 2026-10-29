@@ -22,9 +22,11 @@ A visualização mostra somente segunda a sexta dentro do intervalo. Sábados/do
 
 Use `30`/`030` para 30 minutos, `130` para 1h30 ou `01:30`. `90`, `160`, sinais, decimais e segundos são inválidos; não há arredondamento. Linhas incompletas podem ser salvas como rascunho. Total diário inclui todos os rascunhos; uma duração malformada exige correção/limpeza antes de salvar.
 
+Para acrescentar tempo, clique no **+** verde à esquerda da duração. Digite o acréscimo em **Tempo a somar**, confira **Novo total** e pressione **Enter** ou **Somar**. Por exemplo, `01:00` + `030` resulta em `01:30`. **Esc**, o × ou clicar novamente no + cancela sem alterar o valor. Uma duração vazia parte de zero; uma duração atual inválida precisa ser corrigida antes. Digitar diretamente no campo principal continua substituindo o valor. A soma altera só o rascunho: ainda é necessário salvar. Recibos protegidos não permitem somar tempo.
+
 **Salvar rascunhos** grava todos os dias alterados, inclusive fora do período visível. Catálogo e modelo salvam separadamente. Recolher um dia preserva edições e seleções. **Modelo do dia** permite iniciar uma data ainda não tocada com uma cópia independente; nunca substitui um dia existente, inclusive um dia salvo vazio. [Guia do modelo](day-template.md).
 
-Dias totalmente apropriados iniciam com tarefas recolhidas. Dias vazios, parcialmente apropriados, pendentes ou a conferir ficam abertos. Expandir/recolher manualmente prevalece enquanto a página estiver aberta; recarregar reaplica o padrão. Adicionar linha expande o dia e leva o foco à tarefa nova.
+Dias totalmente apropriados iniciam com tarefas recolhidas. Dias vazios, parcialmente apropriados, pendentes ou a conferir ficam abertos. Clique em qualquer área livre do cabeçalho para alternar; a seta continua disponível por teclado. Selecionar texto ou clicar nos botões não dispara a alternância do cabeçalho. Expandir/recolher manualmente prevalece enquanto a página estiver aberta; recarregar reaplica o padrão. Adicionar linha expande o dia e leva o foco à tarefa nova.
 
 ## Envio e recuperação
 

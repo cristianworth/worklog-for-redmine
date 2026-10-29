@@ -30,6 +30,16 @@ export const toEditor = (day: DraftDay): EditorDay => ({
   })),
 });
 
+export function addDurationInput(current: string, additional: string): string {
+  const base = current.trim() === "" ? 0 : parseDurationInput(current);
+  if (base === null) throw new Error("Corrija a duração atual antes de somar.");
+  const increment = parseDurationInput(additional);
+  if (increment === null) throw new Error("Use 30, 130 ou HH:MM; minutos de 00 a 59.");
+  const total = base + increment;
+  if (!Number.isSafeInteger(total)) throw new Error("Total de duração fora do formato suportado.");
+  return formatDuration(total);
+}
+
 export function mergeLoadedDays(
   state: EditorState,
   dates: string[],

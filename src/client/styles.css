@@ -498,6 +498,7 @@ h1 {
   background: var(--day-background);
   color: var(--ink);
   border-bottom: 1px solid #223f4526;
+  cursor: pointer;
 }
 .day-date-stamp {
   display: grid;
@@ -668,7 +669,7 @@ table {
   width: 17%;
 }
 .duration-col {
-  width: 12%;
+  width: 150px;
 }
 .activity-col {
   width: 21%;
@@ -735,6 +736,42 @@ td select {
 .duration-input {
   font-variant-numeric: tabular-nums;
   font-weight: 600;
+}
+.duration-field {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+.duration-field input {
+  min-width: 0;
+  flex: 1;
+}
+.duration-add {
+  color: var(--success);
+  border: 1px solid var(--line);
+  background: var(--success-wash);
+}
+.duration-add[aria-expanded="true"] {
+  border-color: var(--success);
+}
+.duration-addition {
+  margin-top: 8px;
+  padding: 8px;
+  background: var(--success-wash);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+}
+.duration-addition label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 11px;
+  color: var(--ink);
+}
+.duration-addition-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
 }
 .issue-field {
   display: flex;

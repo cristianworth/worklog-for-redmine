@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  addDurationInput,
   daySummary,
   mergeLoadedDays,
   toDraftDay,
@@ -20,6 +21,31 @@ const saved = {
     },
   ],
 };
+
+describe("adding duration to a draft", () => {
+  it.each([
+    ["1:00", "30", "01:30"],
+    ["01:00", "030", "01:30"],
+    ["01:45", "30", "02:15"],
+    ["01:00", "130", "02:30"],
+    ["01:00", "1:30", "02:30"],
+    ["", "30", "00:30"],
+    ["23:45", "30", "24:15"],
+  ])("adds %s and %s as minutes, producing %s", (current, additional, expected) => {
+    expect(addDurationInput(current, additional)).toBe(expected);
+  });
+  it("refuses a malformed base or increment instead of silently replacing the current duration", () => {
+    expect(() => addDurationInput("01:60", "30")).toThrow("Corrija a duração atual");
+    for (const increment of ["", "60", "-30", "0.5", "1:70", "abc"])
+      expect(() => addDurationInput("01:00", increment)).toThrow("Use 30, 130 ou HH:MM");
+  });
+  it("refuses integer overflow and keeps the strict HH:MM storage contract", () => {
+    expect(() => addDurationInput("150119987579016:31", "1")).toThrow("Total de duração");
+    const day = toEditor(saved);
+    day.entries[0].duration = addDurationInput(day.entries[0].duration, "030");
+    expect(toDraftDay(day).entries[0].minutes).toBe(120);
+  });
+});
 describe("editing across periods", () => {
   it("preserves edited days when a period refresh returns an older stored copy", () => {
     const edited = {

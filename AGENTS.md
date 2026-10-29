@@ -22,6 +22,8 @@
 
 ## Catalog, days and templates
 
+- v0.10.0 adds header click disclosure and a green quick-add duration action. Header controls must not also toggle disclosure; keep the arrow keyboard-accessible and rows mounted. Quick addition previews minutes using the compact-input parser, applies only on Enter/Somar, cancels without changing the base, and respects protected receipts. Direct duration edits still replace; save remains explicit.
+
 - v0.9.0 adds selection of all saved pending rows in the visible period, alphabetical Portuguese activity presentation and execution feedback shared by day/batch submission. Never include protected receipts or unsaved days, silently truncate a selection above 100 rows, or claim success before matching receipts. Day submission belongs in the task footer; progress counts received outcomes, not elapsed time or remote validation steps. See `docs/batch-submission.md`.
 
 - v0.8.4 implements Cristian's selected Azulejos palette: Monday #A9CBE2, Tuesday #B4C1E1, Wednesday #C7BDE0, Thursday #A7D4D1, Friday #C3D8BC, with matching date details and a shared sea-green accent. Cristian wants visible color/personality with related hues and moderate intensity; the spreadsheet reference meant easy day separation, not monochrome gray. Keep weekday colors stable across periods and independent of receipt status. Preserve textual dates/status, today's marker and disclosure behavior. Shared brand/favicon is a passive SVG; include it in artifact auditing and launcher build fingerprints. System font fallbacks require no network. See `docs/interface.md` for tokens and visual checks.
