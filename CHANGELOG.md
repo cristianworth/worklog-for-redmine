@@ -12,6 +12,12 @@ Histórico das versões. Criado em 23/10/2026 com a base anterior ao modelo regi
 - Antes de cada commit/merge, ler este arquivo e avaliar uma versão proporcional à entrega. Em 25/10/2026, Cristian delegou ao agente a decisão de versão neste projeto e pediu push automático dos commits coesos, sem nova confirmação rotineira. Não incrementar a versão por commit da mesma entrega. Publicação e dados reais continuam sujeitos ao escopo autorizado.
 - Nunca incluir credenciais, planilhas privadas, bancos, backups ou dados reais nos registros, tags e arquivos distribuídos.
 
+## [0.10.4] — 2026-10-30
+
+- Linhas do dia mais compactas: consulta e recibo passam para uma faixa abaixo dos campos. Título, status e projeto usam a largura conjunta das quatro colunas, sem truncar o texto nem alongar a coluna de tarefa. Consulta, atualização e conferência de resultado continuam disponíveis.
+- Menos espaçamento vertical; observação começa com uma linha, preservando quebras, rolagem e redimensionamento. Fundo alternado, seleção e estados dos recibos abrangem o lançamento inteiro; erros e soma rápida continuam podendo ampliar a linha quando necessário. Modelo e contratos de dados preservados.
+- Documentação e captura fictícia do README atualizadas. 403 testes/32 arquivos, builds local/demo/Pages e auditorias aprovados. Conferidos quatro lançamentos com projeto longo, seleção, soma por teclado, observação multilinha, salvamento/recarga, recibos simulados protegidos e 375 px sem transbordamento da página ou erros de console. Nenhum acesso ao banco de uso ou envio real.
+
 ## [0.10.3] — 2026-10-29
 
 - Placeholders mais claros (60% de opacidade) e com peso normal, distinguindo exemplos como **Nº da tarefa** e **30 ou 1:30** dos valores preenchidos. Aplicado consistentemente aos campos e ao modelo, sem alterar o texto digitado, bordas ou validação.

@@ -20,6 +20,8 @@ A cor acompanha o dia da semana, inclusive ao mudar o período ou recolher suas 
 
 O espaçamento entre dias e as divisórias das tabelas separam os grupos. Linhas alternadas ajudam a acompanhar os campos; seleção e situação dos recibos têm tratamentos próprios. Uma duração inválida mantém a indicação textual de total parcial.
 
+Cada lançamento do dia agrupa os campos e uma faixa de contexto abaixo deles. Título, status e projeto da consulta usam a largura conjunta de tarefa, duração, atividade e observação, com quebra natural e texto completo; o estado do recibo e as ações de consulta/resultado permanecem acessíveis. A alternância de fundo, a seleção e os estados protegidos abrangem o grupo inteiro. O espaçamento vertical é compacto e a observação começa com uma linha, pode receber quebras e continua redimensionável; textos maiores rolam dentro do campo. Erros e a soma rápida podem ampliar a linha quando necessário. Em telas estreitas, a tabela mantém sua rolagem horizontal. O modelo do dia conserva sua apresentação independente.
+
 Placeholders dos campos usam peso normal e opacidade de 60% para distinguir instruções de valores preenchidos, inclusive nos campos de tarefa/duração, na soma rápida e no modelo. O texto digitado mantém seu contraste e peso originais.
 
 Áreas livres do cabeçalho alternam as tarefas ao clicar. Botões mantêm suas próprias ações; a seta preserva o acesso por teclado e anuncia o estado expandido. Recolher mantém as linhas montadas, inclusive uma soma ainda não aplicada.

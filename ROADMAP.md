@@ -1,6 +1,6 @@
 # Roadmap — Worklog for Redmine
 
-Atualizado em 29/10/2026. Versão da entrega: **v0.10.3**; P8 concluída, lançador Windows entregue e interface Azulejos com soma rápida à direita e sinalização de campos obrigatórios. Código público sob MIT; demo publicada no GitHub Pages. Histórico no [changelog](CHANGELOG.md), invariantes nas [decisões](docs/project-decisions.md) e detalhes técnicos no [plano](docs/development-plan.md).
+Atualizado em 30/10/2026. Versão da entrega: **v0.10.4**; P8 concluída, lançador Windows entregue e interface Azulejos com linhas compactas, soma rápida à direita e sinalização de campos obrigatórios. Código público sob MIT; demo publicada no GitHub Pages. Histórico no [changelog](CHANGELOG.md), invariantes nas [decisões](docs/project-decisions.md) e detalhes técnicos no [plano](docs/development-plan.md).
 
 ## Objetivo e prioridades
 

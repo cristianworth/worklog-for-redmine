@@ -696,10 +696,16 @@ td {
 tbody tr + tr {
   border-top: 1px solid var(--line);
 }
-.day-card tbody tr:nth-child(even):not(.is-appropriated):not(.needs-check):not(.is-rejected) {
+.day-card .entry-group + .entry-group {
+  border-top: 1px solid var(--line);
+}
+.day-card .entry-group > tr + tr {
+  border-top: 0;
+}
+.day-card .entry-group:nth-of-type(even):where(:not(.is-appropriated, .needs-check, .is-rejected)) {
   background: #f5faf7;
 }
-.day-card tbody tr:has(.entry-selector input:checked) {
+.day-card .entry-group:has(.entry-selector input:checked) {
   background: var(--accent-wash);
 }
 .row-number {
@@ -853,6 +859,51 @@ td select {
 .row-receipt .text-button {
   font-size: 11px;
   justify-content: flex-start;
+}
+
+/* Keep task context below all four fields, rather than inside the narrow issue column. */
+.entry-fields > td {
+  padding: 8px 9px 4px;
+}
+.entry-fields > td.row-number {
+  padding-top: 18px;
+}
+.entry-fields textarea {
+  min-height: 40px;
+}
+.entry-details > td {
+  padding: 0 9px 8px;
+}
+.entry-context, .entry-context .row-receipt, .entry-context .issue-lookup {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+.entry-context .row-receipt {
+  flex-direction: row;
+  margin: 0;
+}
+.entry-context .issue-lookup {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+.entry-context .lookup-button {
+  flex-shrink: 0;
+  padding: 3px 0;
+}
+.entry-context .issue-result {
+  flex: 1;
+  min-width: 0;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 12px;
+  margin: 0;
+}
+.entry-context .issue-result small {
+  font-size: inherit;
 }
 
 .save-bar {

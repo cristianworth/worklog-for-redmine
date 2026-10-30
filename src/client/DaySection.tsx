@@ -219,32 +219,32 @@ export function DaySection({
                   </th>
                 </tr>
               </thead>
-              <tbody>
-                {day.entries.map((entry, index) => {
-                  const label = `da linha ${index + 1} em ${description}`;
-                  const key = `${day.date}:${entry.id}`;
-                  const receipt = submissions[key];
-                  const rowLocked =
-                    !!receipt && isSubmissionLocked(receipt.state);
-                  const rowDisabled = disabled || rowLocked;
-                  const missing = missingEntryFields(entry);
-                  const fieldError = (field: RequiredEntryField) => !rowLocked && touched[entry.id]?.[field] ? missing[field] : undefined;
-                  const issueErrorId = `issue-error-${day.date}-${index}`;
-                  const commentErrorId = `comment-error-${day.date}-${index}`;
-                  return (
-                    <tr
-                      key={entry.id}
-                      className={
-                        isAppropriated(receipt)
-                          ? "is-appropriated"
-                          : rowLocked
-                            ? "needs-check"
-                            : receipt?.state === "rejected"
-                              ? "is-rejected"
-                              : ""
-                      }
-                    >
-                      <td className="row-number">
+              {day.entries.map((entry, index) => {
+                const label = `da linha ${index + 1} em ${description}`;
+                const key = `${day.date}:${entry.id}`;
+                const receipt = submissions[key];
+                const rowLocked =
+                  !!receipt && isSubmissionLocked(receipt.state);
+                const rowDisabled = disabled || rowLocked;
+                const missing = missingEntryFields(entry);
+                const fieldError = (field: RequiredEntryField) => !rowLocked && touched[entry.id]?.[field] ? missing[field] : undefined;
+                const issueErrorId = `issue-error-${day.date}-${index}`;
+                const commentErrorId = `comment-error-${day.date}-${index}`;
+                return (
+                  <tbody
+                    key={entry.id}
+                    className={`entry-group ${
+                      isAppropriated(receipt)
+                        ? "is-appropriated"
+                        : rowLocked
+                          ? "needs-check"
+                          : receipt?.state === "rejected"
+                            ? "is-rejected"
+                            : ""
+                    }`}
+                  >
+                    <tr className="entry-fields">
+                      <td className="row-number" rowSpan={2}>
                         <label className="entry-selector">
                           <input
                             type="checkbox"
@@ -299,24 +299,6 @@ export function DaySection({
                           </button>
                         </div>
                         {fieldError("issue") && <small id={issueErrorId} className="field-error" aria-live="polite">{fieldError("issue")}</small>}
-                        <div className="row-receipt">
-                          <ReceiptBadge record={receipt} />
-                          {receipt && receipt.state !== "prepared" && (
-                            <button
-                              className="text-button"
-                              disabled={disabled}
-                              onClick={() => onResult(entry.id)}
-                            >
-                              Ver resultado
-                            </button>
-                          )}
-                        </div>
-                        <IssueLookup
-                          automaticRequest={lookupRequests[entry.id]}
-                          issue={entry.issue}
-                          label={label}
-                          disabled={disabled}
-                        />
                       </td>
                       <td>
                         <DurationField value={entry.duration} label={label}
@@ -347,7 +329,7 @@ export function DaySection({
                           aria-invalid={!!fieldError("comment")}
                           aria-describedby={fieldError("comment") ? commentErrorId : undefined}
                           placeholder="O que foi feito?"
-                          rows={2}
+                          rows={1}
                           value={entry.comment}
                           disabled={rowDisabled}
                           onBlur={() => touch(entry.id, "comment")}
@@ -357,7 +339,7 @@ export function DaySection({
                         />
                         {fieldError("comment") && <small id={commentErrorId} className="field-error" aria-live="polite">{fieldError("comment")}</small>}
                       </td>
-                      <td>
+                      <td rowSpan={2}>
                         <button
                           className="icon-button remove-button"
                           aria-label={`Remover linha ${index + 1} em ${description}`}
@@ -375,9 +357,29 @@ export function DaySection({
                         </button>
                       </td>
                     </tr>
-                  );
-                })}
-              </tbody>
+                    <tr className="entry-details">
+                      <td colSpan={4}>
+                        <div className="entry-context">
+                          <div className="row-receipt">
+                            <ReceiptBadge record={receipt} />
+                            {receipt && receipt.state !== "prepared" && (
+                              <button className="text-button" disabled={disabled} onClick={() => onResult(entry.id)}>
+                                Ver resultado
+                              </button>
+                            )}
+                          </div>
+                          <IssueLookup
+                            automaticRequest={lookupRequests[entry.id]}
+                            issue={entry.issue}
+                            label={label}
+                            disabled={disabled}
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                );
+              })}
             </table>
           </div>
         ) : (
