@@ -12,6 +12,11 @@ Histórico das versões. Criado em 23/10/2026 com a base anterior ao modelo regi
 - Antes de cada commit/merge, ler este arquivo e avaliar uma versão proporcional à entrega. Em 25/10/2026, Cristian delegou ao agente a decisão de versão neste projeto e pediu push automático dos commits coesos, sem nova confirmação rotineira. Não incrementar a versão por commit da mesma entrega. Publicação e dados reais continuam sujeitos ao escopo autorizado.
 - Nunca incluir credenciais, planilhas privadas, bancos, backups ou dados reais nos registros, tags e arquivos distribuídos.
 
+## [0.10.3] — 2026-10-29
+
+- Placeholders mais claros (60% de opacidade) e com peso normal, distinguindo exemplos como **Nº da tarefa** e **30 ou 1:30** dos valores preenchidos. Aplicado consistentemente aos campos e ao modelo, sem alterar o texto digitado, bordas ou validação.
+- 403 testes/32 arquivos, builds local/demo/Pages e auditorias aprovados; comparação fictícia de campos preenchidos/vazios, foco e 375 px conferida sem erros de console. Nenhum dado de uso ou envio real acessado.
+
 ## [0.10.2] — 2026-10-29
 
 - Obrigatórios vazios recebem uma borda discreta de 1 px em vermelho suave (`#BD8C95`) antes de qualquer interação, mantendo o fundo branco. Preencher remove a indicação; mensagens/destaque de erro após interação, duração zero, salvamento de rascunhos e recibos protegidos preservados.

@@ -20,6 +20,8 @@ A cor acompanha o dia da semana, inclusive ao mudar o período ou recolher suas 
 
 O espaçamento entre dias e as divisórias das tabelas separam os grupos. Linhas alternadas ajudam a acompanhar os campos; seleção e situação dos recibos têm tratamentos próprios. Uma duração inválida mantém a indicação textual de total parcial.
 
+Placeholders dos campos usam peso normal e opacidade de 60% para distinguir instruções de valores preenchidos, inclusive nos campos de tarefa/duração, na soma rápida e no modelo. O texto digitado mantém seu contraste e peso originais.
+
 Áreas livres do cabeçalho alternam as tarefas ao clicar. Botões mantêm suas próprias ações; a seta preserva o acesso por teclado e anuncia o estado expandido. Recolher mantém as linhas montadas, inclusive uma soma ainda não aplicada.
 
 O **+** verde ao lado da duração abre **Tempo a somar**, com prévia do total. **Enter/Somar** aplica uma vez e devolve o foco ao campo principal; **Esc/×/+** cancela. O valor original permanece visível durante a operação. Campos de recibos protegidos e bases inválidas bloqueiam o acréscimo; editar diretamente continua substituindo o valor. A coluna tem largura suficiente para o botão e a duração, e apenas a tabela rola horizontalmente em telas estreitas. Não há salvamento/envio implícito.
