@@ -21,7 +21,7 @@ import {
 import { DurationField } from "./DurationField";
 import { IssueLookup } from "./IssueLookup";
 import { dayLabel, shortDate } from "./period";
-import { daySummary, type EditorDay, type EditorEntry } from "./editor";
+import { daySummary, missingEntryFields, type RequiredEntryField, type EditorDay, type EditorEntry } from "./editor";
 
 interface Props {
   simulated?: boolean;
@@ -69,6 +69,10 @@ export function DaySection({
   const [lookupRequests, setLookupRequests] = useState<
     Record<string, { code: string }>
   >({});
+  const [touched, setTouched] = useState<Record<string, Partial<Record<RequiredEntryField, boolean>>>>({});
+  function touch(entryId: string, field: RequiredEntryField) {
+    setTouched((current) => ({ ...current, [entryId]: { ...current[entryId], [field]: true } }));
+  }
   const focusId = useRef<string | null>(null);
   const section = useRef<HTMLElement>(null);
   const summary = daySummary(day);
@@ -223,6 +227,10 @@ export function DaySection({
                   const rowLocked =
                     !!receipt && isSubmissionLocked(receipt.state);
                   const rowDisabled = disabled || rowLocked;
+                  const missing = missingEntryFields(entry);
+                  const fieldError = (field: RequiredEntryField) => !rowLocked && touched[entry.id]?.[field] ? missing[field] : undefined;
+                  const issueErrorId = `issue-error-${day.date}-${index}`;
+                  const commentErrorId = `comment-error-${day.date}-${index}`;
                   return (
                     <tr
                       key={entry.id}
@@ -253,16 +261,20 @@ export function DaySection({
                           <input
                             data-entry={entry.id}
                             aria-label={`Tarefa ${label}`}
+                            aria-required="true"
+                            aria-invalid={!!fieldError("issue")}
+                            aria-describedby={fieldError("issue") ? issueErrorId : undefined}
                             placeholder="Nº da tarefa"
                             inputMode="numeric"
                             value={entry.issue}
                             disabled={rowDisabled}
-                            onBlur={() =>
+                            onBlur={() => {
+                              touch(entry.id, "issue");
                               setLookupRequests((current) => ({
                                 ...current,
                                 [entry.id]: { code: entry.issue.trim() },
-                              }))
-                            }
+                              }));
+                            }}
                             onChange={(event) =>
                               update(entry.id, "issue", event.target.value)
                             }
@@ -285,6 +297,7 @@ export function DaySection({
                             )}
                           </button>
                         </div>
+                        {fieldError("issue") && <small id={issueErrorId} className="field-error" aria-live="polite">{fieldError("issue")}</small>}
                         <div className="row-receipt">
                           <ReceiptBadge record={receipt} />
                           {receipt && receipt.state !== "prepared" && (
@@ -307,6 +320,7 @@ export function DaySection({
                       <td>
                         <DurationField value={entry.duration} label={label}
                           disabled={rowDisabled} locked={rowLocked}
+                          required error={fieldError("duration")} onBlur={() => touch(entry.id, "duration")}
                           onChange={(value) => update(entry.id, "duration", value)} />
                       </td>
                       <td>
@@ -315,6 +329,7 @@ export function DaySection({
                           value={entry.activity}
                           label={`Atividade ${label}`}
                           disabled={rowDisabled}
+                          required error={fieldError("activity")} onBlur={() => touch(entry.id, "activity")}
                           reviewedId={
                             rowLocked ? receipt.snapshot.activityId : undefined
                           }
@@ -326,14 +341,19 @@ export function DaySection({
                       <td>
                         <textarea
                           aria-label={`Observação ${label}`}
+                          aria-required="true"
+                          aria-invalid={!!fieldError("comment")}
+                          aria-describedby={fieldError("comment") ? commentErrorId : undefined}
                           placeholder="O que foi feito?"
                           rows={2}
                           value={entry.comment}
                           disabled={rowDisabled}
+                          onBlur={() => touch(entry.id, "comment")}
                           onChange={(event) =>
                             update(entry.id, "comment", event.target.value)
                           }
                         />
+                        {fieldError("comment") && <small id={commentErrorId} className="field-error" aria-live="polite">{fieldError("comment")}</small>}
                       </td>
                       <td>
                         <button
@@ -386,7 +406,10 @@ export function DaySection({
               : `${pending.length} ${pending.length === 1 ? "linha pendente" : "linhas pendentes"} · revisão antes do envio`}</span>
           <button
             className="button day-send"
-            onClick={onSendDay}
+            onClick={() => {
+              setTouched(Object.fromEntries(day.entries.map((entry) => [entry.id, { issue: true, duration: true, activity: true, comment: true }])));
+              onSendDay();
+            }}
             disabled={disabled || dirty || day.revision < 1 || pending.length > 100}
             aria-label={`${simulated ? "Simular dia" : "Enviar dia"} ${description}`}
             title={pending.length > 100 ? "O limite é de 100 linhas por lote. Selecione menos linhas." : "Revisar as linhas pendentes deste dia"}

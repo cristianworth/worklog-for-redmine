@@ -25,7 +25,8 @@ Prepare several days of time-entry drafts, check daily totals and review what wi
 - A free date range showing Monday–Friday, with stacked days and a duration total per day. Historical weekend data stays stored.
 - The Azulejos cool weekday palette, clear row separation and a shared vector brand/favicon. Dates and receipt states remain readable without relying on color. [Interface decisions](docs/interface.md).
 - Fully appropriated days start collapsed; pending or uncertain days stay expanded. Click a day's header or use its disclosure button to expand/collapse it.
-- Compact duration input: `30` → `00:30`, `130` → `01:30`; integer minutes internally. The green **+** adds time to an existing duration, with a preview and Enter to apply.
+- Compact duration input: `30` → `00:30`, `130` → `01:30`; integer minutes internally. The green **+** on the right adds time to an existing duration, with a preview and Enter to apply.
+- Missing required fields are highlighted when you leave them, with explanatory messages. Incomplete drafts remain saveable; submission requires valid saved rows.
 - One activity catalog, available before looking up a task; selectors show alphabetically ordered names only. IDs remain available in settings and submission review.
 - A reusable day template, copied explicitly into untouched dates.
 - Saved-row selection, review, confirmation and sequential batches with visible progress, partial results and explicit completion feedback.

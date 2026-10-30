@@ -3,12 +3,15 @@ import { Plus, X } from "lucide-react";
 import { formatDuration, parseDurationInput } from "../shared/worklogs";
 import { addDurationInput } from "./editor";
 
-export function DurationField({ value, label, disabled, locked, onChange }: {
+export function DurationField({ value, label, disabled, locked, onChange, required = false, error, onBlur }: {
   value: string;
   label: string;
   disabled: boolean;
   locked: boolean;
   onChange(value: string): void;
+  required?: boolean;
+  error?: string;
+  onBlur?(): void;
 }) {
   const hintId = useId();
   const additionId = useId();
@@ -19,6 +22,7 @@ export function DurationField({ value, label, disabled, locked, onChange }: {
   const [lastTotal, setLastTotal] = useState<string | null>(null);
   const adding = addition !== null;
   const invalid = value !== "" && parseDurationInput(value) === null;
+  const fieldError = error || (invalid ? "Use 30, 130 ou HH:MM; minutos de 00 a 59." : "");
   let preview = "", additionError = "";
   if (adding && addition !== "") {
     try { preview = addDurationInput(value, addition); }
@@ -44,6 +48,17 @@ export function DurationField({ value, label, disabled, locked, onChange }: {
   return (
     <>
       <div className="duration-field">
+        <input ref={input} className="duration-input" aria-label={`Duração ${label}`}
+          aria-invalid={!!fieldError} aria-required={required || undefined}
+          aria-describedby={fieldError || (!locked && !adding) ? hintId : undefined}
+          placeholder="30 ou 1:30" inputMode="numeric" value={value}
+          disabled={disabled || locked || adding}
+          onChange={(event) => { setLastTotal(null); onChange(event.target.value); }}
+          onBlur={() => {
+            onBlur?.();
+            const minutes = parseDurationInput(value);
+            if (minutes !== null && value !== formatDuration(minutes)) onChange(formatDuration(minutes));
+          }} />
         <button type="button" className="icon-button duration-add"
           aria-label={`Somar tempo ${label}`} title="Somar tempo à duração atual"
           aria-expanded={adding} aria-controls={adding ? additionId : undefined}
@@ -51,15 +66,6 @@ export function DurationField({ value, label, disabled, locked, onChange }: {
           onClick={() => { if (adding) close(); else { setLastTotal(null); setAddition(""); } }}>
           <Plus size={17} aria-hidden="true" />
         </button>
-        <input ref={input} className="duration-input" aria-label={`Duração ${label}`}
-          aria-invalid={invalid} aria-describedby={invalid || (!locked && !adding) ? hintId : undefined}
-          placeholder="30 ou 1:30" inputMode="numeric" value={value}
-          disabled={disabled || locked || adding}
-          onChange={(event) => { setLastTotal(null); onChange(event.target.value); }}
-          onBlur={() => {
-            const minutes = parseDurationInput(value);
-            if (minutes !== null && value !== formatDuration(minutes)) onChange(formatDuration(minutes));
-          }} />
       </div>
       {adding && (
         <div id={additionId} className="duration-addition" role="group" aria-label={`Somar tempo ${label}`}>
@@ -83,8 +89,8 @@ export function DurationField({ value, label, disabled, locked, onChange }: {
           </div>
         </div>
       )}
-      {invalid && <small className="field-error" id={hintId}>Use 30, 130 ou HH:MM; minutos de 00 a 59.</small>}
-      {!locked && !invalid && !adding && <small id={hintId} className="duration-hint" role={lastTotal === value ? "status" : undefined}>
+      {fieldError && <small className="field-error" id={hintId} aria-live="polite">{fieldError}</small>}
+      {!locked && !fieldError && !adding && <small id={hintId} className="duration-hint" role={lastTotal === value ? "status" : undefined}>
         {lastTotal === value ? `Total atualizado: ${value}` : "30 → 00:30 · 130 → 01:30"}
       </small>}
     </>

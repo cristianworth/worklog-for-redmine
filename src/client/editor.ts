@@ -8,6 +8,19 @@ import {
 } from "../shared/worklogs";
 
 export type EditorEntry = Omit<Draft, "minutes"> & { duration: string };
+export type RequiredEntryField = "issue" | "duration" | "activity" | "comment";
+
+export function missingEntryFields(entry: EditorEntry): Partial<Record<RequiredEntryField, string>> {
+  const messages: Record<RequiredEntryField, string> = {
+    issue: "Informe o número da tarefa.",
+    duration: "Informe a duração.",
+    activity: "Selecione uma atividade.",
+    comment: "Informe a observação.",
+  };
+  return Object.fromEntries((Object.keys(messages) as RequiredEntryField[])
+    .filter((field) => !entry[field].trim())
+    .map((field) => [field, messages[field]]));
+}
 export interface EditorDay {
   date: string;
   revision: number;

@@ -12,6 +12,15 @@ Histórico das versões. Criado em 23/10/2026 com a base anterior ao modelo regi
 - Antes de cada commit/merge, ler este arquivo e avaliar uma versão proporcional à entrega. Em 25/10/2026, Cristian delegou ao agente a decisão de versão neste projeto e pediu push automático dos commits coesos, sem nova confirmação rotineira. Não incrementar a versão por commit da mesma entrega. Publicação e dados reais continuam sujeitos ao escopo autorizado.
 - Nunca incluir credenciais, planilhas privadas, bancos, backups ou dados reais nos registros, tags e arquivos distribuídos.
 
+## [0.10.1] — 2026-10-29
+
+### Feedback dos campos obrigatórios
+
+- **+** de soma movido para a direita da duração, inclusive na ordem de navegação por teclado; prévia, Enter/Somar e cancelamento preservados.
+- Tarefa, duração, atividade e observação vazias recebem borda/fundo vermelho suave, mensagem e sinalização ARIA ao perder o foco. Preencher limpa o aviso imediatamente; linhas novas começam neutras e a revisão do dia também sinaliza campos ausentes.
+- Rascunhos incompletos continuam salváveis. Duração zero permanece informada, somar em um campo vazio pode preenchê-lo, recibos protegidos continuam bloqueados e a revisão mantém a validação definitiva antes do envio.
+- Documentação atual e captura fictícia do README atualizadas. 401 testes/32 arquivos, builds local/demo/Pages e auditorias aprovados. Conferência de mensagens/cores nos quatro campos, correção, teclado, salvamento incompleto, revisão bloqueada e 375 px sem transbordamento da página ou erros de console. Sem acesso ao banco de uso ou envio real.
+
 ## [0.10.0] — 2026-10-29
 
 ### Cabeçalhos e soma rápida de duração

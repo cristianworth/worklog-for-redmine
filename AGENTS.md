@@ -22,6 +22,8 @@
 
 ## Catalog, days and templates
 
+- v0.10.1 places quick addition to the right of duration and flags missing issue/duration/activity/comment on blur or day review with red styling, text and ARIA. New untouched rows start neutral; corrections clear missing-field feedback. Preserve saving incomplete drafts, zero-minute semantics and protected receipts; never turn this presentation feedback into implicit submission or native form-save blocking.
+
 - v0.10.0 adds header click disclosure and a green quick-add duration action. Header controls must not also toggle disclosure; keep the arrow keyboard-accessible and rows mounted. Quick addition previews minutes using the compact-input parser, applies only on Enter/Somar, cancels without changing the base, and respects protected receipts. Direct duration edits still replace; save remains explicit.
 
 - v0.9.0 adds selection of all saved pending rows in the visible period, alphabetical Portuguese activity presentation and execution feedback shared by day/batch submission. Never include protected receipts or unsaved days, silently truncate a selection above 100 rows, or claim success before matching receipts. Day submission belongs in the task footer; progress counts received outcomes, not elapsed time or remote validation steps. See `docs/batch-submission.md`.

@@ -938,7 +938,7 @@ td select {
   font-size: 12px;
   margin-top: 5px;
 }
-input[aria-invalid="true"], select[aria-invalid="true"] {
+input[aria-invalid="true"], select[aria-invalid="true"], textarea[aria-invalid="true"] {
   border-color: var(--danger);
   background: var(--danger-wash);
 }

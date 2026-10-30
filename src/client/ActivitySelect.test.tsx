@@ -17,6 +17,15 @@ const render = (props: Partial<Parameters<typeof ActivitySelect>[0]> = {}) =>
     />,
   );
 describe("global activity selection", () => {
+  it("announces a required empty activity without invoking native form validation or selecting a value", () => {
+    const html = render({ required: true, error: "Selecione uma atividade." });
+    expect(html).toContain('aria-required="true"');
+    expect(html).toContain('aria-invalid="true"');
+    expect(html).toContain('class="field-error"');
+    expect(html).toContain("Selecione uma atividade.");
+    expect(html).toMatch(/value="" selected=""/);
+    expect(html).not.toMatch(/<select[^>]*\srequired=/);
+  });
   it("sorts names alphabetically in Portuguese without reordering the catalog or changing the selected value", () => {
     const catalog = [
       { activityId: 4, name: "Zeladoria" },

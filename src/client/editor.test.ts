@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   addDurationInput,
+  missingEntryFields,
   daySummary,
   mergeLoadedDays,
   toDraftDay,
@@ -21,6 +22,29 @@ const saved = {
     },
   ],
 };
+
+describe("required draft fields", () => {
+  it("identifies every missing field, including whitespace, without mutating the draft", () => {
+    const entry = { id: "fictional", issue: " ", duration: "", activity: "\t", comment: "\n" };
+    const before = { ...entry };
+    expect(missingEntryFields(entry)).toEqual({
+      issue: "Informe o número da tarefa.", duration: "Informe a duração.",
+      activity: "Selecione uma atividade.", comment: "Informe a observação.",
+    });
+    expect(entry).toEqual(before);
+  });
+  it("clears each missing-field error when supplied and accepts zero minutes as informed", () => {
+    const entry = { id: "fictional", issue: "9001", duration: "0", activity: "Revisão", comment: "Exemplo fictício" };
+    expect(missingEntryFields(entry)).toEqual({});
+    expect(missingEntryFields({ ...entry, comment: " " })).toEqual({ comment: "Informe a observação." });
+  });
+  it("keeps incomplete drafts saveable independently of required-for-submission feedback", () => {
+    const day = toEditor(saved);
+    day.entries[0] = { ...day.entries[0], issue: "", duration: "", activity: "", comment: "" };
+    expect(Object.keys(missingEntryFields(day.entries[0]))).toHaveLength(4);
+    expect(toDraftDay(day).entries[0].minutes).toBeNull();
+  });
+});
 
 describe("adding duration to a draft", () => {
   it.each([

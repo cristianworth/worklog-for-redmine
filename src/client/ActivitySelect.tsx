@@ -9,6 +9,9 @@ export function ActivitySelect({
   disabled,
   reviewedId,
   onChange,
+  required = false,
+  error,
+  onBlur,
 }: {
   activities: Activity[];
   value: string;
@@ -16,6 +19,9 @@ export function ActivitySelect({
   disabled: boolean;
   reviewedId?: number;
   onChange(value: string): void;
+  required?: boolean;
+  error?: string;
+  onBlur?(): void;
 }) {
   const hintId = useId();
   const selected = resolveActivity(activities, value);
@@ -34,7 +40,9 @@ export function ActivitySelect({
       <select
         aria-label={label}
         aria-describedby={hintId}
-        aria-invalid={unmatched}
+        aria-invalid={unmatched || !!error}
+        aria-required={required || undefined}
+        onBlur={onBlur}
         value={reviewedId ? value : (selected?.name ?? value)}
         disabled={disabled || !!reviewedId || !activities.length}
         onChange={(event) => onChange(event.target.value)}
@@ -63,9 +71,10 @@ export function ActivitySelect({
       </select>
       <small
         id={hintId}
-        className={`activity-hint ${unmatched ? "is-unmapped" : ""}`}
+        className={error ? "field-error" : `activity-hint ${unmatched ? "is-unmapped" : ""}`}
+        aria-live={error ? "polite" : undefined}
       >
-        {hint}
+        {error || hint}
       </small>
     </>
   );
