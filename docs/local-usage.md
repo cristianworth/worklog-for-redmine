@@ -22,6 +22,8 @@ A visualização mostra somente segunda a sexta dentro do intervalo. Sábados/do
 
 Use `30`/`030` para 30 minutos, `130` para 1h30 ou `01:30`. `90`, `160`, sinais, decimais e segundos são inválidos; não há arredondamento. Linhas incompletas podem ser salvas como rascunho. Total diário inclui todos os rascunhos; uma duração malformada exige correção/limpeza antes de salvar.
 
+Campos obrigatórios ainda vazios já têm uma borda discreta de 1 px em vermelho suave, sem mudar o fundo antes da interação. Preencher remove essa indicação. **Selecionar todos** fica alinhado à margem esquerda dos dias e mantém a seleção apenas dos pendentes salvos no período visível.
+
 Tarefa, duração, atividade e observação são obrigatórias para enviar. Ao sair de um desses campos vazio (inclusive só com espaços), ele recebe borda/fundo vermelho suave e uma mensagem explicativa. Preencher remove o aviso imediatamente; `00:00` conta como duração informada, sem impor um mínimo novo. **Enviar dia** também sinaliza os campos faltantes antes de abrir a revisão. Os avisos não impedem salvar rascunhos incompletos, não alteram revisões/dados e não liberam edição de recibos protegidos.
 
 Para acrescentar tempo, clique no **+** verde à direita da duração. Digite o acréscimo em **Tempo a somar**, confira **Novo total** e pressione **Enter** ou **Somar**. Por exemplo, `01:00` + `030` resulta em `01:30`. **Esc**, o × ou clicar novamente no + cancela sem alterar o valor. Uma duração vazia parte de zero; uma duração atual inválida precisa ser corrigida antes. Digitar diretamente no campo principal continua substituindo o valor. A soma altera só o rascunho: ainda é necessário salvar. Recibos protegidos não permitem somar tempo.

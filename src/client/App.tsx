@@ -683,6 +683,14 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
         </section>
 
         <div className="draft-toolbar">
+          <button
+            className="button secondary"
+            disabled={loading || saving || loadFailed || !receiptsLoaded || !visiblePending.length}
+            onClick={() => setSelection(visiblePending)}
+            aria-describedby="send-status"
+          >
+            Selecionar todos
+          </button>
           <span className="draft-explanation">
             <span className="draft-dot" />
             Rascunhos locais
@@ -691,14 +699,6 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
             </span>
           </span>
           <div className="send-control">
-            <button
-              className="button secondary"
-              disabled={loading || saving || loadFailed || !receiptsLoaded || !visiblePending.length}
-              onClick={() => setSelection(visiblePending)}
-              aria-describedby="send-status"
-            >
-              Selecionar todos
-            </button>
             {!!selection.length && (
               <button className="text-button" onClick={() => setSelection([])}>
                 Limpar seleção

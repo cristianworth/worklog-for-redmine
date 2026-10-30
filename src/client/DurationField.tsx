@@ -50,6 +50,7 @@ export function DurationField({ value, label, disabled, locked, onChange, requir
       <div className="duration-field">
         <input ref={input} className="duration-input" aria-label={`Duração ${label}`}
           aria-invalid={!!fieldError} aria-required={required || undefined}
+          data-missing-required={required && !locked && !value.trim()}
           aria-describedby={fieldError || (!locked && !adding) ? hintId : undefined}
           placeholder="30 ou 1:30" inputMode="numeric" value={value}
           disabled={disabled || locked || adding}

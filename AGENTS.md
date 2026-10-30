@@ -22,7 +22,9 @@
 
 ## Catalog, days and templates
 
-- v0.10.1 places quick addition to the right of duration and flags missing issue/duration/activity/comment on blur or day review with red styling, text and ARIA. New untouched rows start neutral; corrections clear missing-field feedback. Preserve saving incomplete drafts, zero-minute semantics and protected receipts; never turn this presentation feedback into implicit submission or native form-save blocking.
+- v0.10.2 gives untouched missing required fields a subtle 1 px red border on white, cleared when filled; stronger error styling/messages remain interaction-driven. Protected receipts get no missing-field hint, and zero duration counts as filled. Select all aligns with the left edge of the day cards; selection eligibility stays unchanged.
+
+- v0.10.1 places quick addition to the right of duration and flags missing issue/duration/activity/comment on blur or day review with red styling, text and ARIA. Corrections clear missing-field feedback. Preserve saving incomplete drafts, zero-minute semantics and protected receipts; never turn this presentation feedback into implicit submission or native form-save blocking.
 
 - v0.10.0 adds header click disclosure and a green quick-add duration action. Header controls must not also toggle disclosure; keep the arrow keyboard-accessible and rows mounted. Quick addition previews minutes using the compact-input parser, applies only on Enter/Somar, cancels without changing the base, and respects protected receipts. Direct duration edits still replace; save remains explicit.
 

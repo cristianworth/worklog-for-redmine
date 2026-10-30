@@ -421,6 +421,7 @@ h1 {
   align-items: center;
   gap: 8px 12px;
   max-width: 650px;
+  margin-left: auto;
 }
 .send-control > span {
   flex-basis: 100%;
@@ -941,6 +942,9 @@ td select {
 input[aria-invalid="true"], select[aria-invalid="true"], textarea[aria-invalid="true"] {
   border-color: var(--danger);
   background: var(--danger-wash);
+}
+[data-missing-required="true"]:not([aria-invalid="true"]) {
+  border-color: #bd8c95;
 }
 .copy-feedback {
   font-size: 12px;

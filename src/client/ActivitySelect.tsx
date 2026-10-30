@@ -42,6 +42,7 @@ export function ActivitySelect({
         aria-describedby={hintId}
         aria-invalid={unmatched || !!error}
         aria-required={required || undefined}
+        data-missing-required={required && !reviewedId && !value.trim()}
         onBlur={onBlur}
         value={reviewedId ? value : (selected?.name ?? value)}
         disabled={disabled || !!reviewedId || !activities.length}

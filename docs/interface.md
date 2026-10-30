@@ -34,9 +34,9 @@ O **+** verde ao lado da duração abre **Tempo a somar**, com prévia do total.
 
 ## Seleção e retorno do envio
 
-O **+** de soma fica à direita do campo de duração, também na ordem de navegação por teclado. Campos obrigatórios do dia (tarefa, duração, atividade e observação) exibem borda/fundo vermelho suave, mensagem e `aria-invalid` ao perder o foco vazios; corrigir limpa o aviso imediatamente. Uma linha nova começa neutra. Revisar o dia também revela campos ausentes. `aria-required` informa o requisito sem validação nativa que impeça salvar rascunhos incompletos; a validação definitiva permanece na revisão do envio.
+O **+** de soma fica à direita do campo de duração, também na ordem de navegação por teclado. Campos obrigatórios do dia (tarefa, duração, atividade e observação) exibem borda/fundo vermelho suave, mensagem e `aria-invalid` ao perder o foco vazios; corrigir limpa o aviso imediatamente. Campos obrigatórios vazios já mostram uma borda discreta de 1 px em vermelho suave (`#BD8C95`), sem mudar o fundo antes da interação; preencher remove a indicação. Revisar o dia também revela campos ausentes. `aria-required` informa o requisito sem validação nativa que impeça salvar rascunhos incompletos; a validação definitiva permanece na revisão do envio.
 
-**Selecionar todos** reúne apenas pendentes salvos do período visível; salvar e enviar continuam separados. O botão de envio de cada dia fica no rodapé das suas tarefas, acompanhado da quantidade pendente e da indicação de revisão. Datas, totais, adicionar linha e recolher ficam no cabeçalho. Dias integralmente apropriados não exibem uma ação de reenvio.
+**Selecionar todos**, alinhado à margem esquerda dos dias, reúne apenas pendentes salvos do período visível; salvar e enviar continuam separados. O botão de envio de cada dia fica no rodapé das suas tarefas, acompanhado da quantidade pendente e da indicação de revisão. Datas, totais, adicionar linha e recolher ficam no cabeçalho. Dias integralmente apropriados não exibem uma ação de reenvio.
 
 Seletores de atividades dos dias/modelo e o catálogo em Configurações apresentam os nomes em ordem alfabética brasileira, sem distinguir maiúsculas ou acentos para ordenar. A apresentação não altera IDs nem substitui valores antigos; o catálogo não muda de posição a cada tecla durante a edição.
 

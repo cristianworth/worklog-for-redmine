@@ -262,6 +262,7 @@ export function DaySection({
                             data-entry={entry.id}
                             aria-label={`Tarefa ${label}`}
                             aria-required="true"
+                            data-missing-required={!rowLocked && !!missing.issue}
                             aria-invalid={!!fieldError("issue")}
                             aria-describedby={fieldError("issue") ? issueErrorId : undefined}
                             placeholder="Nº da tarefa"
@@ -342,6 +343,7 @@ export function DaySection({
                         <textarea
                           aria-label={`Observação ${label}`}
                           aria-required="true"
+                          data-missing-required={!rowLocked && !!missing.comment}
                           aria-invalid={!!fieldError("comment")}
                           aria-describedby={fieldError("comment") ? commentErrorId : undefined}
                           placeholder="O que foi feito?"

@@ -7,6 +7,10 @@ const render = (changes: Partial<Parameters<typeof DurationField>[0]> = {}) => r
 );
 
 describe("quick duration addition controls", () => {
+  it("hints at an untouched required blank but considers zero minutes filled", () => {
+    expect(render({ value: "", required: true })).toContain('data-missing-required="true"');
+    expect(render({ value: "0", required: true })).not.toContain('data-missing-required="true"');
+  });
   it("places the duration before its addition button in visual and keyboard order", () => {
     const html = render();
     expect(html.indexOf('<input')).toBeLessThan(html.indexOf('<button'));

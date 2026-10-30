@@ -28,6 +28,15 @@ async function fixture() {
 }
 
 describe("default day disclosure", () => {
+  it("marks untouched required blanks without showing validation errors or marking protected receipts", async () => {
+    const { props, render } = await fixture();
+    const day = { ...props.day, entries: [{ ...props.day.entries[0], issue: "", duration: "", activity: "", comment: "" }] };
+    const html = render({ day, submissions: {} });
+    expect(html.match(/data-missing-required="true"/g)).toHaveLength(4);
+    expect(html).not.toContain('aria-invalid="true"');
+    expect(html).not.toContain("Informe a observação.");
+    expect(render({ day })).not.toContain('data-missing-required="true"');
+  });
   it("keeps the send action next to pending tasks and disables it for unsaved edits", async () => {
     const { render } = await fixture();
     const html = render({ submissions: {} });
