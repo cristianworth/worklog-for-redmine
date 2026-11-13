@@ -201,6 +201,7 @@ describe("global activities and submission boundaries", () => {
     expect(daySummary(toEditor(saved))).toEqual({
       total: "01:30",
       invalid: false,
+      balance: "-06:30",
     });
   });
 });

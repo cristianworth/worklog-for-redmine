@@ -70,6 +70,25 @@ describe("adding duration to a draft", () => {
     expect(toDraftDay(day).entries[0].minutes).toBe(120);
   });
 });
+describe("daily balance", () => {
+  it.each([
+    ["915", "+01:15"], ["730", "-00:30"], ["800", "00:00"], ["0", "-08:00"], ["", "-08:00"],
+  ])("calculates the balance for %s as %s", (duration, balance) => {
+    const day = toEditor(saved);
+    day.entries[0].duration = duration;
+    expect(daySummary(day).balance).toBe(balance);
+  });
+  it("uses all entries and hides the balance for invalid or overflowing totals", () => {
+    const day = toEditor(saved);
+    day.entries.push({ ...day.entries[0], id: "second", duration: "630" });
+    expect(daySummary(day).balance).toBe("00:00");
+    day.entries[1].duration = "160";
+    expect(daySummary(day)).toEqual({ total: "01:30", invalid: true, balance: null });
+    day.entries[0].duration = "150119987579016:31";
+    day.entries[1].duration = "1";
+    expect(daySummary(day)).toEqual({ total: "—", invalid: true, balance: null });
+  });
+});
 describe("editing across periods", () => {
   it("preserves edited days when a period refresh returns an older stored copy", () => {
     const edited = {

@@ -28,6 +28,16 @@ async function fixture() {
 }
 
 describe("default day disclosure", () => {
+  it("shows the balance in the collapsed header and identifies unavailable balances", async () => {
+    const { props, render } = await fixture();
+    const header = render({ collapsed: true }).split("</header>")[0];
+    expect(header).toContain("Saldo do dia");
+    expect(header).toContain("-06:00");
+    const day = { ...props.day, entries: [{ ...props.day.entries[0], duration: "160" }] };
+    const partial = render({ day }).split("</header>")[0];
+    expect(partial).toContain("Total parcial");
+    expect(partial).toContain("Indisponível");
+  });
   it("marks untouched required blanks without showing validation errors or marking protected receipts", async () => {
     const { props, render } = await fixture();
     const day = { ...props.day, entries: [{ ...props.day.entries[0], issue: "", duration: "", activity: "", comment: "" }] };

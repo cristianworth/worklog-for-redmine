@@ -20,7 +20,7 @@ A cor acompanha o dia da semana, inclusive ao mudar o período ou recolher suas 
 
 Os dias úteis do período aparecem do mais recente para o mais antigo. A ordem de seleção e envio permanece independente da apresentação.
 
-O espaçamento entre dias e as divisórias das tabelas separam os grupos. Linhas alternadas ajudam a acompanhar os campos; seleção e situação dos recibos têm tratamentos próprios. Uma duração inválida mantém a indicação textual de total parcial.
+O espaçamento entre dias e as divisórias das tabelas separam os grupos. Linhas alternadas ajudam a acompanhar os campos; seleção e situação dos recibos têm tratamentos próprios. O cabeçalho apresenta o total e o saldo em relação a 8 horas, inclusive recolhido. O saldo usa sinal positivo ou negativo, mostra `00:00` ao atingir a meta e fica indisponível quando uma duração inválida torna o total parcial.
 
 Cada lançamento do dia agrupa os campos e uma faixa de contexto abaixo deles. Título, status e projeto da consulta usam a largura conjunta de tarefa, duração, atividade e observação, com quebra natural e texto completo; o estado do recibo e as ações de consulta/resultado permanecem acessíveis. A alternância de fundo, a seleção e os estados protegidos abrangem o grupo inteiro. O espaçamento vertical é compacto e a observação começa com uma linha, pode receber quebras e continua redimensionável; textos maiores rolam dentro do campo. Erros e a soma rápida podem ampliar a linha quando necessário. Em telas estreitas, a tabela mantém sua rolagem horizontal. O modelo do dia conserva sua apresentação independente.
 

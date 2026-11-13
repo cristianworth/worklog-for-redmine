@@ -83,24 +83,24 @@ export function toDraftDay(day: EditorDay): DraftDay {
 export function daySummary(day: EditorDay): {
   total: string;
   invalid: boolean;
+  balance: string | null;
 } {
   const invalid = day.entries.some(
     (entry) =>
       entry.duration !== "" && parseDurationInput(entry.duration) === null,
   );
   try {
+    const minutes = totalMinutes(day.entries.map((entry) => ({
+      minutes: parseDurationInput(entry.duration),
+    })));
+    const difference = minutes - 480;
     return {
-      total: formatDuration(
-        totalMinutes(
-          day.entries.map((entry) => ({
-            minutes: parseDurationInput(entry.duration),
-          })),
-        ),
-      ),
+      total: formatDuration(minutes),
       invalid,
+      balance: invalid ? null : `${difference > 0 ? "+" : difference < 0 ? "-" : ""}${formatDuration(Math.abs(difference))}`,
     };
   } catch {
-    return { total: "—", invalid: true };
+    return { total: "—", invalid: true, balance: null };
   }
 }
 

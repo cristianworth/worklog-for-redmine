@@ -64,7 +64,7 @@ describe("compact hours and minutes input", () => {
         comment: "Synthetic work",
       })),
     };
-    expect(daySummary(day)).toEqual({ total: "02:45", invalid: false });
+    expect(daySummary(day)).toEqual({ total: "02:45", invalid: false, balance: "-05:15" });
     const saved = toDraftDay(day);
     expect(saved.entries.map((entry) => entry.minutes)).toEqual([30, 90, 45]);
     expect(toEditor(saved).entries.map((entry) => entry.duration)).toEqual([

@@ -12,6 +12,11 @@ Histórico das versões. Criado em 23/10/2026 com a base anterior ao modelo regi
 - Antes de cada commit/merge, ler este arquivo e avaliar uma versão proporcional à entrega. Em 25/10/2026, Cristian delegou ao agente a decisão de versão neste projeto e pediu push automático dos commits coesos, sem nova confirmação rotineira. Não incrementar a versão por commit da mesma entrega. Publicação e dados reais continuam sujeitos ao escopo autorizado.
 - Nunca incluir credenciais, planilhas privadas, bancos, backups ou dados reais nos registros, tags e arquivos distribuídos.
 
+## [0.12.0] — 2026-11-13
+
+- Cabeçalho mostra o saldo diário em relação a 8 horas, atualizado durante a edição e visível com o dia recolhido. Totais parciais deixam o saldo indisponível; salvamento e envio seguem independentes.
+- 411 testes/32 arquivos, builds local/demo/Pages e auditorias aprovados. Na demo fictícia, conferidos edição, saldo parcial, soma rápida por teclado, recolhimento e cabeçalho em 375 px.
+
 ## [0.11.0] — 2026-11-13
 
 - Dias úteis exibidos do mais recente para o mais antigo; geração do período, armazenamento e ordem de seleção preservados.
