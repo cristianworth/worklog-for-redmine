@@ -32,6 +32,10 @@ export function workdayRange(from: string, to: string): string[] {
   return dateRange(from, to).filter(isWeekday);
 }
 
+export function newestFirst(dates: string[]): string[] {
+  return [...dates].reverse();
+}
+
 export function endDate(period: PeriodPreference, today: string): string {
   return period.endMode === "today" ? today : period.to;
 }

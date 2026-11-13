@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   dateRange,
   workdayRange,
+  newestFirst,
   endDate,
   localDate,
   restorePeriod,
@@ -16,6 +17,12 @@ describe("calendar period", () => {
     expect(workdayRange("2026-10-30", "2026-11-03")).toEqual(["2026-10-30", "2026-11-02", "2026-11-03"]);
     expect(workdayRange("2026-10-26", "2026-10-26")).toEqual(["2026-10-26"]);
     expect(() => workdayRange("2026-10-26", "2026-10-23")).toThrow();
+  });
+  it("shows the most recent workday first without changing the original range", () => {
+    const dates = workdayRange("2026-10-30", "2026-11-03");
+    expect(newestFirst(dates)).toEqual(["2026-11-03", "2026-11-02", "2026-10-30"]);
+    expect(dates).toEqual(["2026-10-30", "2026-11-02", "2026-11-03"]);
+    expect(newestFirst(workdayRange("2026-10-24", "2026-10-25"))).toEqual([]);
   });
   it("includes both Wednesdays and the weekend without a fixed workweek", () => {
     expect(dateRange("2026-10-14", "2026-10-21")).toEqual([

@@ -22,7 +22,7 @@ Prepare several days of time-entry drafts, check daily totals and review what wi
 
 ## What it does
 
-- A free date range showing Monday–Friday, with stacked days and a duration total per day. Historical weekend data stays stored.
+- A free date range showing Monday–Friday, with the most recent workday first and a duration total per day. Historical weekend data stays stored.
 - The Azulejos cool weekday palette, clear row separation and a shared vector brand/favicon. Dates and receipt states remain readable without relying on color. [Interface decisions](docs/interface.md).
 - Compact task rows, with lookup details spanning the editor width. Comments start with one line and remain resizable; longer text stays editable and scrollable.
 - Fully appropriated days start collapsed; pending or uncertain days stay expanded. Click a day's header or use its disclosure button to expand/collapse it.

@@ -35,6 +35,7 @@ import {
   endDate,
   localDate,
   periodStorageKey,
+  newestFirst,
   restorePeriod,
   shortDate,
   type PeriodPreference,
@@ -614,7 +615,7 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
           <div className="period-title">
             <CalendarRange size={18} aria-hidden="true" />
             <h2>Período de trabalho</h2>
-            <span className="period-hint">Segunda a sexta, em sequência</span>
+            <span className="period-hint">Segunda a sexta, mais recente primeiro</span>
           </div>
           <div className="period-controls">
             <label className="date-field" htmlFor="period-start">
@@ -827,7 +828,7 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
           </span>
         </div>
         <div className="days-list" aria-busy={loading}>
-          {visibleDates.map((date) => (
+          {newestFirst(visibleDates).map((date) => (
             <DaySection
               key={date}
               simulated={data.mode === "demo"}
