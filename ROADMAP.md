@@ -100,7 +100,7 @@ Implementado: `build:pages`/`preview:pages`, auditoria de recursos no subdiretó
 
 ## Depois da primeira publicação
 
-Coletar observações reais de uso e priorizar correções que impeçam entender ou completar o percurso. Novas funcionalidades dependem desse retorno; não adicionar login, análises de uso, domínio próprio ou backend público só para ampliar o portfólio.
+Coletar observações reais de uso e priorizar correções que impeçam entender ou completar o percurso. A [avaliação independente por visitante — #5](https://github.com/cristianworth/worklog-for-redmine/issues/5) acompanha o roteiro e seu resultado, sem substituir retorno externo por testes técnicos. Novas funcionalidades dependem desse retorno; não adicionar login, análises de uso, domínio próprio ou backend público só para ampliar o portfólio.
 
 ## Limites preservados
 
