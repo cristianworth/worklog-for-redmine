@@ -17,11 +17,13 @@ describe("saved pending selection", () => {
   it("selects all pending rows of visible days, including partially appropriated days, in display order", async () => {
     const { days, editor, record } = await fixture();
     const receipts = { [`${days[0].date}:${record.snapshot.entryId}`]: { ...record, state: "confirmed" as const } };
-    const selected = pendingEntries([days[0].date, days[1].date], editor, receipts);
+    const dates = [days[0].date, days[1].date];
+    const selected = pendingEntries(dates, editor, receipts);
     expect(selected).toEqual([
-      ...days[0].entries.slice(1).map((entry) => ({ date: days[0].date, entryId: entry.id })),
       ...days[1].entries.map((entry) => ({ date: days[1].date, entryId: entry.id })),
+      ...days[0].entries.slice(1).map((entry) => ({ date: days[0].date, entryId: entry.id })),
     ]);
+    expect(dates).toEqual([days[0].date, days[1].date]);
     expect(selected.some((item) => item.date === days[2].date)).toBe(false);
   });
   it("excludes every protected state but allows a rejected row to be reviewed again", async () => {

@@ -175,8 +175,8 @@ describe("batch submission", () => {
     t.invalidIssues.set("1002", 404);
     const result = await t.service.start(review.id);
     expect(t.posts()).toBe(0);
-    expect(result.items.slice(0, 3).every((item) => item.error === null)).toBe(true);
-    expect(result.items[3].error).toContain("14/10/2026");
+    expect(result.items.slice(3).every((item) => item.error === null)).toBe(true);
+    expect(result.items[0].error).toContain("14/10/2026");
     expect(result.state).toBe("interrupted");
   });
   it("checks every task before the first POST and shares repeated context only within preflight", async () => {
@@ -246,21 +246,37 @@ describe("batch submission", () => {
         .every(([, options]) => !String(options?.body).includes("status_id")),
     ).toBe(true);
   });
-  it("submits two selected dates together with the correct date on every entry", async () => {
+  it("reviews and submits selected dates newest first while preserving the selection within each day", async () => {
     const t = setup(":memory:", ["2026-10-13", "2026-10-14"]);
-    const result = await t.service.start(
-      (await t.service.prepare(t.selections)).id,
-    );
-    expect(result.state).toBe("finished");
-    expect(t.posts()).toBe(6);
-    expect(t.rows.map((r) => r.spent_on)).toEqual([
-      "2026-10-13",
-      "2026-10-13",
-      "2026-10-13",
-      "2026-10-14",
-      "2026-10-14",
-      "2026-10-14",
+    const selections = [t.selections[1], t.selections[5], t.selections[0], t.selections[3]];
+    const original = structuredClone(selections);
+    const review = await t.service.prepare(selections);
+    expect(review.items.map((item) => item.selection)).toEqual([
+      t.selections[5], t.selections[3], t.selections[1], t.selections[0],
     ]);
+    expect(selections).toEqual(original);
+    expect(t.posts()).toBe(0);
+    const result = await t.service.start(review.id);
+    expect(result.state).toBe("finished");
+    expect(t.posts()).toBe(4);
+    expect(t.rows.map((r) => r.spent_on)).toEqual([
+      "2026-10-14",
+      "2026-10-14",
+      "2026-10-13",
+      "2026-10-13",
+    ]);
+    expect(t.rows.map((row) => row.comments)).toEqual([
+      "Synthetic work 3", "Synthetic work 1", "Synthetic work 2", "Synthetic work 1",
+    ]);
+    expect(t.service.get(review.id).items.map((item) => item.selection)).toEqual(review.items.map((item) => item.selection));
+  });
+  it("preserves the stored order when reading a historical batch", async () => {
+    const t = setup(":memory:", ["2026-10-13", "2026-10-14"]);
+    const review = await t.service.prepare(t.selections);
+    const historical = { ...review, state: "finished" as const, items: review.items.toReversed() };
+    store.saveBatch(historical);
+    expect(t.service.get(review.id).items.map((item) => item.selection)).toEqual(historical.items.map((item) => item.selection));
+    expect(t.service.list("2026-10-13", "2026-10-14")[0].items.map((item) => item.selection)).toEqual(historical.items.map((item) => item.selection));
   });
   it("does not start any row if one selected draft cannot be reviewed", async () => {
     const t = setup();
@@ -322,6 +338,22 @@ describe("batch submission", () => {
     );
     expect(next.state).toBe("finished");
     expect(t.posts()).toBe(4);
+  });
+  it("stops before older dates after a rejection while preserving the newer confirmed date", async () => {
+    const t = setup(":memory:", ["2026-10-12", "2026-10-13", "2026-10-14"]);
+    const selections = t.selections.filter((item) => item.entryId === "row-1");
+    const review = await t.service.prepare(selections);
+    t.fail(2);
+    const result = await t.service.start(review.id);
+    expect(result.state).toBe("interrupted");
+    expect(result.items.map((item) => [item.selection.date, item.record?.state])).toEqual([
+      ["2026-10-14", "confirmed"], ["2026-10-13", "rejected"], ["2026-10-12", "prepared"],
+    ]);
+    const attempted = t.request.mock.calls.filter(([, options]) => options?.method === "POST")
+      .map(([, options]) => JSON.parse(String(options!.body)).time_entry.spent_on);
+    expect(attempted).toEqual(["2026-10-14", "2026-10-13"]);
+    expect(t.posts()).toBe(2);
+    expect(() => t.service.start(review.id)).toThrow();
   });
   it("preserves uncertainty and reads the remote result without replaying the batch", async () => {
     const t = setup();

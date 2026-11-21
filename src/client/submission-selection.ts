@@ -20,7 +20,7 @@ export function pendingEntries(
   editor: EditorState,
   receipts: Record<string, SubmissionRecord>,
 ) {
-  return dates.flatMap((date) => (editor.days[date]?.entries ?? [])
+  return dates.toSorted((a, b) => b.localeCompare(a)).flatMap((date) => (editor.days[date]?.entries ?? [])
     .filter((entry) => canSelectEntry(editor, receipts, date, entry.id))
     .map((entry) => ({ date, entryId: entry.id })));
 }

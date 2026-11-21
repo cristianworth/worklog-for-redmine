@@ -1,5 +1,5 @@
 import { resolveActivity } from "../shared/activities";
-import { canConfirmBatch, validateBatchSelection, type BatchSelection, type SubmissionBatch } from "../shared/batches";
+import { canConfirmBatch, orderBatchSelection, validateBatchSelection, type BatchSelection, type SubmissionBatch } from "../shared/batches";
 import { isSubmissionLocked, submissionDraft, type SubmissionRecord, type SubmissionSnapshot } from "../shared/submissions";
 import type { DraftDay } from "../shared/worklogs";
 import { DataAccessError, type IssueDetails, type SubmissionAction } from "./data-access";
@@ -200,7 +200,7 @@ export function createDemoSubmissions(store: DemoStore, exclusive: DemoExclusive
     }),
     act: (id: string, action: SubmissionAction) => exclusive(() => action === "confirm" ? sendRaw(id) : verifyRaw(id)),
     prepareBatch: (values: BatchSelection[]) => exclusive(() => {
-      const entries = validateBatchSelection(values), time = now();
+      const entries = orderBatchSelection(validateBatchSelection(values)), time = now();
       const batch: SubmissionBatch = { id: crypto.randomUUID(), simulated: true, state: "prepared", createdAt: time, updatedAt: time,
         message: "Revise as linhas antes de confirmar a simulação. Nada será enviado ao Redmine.", items: entries.map((selection) => {
           try {

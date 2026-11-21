@@ -128,7 +128,7 @@ describe("global activities and submission boundaries", () => {
         revision: day.revision,
       })),
     );
-    expect(review.items[1].error).toContain("não está disponível");
+    expect(review.items[0].error).toContain("não está disponível");
     expect(() => t.service.start(review.id)).toThrow();
     expect(t.posts).toHaveLength(0);
   });
@@ -156,8 +156,8 @@ describe("global activities and submission boundaries", () => {
         payload.spent_on,
       ]),
     ).toEqual([
-      [101, "00:30", "2026-10-22"],
       [101, "01:30", "2026-10-23"],
+      [101, "00:30", "2026-10-22"],
     ]);
     expect(t.posts.every((payload) => !("status_id" in payload))).toBe(true);
   });
@@ -176,7 +176,7 @@ describe("global activities and submission boundaries", () => {
         revision: day.revision,
       })),
     );
-    expect(review.items[1].error).toContain("Cadastre esta atividade");
+    expect(review.items[0].error).toContain("Cadastre esta atividade");
     expect(() => t.service.start(review.id)).toThrow();
     expect(t.posts).toHaveLength(0);
   });

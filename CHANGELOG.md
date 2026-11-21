@@ -12,6 +12,12 @@ Histórico das versões. Criado em 23/10/2026 com a base anterior ao modelo regi
 - Antes de cada commit/merge, ler este arquivo e avaliar uma versão proporcional à entrega. Em 25/10/2026, Cristian delegou ao agente a decisão de versão neste projeto e pediu push automático dos commits coesos, sem nova confirmação rotineira. Não incrementar a versão por commit da mesma entrega. Publicação e dados reais continuam sujeitos ao escopo autorizado.
 - Nunca incluir credenciais, planilhas privadas, bancos, backups ou dados reais nos registros, tags e arquivos distribuídos.
 
+## [0.12.1] — 2026-11-20
+
+- Novos lotes apresentam, executam e mostram resultados com datas do dia mais recente para o mais antigo, tanto no modo local quanto na demo. Seleção manual e **Selecionar todos** seguem a mesma regra; a ordem relativa das linhas de cada dia e os lotes históricos são preservados. Corrige a issue #3.
+- Validação integral, confirmação explícita, proteção de recibos e interrupção na primeira falha mantidas. Leituras/salvamento de dias preservam seus contratos; envios recentes já eram apresentados por criação decrescente.
+- 415 testes/32 arquivos, builds local/demo/Pages e auditorias aprovados. Conferidos seleção manual intercalada, selecionar todos, revisão/resultados de 30, 28 e 26/10/2026, criações simuladas na mesma ordem, confirmação por teclado e 375 px sem transbordamento ou erros de console. Nenhum banco de uso ou envio real acessado.
+
 ## [0.12.0] — 2026-11-13
 
 - Cabeçalho mostra o saldo diário em relação a 8 horas, atualizado durante a edição e visível com o dia recolhido. Totais parciais deixam o saldo indisponível; salvamento e envio seguem independentes.

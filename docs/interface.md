@@ -18,7 +18,7 @@ O petróleo `#2F6B66` conecta marca, ações, foco e avisos da demo; o fundo cla
 
 A cor acompanha o dia da semana, inclusive ao mudar o período ou recolher suas tarefas. A data é interpretada em UTC somente para escolher o tom, sem converter a data de trabalho pelo fuso do navegador. Resultados continuam identificados por texto/recibos; a paleta semanal não representa confirmação ou erro. O marcador **Hoje** complementa a data.
 
-Os dias úteis do período aparecem do mais recente para o mais antigo. A ordem de seleção e envio permanece independente da apresentação.
+Os dias úteis do período aparecem do mais recente para o mais antigo. Novos lotes também apresentam e executam as datas nessa ordem, independentemente da ordem dos cliques; as linhas de cada dia mantêm sua ordem relativa na seleção. Resultados de lotes históricos preservam a ordem registrada.
 
 O espaçamento entre dias e as divisórias das tabelas separam os grupos. Linhas alternadas ajudam a acompanhar os campos; seleção e situação dos recibos têm tratamentos próprios. O cabeçalho apresenta o total e o saldo em relação a 8 horas, inclusive recolhido. O saldo usa sinal positivo ou negativo, mostra `00:00` ao atingir a meta e fica indisponível quando uma duração inválida torna o total parcial.
 

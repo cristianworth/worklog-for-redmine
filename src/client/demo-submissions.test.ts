@@ -62,6 +62,33 @@ describe("simulated submissions and durable browser receipts", () => {
     expect(t.state().creations).toHaveLength(4);
   });
 
+  it("reviews and simulates mixed selections newest first without reversing rows within a day", async () => {
+    const t = setup(), selections = t.selections();
+    const input = [selections[1], selections[3], selections[0], selections[2]];
+    const original = structuredClone(input);
+    const review = await t.data.prepareBatch(input);
+    const ordered = [selections[3], selections[2], selections[1], selections[0]];
+    expect(review.items.map((item) => item.selection)).toEqual(ordered);
+    expect(input).toEqual(original);
+    expect(t.state().creations).toHaveLength(0);
+    await t.data.confirmBatch(review.id);
+    expect((await finished(t.data, review.id)).state).toBe("finished");
+    expect(t.state().creations.map((creation) => ({ date: creation.snapshot.date, entryId: creation.snapshot.entryId })))
+      .toEqual(ordered.map(({ date, entryId }) => ({ date, entryId })));
+    expect((await t.open().readBatch(review.id)).items.map((item) => item.selection)).toEqual(ordered);
+  });
+
+  it("preserves the stored order of historical batches after reload and history reads", async () => {
+    const t = setup(), review = await t.data.prepareBatch(t.selections());
+    const state = t.state();
+    const historical = { ...state.batches[0], state: "finished" as const, items: state.batches[0].items.toReversed() };
+    state.batches[0] = historical;
+    t.values.set(demoStorageKey, JSON.stringify(state));
+    const reopened = t.open();
+    expect((await reopened.readBatch(review.id)).items.map((item) => item.selection)).toEqual(historical.items.map((item) => item.selection));
+    expect((await reopened.listBatches("2026-10-21", "2026-10-23"))[0].items.map((item) => item.selection)).toEqual(historical.items.map((item) => item.selection));
+  });
+
   it("blocks the entire selection when preparation contains an invalid task", async () => {
     const t = setup();
     const day = (await t.data.readDays("2026-10-22", "2026-10-22"))[0];
@@ -81,7 +108,7 @@ describe("simulated submissions and durable browser receipts", () => {
     await t.data.confirmBatch(batch.id);
     const result = await finished(t.data, batch.id);
     expect(result.state).toBe("interrupted");
-    expect(result.items.at(-1)?.error).toContain("23/10/2026");
+    expect(result.items[0].error).toContain("23/10/2026");
     expect(t.state().creations).toHaveLength(0);
   });
 
@@ -95,12 +122,14 @@ describe("simulated submissions and durable browser receipts", () => {
   });
 
   it("stops at the first rejection and preserves previous results and unsent lines", async () => {
-    const t = setup({ outcome: (snapshot) => snapshot.entryId === "demo-search-review" ? "rejected" : "confirmed" });
+    const t = setup({ outcome: (snapshot) => snapshot.entryId === "demo-validation" ? "rejected" : "confirmed" });
     const batch = await t.data.prepareBatch(t.selections());
     await t.data.confirmBatch(batch.id);
     const result = await finished(t.data, batch.id);
     expect(result.state).toBe("interrupted");
     expect(result.items.map((item) => item.record?.state)).toEqual(["confirmed", "rejected", "prepared", "prepared"]);
+    expect(result.items.map((item) => item.selection.date)).toEqual(["2026-10-23", "2026-10-22", "2026-10-21", "2026-10-21"]);
+    expect(t.state().creations[0].snapshot.date).toBe("2026-10-23");
     expect(t.state().creations).toHaveLength(1);
     expect((await t.open().readBatch(batch.id)).items[0].record?.state).toBe("confirmed");
   });

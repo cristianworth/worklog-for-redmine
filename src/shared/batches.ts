@@ -20,6 +20,9 @@ export interface SubmissionBatch {
   updatedAt: string;
   message: string;
 }
+export function orderBatchSelection(entries: BatchSelection[]): BatchSelection[] {
+  return entries.toSorted((a, b) => b.date.localeCompare(a.date));
+}
 export function validateBatchSelection(value: unknown): BatchSelection[] {
   if (!Array.isArray(value) || !value.length || value.length > 100)
     throw new Error("Selecione de 1 a 100 linhas salvas por lote.");

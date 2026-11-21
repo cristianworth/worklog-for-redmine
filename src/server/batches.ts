@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import {
   canConfirmBatch,
+  orderBatchSelection,
   validateBatchSelection,
   type SubmissionBatch,
 } from "../shared/batches";
@@ -45,7 +46,7 @@ export function createBatchService(
   async function prepare(input: unknown): Promise<SubmissionBatch> {
     let entries;
     try {
-      entries = validateBatchSelection(input);
+      entries = orderBatchSelection(validateBatchSelection(input));
     } catch (error) {
       throw new SubmissionError((error as Error).message);
     }
