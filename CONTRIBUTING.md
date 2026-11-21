@@ -16,6 +16,10 @@ For a bug, include the application version, browser/Node version, mode (demo/loc
 
 Keep each pull request cohesive. Explain the resulting behavior, relevant trade-offs, checks actually run and known limitations. Preserve public contracts and avoid unrelated renames or formatting churn. Update current guides when behavior changes; record delivered changes in the changelog after the release/version decision. Historical release entries and tags must not be rewritten.
 
+Reuse or open an issue when work needs tracking; do not duplicate completed milestones. Use a short work branch from the current remote `master`, preserving unrelated local changes and commits. Target `master` and relate the issue when applicable; keep the PR in draft while review or validation is pending.
+
+Review the diff and checks for the current SHA before integration. Merge requires Cristian's approval of the diff and authorization to integrate; later content changes require renewed review and approval. Green CI does not authorize merge, and direct pushes to `master` require explicit authorization. This process does not grant operational permissions beyond the current request. After an authorized merge, check CI, deployment and the published demo before reporting publication.
+
 ## Invariants worth preserving
 
 - Saving drafts never submits hours. Submission requires saved data, review and explicit confirmation.

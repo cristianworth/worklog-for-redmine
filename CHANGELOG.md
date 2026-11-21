@@ -9,7 +9,7 @@ Histórico das versões. Criado em 23/10/2026 com a base anterior ao modelo regi
 - Registrar somente alterações entregues nas versões datadas. Ideias e tarefas futuras ficam em [ROADMAP.md](ROADMAP.md), sem apresentar funcionalidades planejadas como existentes.
 - `package.json` e as duas versões raiz de `package-lock.json` devem coincidir com a versão atual. A interface lê a versão do manifest durante a compilação; recompilar depois de alterá-la.
 - Tags locais `vX.Y.Z` identificam a revisão de cada versão. Não mover tags já criadas nem reescrever histórico. A tag retrospectiva v0.0.0 aponta para a última revisão anterior ao P5; os manifests antigos continuam como estavam.
-- Antes de cada commit/merge, ler este arquivo e avaliar uma versão proporcional à entrega. Em 25/10/2026, Cristian delegou ao agente a decisão de versão neste projeto e pediu push automático dos commits coesos, sem nova confirmação rotineira. Não incrementar a versão por commit da mesma entrega. Publicação e dados reais continuam sujeitos ao escopo autorizado.
+- Antes de cada commit/merge, ler este arquivo e avaliar uma versão proporcional à entrega. Em 25/10/2026, Cristian delegou ao agente a decisão de versão neste projeto e pediu push automático dos commits coesos, sem nova confirmação rotineira. Commits e pushes seguem o escopo autorizado na branch de trabalho e o [processo de contribuição](CONTRIBUTING.md#issues-and-pull-requests); integração exige aprovação do diff e autorização próprias. Não incrementar a versão por commit da mesma entrega. Publicação e dados reais continuam sujeitos ao escopo autorizado.
 - Nunca incluir credenciais, planilhas privadas, bancos, backups ou dados reais nos registros, tags e arquivos distribuídos.
 
 ## [0.12.1] — 2026-11-20

@@ -42,7 +42,7 @@ Esses passos são conferência técnica; uma avaliação independente por um rec
 
 Uma falha nos checks não publica uma nova versão. Se o deploy falhar, consulte o job e o estado do Pages antes de anunciar o endereço como disponível. Não troque para publicar a raiz do repositório nem envie `dist/` como atalho.
 
-Para corrigir uma regressão publicada, faça uma correção ou `git revert` coeso em `master`, revise o changelog/versão e deixe a CI republicar. Não force push nem mova tags. Dados da demo pertencem ao visitante: rollback do código não restaura armazenamento apagado e uma versão mais antiga pode recusar um schema novo. Preserve compatibilidade ou mostre recuperação explícita; não apague dados silenciosamente.
+Para corrigir uma regressão publicada, prepare uma correção ou `git revert` coeso em branch de trabalho a partir de `master` remota atualizada, revise o changelog/versão e siga o [processo de contribuição](../CONTRIBUTING.md#issues-and-pull-requests). A integração depende de revisão, checks do SHA atual e aprovação de Cristian para o diff; somente o merge autorizado em `master` deixa a CI republicar. Rollback não autoriza push direto à principal. Não force push nem mova tags. Dados da demo pertencem ao visitante: rollback do código não restaura armazenamento apagado e uma versão mais antiga pode recusar um schema novo. Preserve compatibilidade ou mostre recuperação explícita; não apague dados silenciosamente.
 
 Para problemas de recursos 404, confira primeiro a base, a última compilação e o caminho do artefato. Para site ainda indisponível, confira **Settings → Pages**, o ambiente `github-pages`, o commit publicado e o job de deploy. A prévia Vite é uma ferramenta local, não o servidor da publicação.
 

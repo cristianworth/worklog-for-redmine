@@ -17,7 +17,7 @@ Cristian costuma recompor vários dias em uma sessão e enviá-los depois, frequ
 - A consulta do card continua fornecendo descrição/status/projeto. A validação integral do lote permanece; se a API fornecer atividades disponíveis por projeto, elas também são conferidas. Uma lista remota ausente não prova permissão nem proibição.
 - Recibos guardam códigos/datas originais e protegem contra duplicação. Resultado incerto exige conferência por leitura; nenhuma repetição automática após falha ou exclusão remota.
 - Modelo é salvo separadamente e só é copiado uma vez para um dia não iniciado. Alterar modelo ou catálogo não reescreve dias/recibos anteriores. Movimentação de status foi cancelada.
-- Código já público em `cristianworth/worklog-for-redmine`, licença MIT. Permanecer na `master`, manter commits coesos e seguir as regras de versão do changelog. Planilha, VBA, configuração, bancos, backups e resultados reais ficam fora do Git.
+- Código já público em `cristianworth/worklog-for-redmine`, licença MIT. Manter `master` como branch padrão e de publicação; mudanças seguem o [processo de contribuição](../CONTRIBUTING.md#issues-and-pull-requests), com commits coesos e as regras de versão do changelog. Planilha, VBA, configuração, bancos, backups e resultados reais ficam fora do Git.
 
 ## Marco atual — v0.6.0 / P8 publicada e conferida
 
