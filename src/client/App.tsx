@@ -102,7 +102,7 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
     catch { return []; }
   });
   const shownDates = visibleDates.filter((date) => !hiddenDates.includes(date));
-  const hiddenInPeriod = visibleDates.filter((date) => hiddenDates.includes(date));
+  const [showHiddenDays, setShowHiddenDays] = useState(false);
   const focusAfterVisibilityChange = useRef<string | null>(null);
   const [dayCollapseOverrides, setDayCollapseOverrides] = useState<Partial<Record<string, boolean>>>({});
   const [activeRange, setActiveRange] = useState<{
@@ -467,7 +467,7 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
 
   const dirtyCount = editor.dirtyDates.length;
   const hiddenCount = editor.dirtyDates.filter(
-    (date) => !shownDates.includes(date),
+    (date) => !visibleDates.includes(date) || (!showHiddenDays && hiddenDates.includes(date)),
   ).length;
   const invalidDates = editor.dirtyDates.filter(
     (date) => daySummary(editor.days[date]).invalid,
@@ -847,28 +847,30 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
             )}
           </span>
         </div>
-        {hiddenInPeriod.length > 0 && (
-          <div className="notice hidden-days" role="status">
-            <span>Dias ocultos neste período:</span>
-            {newestFirst(hiddenInPeriod).map((date) => (
-              <button key={date} id={`show-day-${date}`} className="text-button" onClick={() => {
-                focusAfterVisibilityChange.current = `hide-day-${date}`;
-                setHiddenDates((current) => current.filter((value) => value !== date));
-              }} aria-label={`Mostrar dia ${shortDate(date)}`}>
-                Mostrar {shortDate(date)}
-              </button>
-            ))}
-          </div>
-        )}
+        <label className="show-hidden-days">
+          <input
+            id="show-hidden-days"
+            type="checkbox"
+            checked={showHiddenDays}
+            onChange={(event) => setShowHiddenDays(event.target.checked)}
+          />
+          Exibir dias ocultados
+        </label>
         <div className="days-list" aria-busy={loading}>
           {newestFirst(visibleDates).map((date) => (
-            <div key={date} hidden={hiddenDates.includes(date)}>
+            <div key={date} hidden={hiddenDates.includes(date) && !showHiddenDays}>
               <DaySection
                 onHide={() => {
-                  focusAfterVisibilityChange.current = `show-day-${date}`;
-                  setSelection((current) => current.filter((item) => item.date !== date));
-                  setHiddenDates((current) => current.includes(date) ? current : [...current, date]);
+                  if (hiddenDates.includes(date)) {
+                    focusAfterVisibilityChange.current = `hide-day-${date}`;
+                    setHiddenDates((current) => current.filter((value) => value !== date));
+                  } else {
+                    focusAfterVisibilityChange.current = showHiddenDays ? `hide-day-${date}` : "show-hidden-days";
+                    setSelection((current) => current.filter((item) => item.date !== date));
+                    setHiddenDates((current) => current.includes(date) ? current : [...current, date]);
+                  }
                 }}
+                hiddenDay={hiddenDates.includes(date)}
                 simulated={data.mode === "demo"}
                 collapsed={dayCollapseOverrides[date]}
                 onCollapsedChange={(collapsed) =>
@@ -907,8 +909,8 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
             </div>
           ))}
         </div>
-        {!!visibleDates.length && !shownDates.length && !loading && !loadFailed && (
-          <p className="notice" role="status">Todos os dias úteis deste período estão ocultos. Use “Mostrar” para recuperá-los.</p>
+        {!!visibleDates.length && !shownDates.length && !showHiddenDays && !loading && !loadFailed && (
+          <p className="notice" role="status">Todos os dias úteis deste período estão ocultos. Marque “Exibir dias ocultados” para recuperá-los.</p>
         )}
         {!visibleDates.length && loading && (
           <div className="initial-loading" role="status">

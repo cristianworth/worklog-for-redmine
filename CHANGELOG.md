@@ -14,8 +14,8 @@ Histórico das versões. Criado em 23/10/2026 com a base anterior ao modelo regi
 
 ## [0.13.0] — 2026-11-24
 
-- Dias úteis específicos podem ser ocultados e recuperados, sem apagar rascunhos ou recibos. A preferência é armazenada no navegador, separada entre demo e modo local; seleção e salvamento respeitam os dias ocultos.
-- 416 testes/32 arquivos, builds local/demo/Pages e auditorias aprovados. Na demo fictícia, conferidos ocultação, seleção, recarga, restauração, edição e salvamento de dia oculto; teclado e viewport de 375 px.
+- Dias úteis específicos podem ser ocultados e recuperados pelo checkbox **Exibir dias ocultados**, sem apagar rascunhos ou recibos. A preferência é armazenada no navegador, separada entre demo e modo local; seleção e salvamento respeitam os dias ocultos.
+- 417 testes/32 arquivos, builds local/demo/Pages e auditorias aprovados. Na demo fictícia, conferidos ocultação, seleção, recarga, restauração, edição e salvamento de dia oculto; checkbox, teclado e viewport de 375 px.
 
 ## [0.12.1] — 2026-11-20
 

@@ -644,12 +644,20 @@ h1 {
   color: var(--ink);
   white-space: nowrap;
 }
-.hidden-days {
-  display: flex;
-  gap: 8px 14px;
-  flex-wrap: wrap;
+.show-hidden-days {
+  display: inline-flex;
   align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
 }
+.is-hidden-day .day-heading {
+  filter: grayscale(0.8);
+  background: #e2e7e4;
+}
+.is-hidden-day .day-date-stamp { background: #798b85; }
+.is-hidden-day [id^="day-content-"] { opacity: 0.65; }
+.hidden-day-label { font-weight: 700; }
+
 .day-heading .button:disabled {
   opacity: 1;
   background: transparent;

@@ -25,7 +25,7 @@ Prepare several days of time-entry drafts, check daily totals and review what wi
 - A free date range showing Monday–Friday, with the most recent workday first and a duration total and balance against an eight-hour day. Historical weekend data stays stored.
 - The Azulejos cool weekday palette, clear row separation and a shared vector brand/favicon. Dates and receipt states remain readable without relying on color. [Interface decisions](docs/interface.md).
 - Compact task rows, with lookup details spanning the editor width. Comments start with one line and remain resizable; longer text stays editable and scrollable.
-- Hide and restore individual dates for holidays or other non-working days; drafts and receipts remain intact.
+- Hide individual dates for holidays or other non-working days; reveal and restore them with the hidden-days checkbox. Drafts and receipts remain intact.
 - Fully appropriated days start collapsed; pending or uncertain days stay expanded. Click a day's header or use its disclosure button to expand/collapse it.
 - Compact duration input: `30` → `00:30`, `130` → `01:30`; integer minutes internally. The green **+** on the right adds time to an existing duration, with a preview and Enter to apply.
 - Missing required fields have a subtle red outline immediately; leaving them empty adds explanatory messages. Incomplete drafts remain saveable; submission requires valid saved rows.
