@@ -267,7 +267,7 @@ export function SubmissionReview({
             {access.mode === "demo" ? "Confirmar simulação" : "Confirmar envio ao Redmine"}
           </button>
         )}
-        {(record?.state === "confirmed" || record?.state === "existing") && (
+        {!record?.deletion && (record?.state === "confirmed" || record?.state === "existing") && (
           <button
             className="button secondary"
             disabled={busy}

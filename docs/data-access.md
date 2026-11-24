@@ -11,6 +11,7 @@ Implementação conferida em 25/10/2026. O contrato `WorklogDataAccess`, em `src
 | Estado/teste da conexão | GET `/api/redmine/status`, POST `/api/redmine/check` | Estado sem configuração/chave; conferência sem conexão |
 | Listar recibos/lotes por período | GET `/api/submissions` e `/api/submission-batches` | Recibos/lotes fictícios do visitante |
 | Preparar/confirmar/conferir/reconciliar recibo | POSTs individuais originais | Revisão explícita, criação fictícia e conferência sem recriar |
+| Excluir/conferir exclusão de recibo | POST `/api/submissions/:id/delete` com confirmação/revisão; POST `recover-deletion` | Remoção atômica da criação fictícia/linha, com recibo de auditoria |
 | Preparar/confirmar/consultar lote | POSTs/GET originais, confirmação 202 | Preflight integral e execução sequencial no navegador |
 
 ## Contratos preservados

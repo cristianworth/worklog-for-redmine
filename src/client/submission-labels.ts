@@ -7,6 +7,7 @@ export const submissionLabel: Record<SubmissionRecord["state"], string> = {
   rejected: "Recusado",
   uncertain: "Resultado incerto",
   existing: "Já existente no Redmine",
+  deleted: "Excluído · recibo preservado",
 };
 
 export const demoSubmissionLabel: typeof submissionLabel = {
@@ -16,4 +17,5 @@ export const demoSubmissionLabel: typeof submissionLabel = {
   rejected: "Simulação recusada",
   uncertain: "Resultado simulado incerto",
   existing: "Simulação já existente",
+  deleted: "Exclusão simulada · recibo preservado",
 };

@@ -14,6 +14,7 @@ export function BatchProgress({ batch, confirming, simulated }: {
     (item.record && !["prepared", "sending"].includes(item.record.state))).length;
   const confirmed = batch.items.filter((item) => item.record && isAppropriated(item.record) && !item.error).length;
   const succeeded = batch.state === "finished" && confirmed === batch.items.length;
+  const deleted = batch.items.filter((item) => item.record?.state === "deleted").length;
   const current = batch.items.find((item) => item.record?.state === "sending");
   const title = active
     ? confirming
@@ -21,7 +22,7 @@ export function BatchProgress({ batch, confirming, simulated }: {
       : simulated ? "Simulação em andamento…" : "Envio em andamento…"
     : succeeded
       ? simulated ? "Simulação concluída com sucesso" : "Envio concluído com sucesso"
-      : "Execução encerrada com pendências";
+      : deleted ? "Execução encerrada · exclusões posteriores" : "Execução encerrada com pendências";
   return (
     <section className={`batch-progress ${active ? "is-running" : succeeded ? "is-success" : "has-pending"}`}
       aria-label="Progresso do envio">
@@ -41,7 +42,8 @@ export function BatchProgress({ batch, confirming, simulated }: {
             : "Validando a seleção e aguardando resultados. Isso pode levar alguns instantes."
           : succeeded
             ? simulated ? "Recibos fictícios salvos. Nenhuma hora foi enviada ao Redmine." : "Resultados confirmados e recibos salvos."
-            : "Confira os impedimentos e os recibos abaixo. Nenhum envio será repetido automaticamente."}</p>
+            : deleted ? `${deleted} ${deleted === 1 ? "linha foi excluída" : "linhas foram excluídas"} após o envio. O histórico foi preservado; nenhum envio será repetido.`
+              : "Confira os impedimentos e os recibos abaixo. Nenhum envio será repetido automaticamente."}</p>
       </div>
       <progress max={batch.items.length || 1} value={completed} aria-label="Linhas processadas" />
     </section>

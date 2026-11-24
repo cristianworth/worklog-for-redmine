@@ -24,7 +24,7 @@ Review the diff and checks for the current SHA before integration. Merge require
 
 - Saving drafts never submits hours. Submission requires saved data, review and explicit confirmation.
 - Activities come from one catalog per configured Redmine instance; project context does not duplicate catalog rows.
-- Confirmed/existing/started/uncertain receipts stay protected. Reconciliation reads; it never repeats creation.
+- Confirmed/existing/started/uncertain receipts stay protected. Reconciliation reads; it never repeats creation. Explicit time-entry deletion uses the verified remote ID and preserves an audit receipt; only acknowledged remote deletion allows local removal. See [deletion and recovery](docs/time-entry-deletion.md).
 - Batch preflight covers the whole selection before the first write. Later failure preserves partial results. No automatic resume.
 - A template never overwrites an existing day, including a saved empty day. Issue status changes are outside scope.
 - Demo code cannot call the local API or include server modules, credentials, databases or private references.

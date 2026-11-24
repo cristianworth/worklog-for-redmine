@@ -1,6 +1,6 @@
 import { resolveActivity } from "../shared/activities";
 import { canConfirmBatch, orderBatchSelection, validateBatchSelection, type BatchSelection, type SubmissionBatch } from "../shared/batches";
-import { isSubmissionLocked, submissionDraft, type SubmissionRecord, type SubmissionSnapshot } from "../shared/submissions";
+import { canDeleteSubmission, matchesReceiptDraft, nextDeletion, isSubmissionLocked, submissionDraft, type SubmissionRecord, type SubmissionSnapshot } from "../shared/submissions";
 import type { DraftDay } from "../shared/worklogs";
 import { DataAccessError, type IssueDetails, type SubmissionAction } from "./data-access";
 import { demoIssues } from "./demo-examples";
@@ -21,6 +21,10 @@ export function assertDemoEditable(state: DemoState, days: DraftDay[]) {
     if (!next) continue;
     const before = state.days.find((day) => day.date === next.date)?.entries.find((entry) => entry.id === record.snapshot.entryId);
     const after = next.entries.find((entry) => entry.id === record.snapshot.entryId);
+    if (record.state === "deleted") {
+      if (after) throw new DataAccessError("Uma linha excluída não pode ser restaurada por um rascunho antigo.", 409);
+      continue;
+    }
     if (!before || !after || ["issue", "minutes", "activity", "comment"].some((key) =>
       before[key as keyof typeof before] !== after[key as keyof typeof after]))
       throw new DataAccessError("Uma linha possui um resultado simulado protegido. Restaure os exemplos para recomeçar; os outros rascunhos continuam editáveis.", 409);
@@ -106,7 +110,7 @@ export function createDemoSubmissions(store: DemoStore, exclusive: DemoExclusive
         return replace(state, record);
       }
       const creation = equivalent ?? {
-        id: state.creations.reduce((highest, value) => Math.max(highest, value.id), 990000) + 1,
+        id: Math.max(990000, ...state.creations.map((value) => value.id), ...state.submissions.map((value) => value.remoteId ?? 0)) + 1,
         snapshot: current.snapshot, createdAt: time,
       };
       record = { ...current, state: outcome === "uncertain" ? "uncertain" : equivalent ? "existing" : "confirmed",
@@ -123,6 +127,7 @@ export function createDemoSubmissions(store: DemoStore, exclusive: DemoExclusive
     let record!: SubmissionRecord;
     store.update((state) => {
       const previous = find(state, id);
+      if (previous.deletion || previous.state === "deleted") { record = previous; return state; }
       if (previous.state === "prepared" || previous.state === "rejected")
         throw new DataAccessError("Este recibo ainda não possui criação simulada para conferir.", 409);
       const matches = state.creations.filter((creation) => sameDemoWork(creation.snapshot, previous.snapshot));
@@ -198,7 +203,34 @@ export function createDemoSubmissions(store: DemoStore, exclusive: DemoExclusive
       validateBatchSelection([selection]);
       return prepareRaw(selection);
     }),
-    act: (id: string, action: SubmissionAction) => exclusive(() => action === "confirm" ? sendRaw(id) : verifyRaw(id)),
+    act: (id: string, action: SubmissionAction) => exclusive(() => {
+      if (action === "recover-deletion") return find(store.read(), id);
+      return action === "confirm" ? sendRaw(id) : verifyRaw(id);
+    }),
+    remove: (id: string, revision: number) => exclusive(() => {
+      let result!: SubmissionRecord;
+      store.update((state) => {
+        const record = find(state, id);
+        if (record.state === "deleted") { result = record; return state; }
+        const day = state.days.find((day) => day.date === record.snapshot.date);
+        if (!canDeleteSubmission(record) || !day || day.revision !== revision || !matchesReceiptDraft(day, record))
+          throw new DataAccessError("O dia ou recibo mudou. Recarregue antes de excluir a simulação.", 409);
+        const creation = state.creations.find((creation) => creation.id === record.remoteId);
+        if (!creation || !sameDemoWork(creation.snapshot, record.snapshot))
+          throw new DataAccessError("O resultado fictício não corresponde ao recibo. A linha permanece protegida.", 409);
+        if (state.submissions.some((other) => other.id !== id && other.state !== "deleted" && other.remoteId === record.remoteId))
+          throw new DataAccessError("O resultado fictício está vinculado a mais de uma linha. A exclusão foi bloqueada.", 409);
+        const time = now(), message = "Exclusão simulada concluída. Linha removida do Worklog; nenhum acesso ao Redmine. Recibo fictício preservado.";
+        const acknowledged = { ...record, deletion: nextDeletion(record, "remote_deleted", "Exclusão fictícia confirmada.", time) };
+        result = { ...acknowledged, state: "deleted", updatedAt: time, message, deletion: nextDeletion(acknowledged, "deleted", message, time) };
+        return replace({ ...state,
+          creations: state.creations.filter((creation) => creation.id !== record.remoteId),
+          days: state.days.map((value) => value.date === day.date ? { ...day, revision: day.revision + 1,
+            entries: day.entries.filter((entry) => entry.id !== record.snapshot.entryId) } : value),
+        }, result);
+      });
+      return structuredClone(result);
+    }),
     prepareBatch: (values: BatchSelection[]) => exclusive(() => {
       const entries = orderBatchSelection(validateBatchSelection(values)), time = now();
       const batch: SubmissionBatch = { id: crypto.randomUUID(), simulated: true, state: "prepared", createdAt: time, updatedAt: time,

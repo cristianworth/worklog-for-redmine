@@ -439,5 +439,12 @@ describe("appropriation presentation", () => {
     expect(acceptReceipt(a, later)).toBe(true);
     expect(acceptReceipt(later, a)).toBe(false);
     expect(acceptReceipt(a, { ...later, state: "sending" })).toBe(false);
+    const deletion = { state: "uncertain" as const, startedAt: later.updatedAt, updatedAt: later.updatedAt,
+      events: [{ at: later.updatedAt, state: "uncertain" as const, message: "Synthetic lost response" }] };
+    const deleting = { ...later, deletion };
+    expect(acceptReceipt(deleting, later)).toBe(false);
+    const deleted = { ...deleting, state: "deleted" as const };
+    expect(acceptReceipt(deleting, deleted)).toBe(true);
+    expect(acceptReceipt(deleted, later)).toBe(false);
   });
 });

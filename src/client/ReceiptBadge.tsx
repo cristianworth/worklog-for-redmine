@@ -27,7 +27,7 @@ export function ReceiptBadge({ record }: { record?: SubmissionRecord }) {
   const complete = isAppropriated(receipt);
   const creation = receipt?.remoteCreatedAt ?? receipt?.confirmedAt;
   const checking =
-    problem || receipt?.state === "sending" || receipt?.state === "uncertain";
+    problem || (!!receipt?.deletion && receipt.state !== "deleted") || receipt?.state === "sending" || receipt?.state === "uncertain";
   const rejected = receipt?.state === "rejected";
   const label = receipt?.simulated && complete
     ? receipt.state === "existing" ? "Simulação existente" : "Simulado"
@@ -44,6 +44,8 @@ export function ReceiptBadge({ record }: { record?: SubmissionRecord }) {
             : rejected
               ? "Recusado"
               : "Pendente";
+  const displayedLabel = receipt?.state === "deleted" ? "Excluído · recibo preservado"
+    : receipt?.deletion ? "Exclusão a conferir" : label;
   const Icon = complete
     ? CheckCircle2
     : problem
@@ -59,7 +61,7 @@ export function ReceiptBadge({ record }: { record?: SubmissionRecord }) {
     >
       <span className="receipt-state">
         <Icon size={14} aria-hidden="true" />
-        <strong>{receipt?.simulated && !complete ? `${label} · simulado` : label}</strong>
+        <strong>{receipt?.simulated && !complete ? `${displayedLabel} · simulado` : displayedLabel}</strong>
         {receipt?.remoteId && (
           <span className="receipt-id">#{receipt.remoteId}</span>
         )}

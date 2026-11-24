@@ -15,6 +15,7 @@ Comece pelo [README do projeto](../README.md) para experimentar a demo ou instal
 | Revisar regras de criação/recuperação | [Envio individual](individual-submission.md) e [lotes](batch-submission.md) |
 | Configurar cópias de dias recorrentes | [Modelo do dia](day-template.md) |
 | Entender recibos e conferência | [Situação dos apontamentos](appropriation-status-plan.md) |
+| Excluir uma linha apropriada e conferir falhas | [Exclusão de lançamentos](time-entry-deletion.md) |
 | Contribuir ou relatar um problema | [Contributing](../CONTRIBUTING.md) e [segurança](../SECURITY.md) |
 
 ## Status e referências históricas

@@ -32,6 +32,10 @@ Para acrescentar tempo, clique no **+** verde à direita da duração. Digite o 
 
 Dias totalmente apropriados iniciam com tarefas recolhidas. Dias vazios, parcialmente apropriados, pendentes ou a conferir ficam abertos. Clique em qualquer área livre do cabeçalho para alternar; a seta continua disponível por teclado. Selecionar texto ou clicar nos botões não dispara a alternância do cabeçalho. Expandir/recolher manualmente prevalece enquanto a página estiver aberta; recarregar reaplica o padrão. Adicionar linha expande o dia e leva o foco à tarefa nova.
 
+## Remover uma linha apropriada
+
+Salve as alterações do dia, clique em **Remover linha** e confira tarefa, data e duração. **Excluir do Redmine e do Worklog** exclui o lançamento de horas e remove a linha local após confirmação remota; a tarefa/card e o recibo de auditoria são preservados. Cancelar não altera dados. Falha ou incerteza mantém a linha protegida: use **Ver resultado → Conferir exclusão**, sem repetir automaticamente a operação. [Limites, histórico e recuperação](time-entry-deletion.md).
+
 ## Envio e recuperação
 
 1. Salve os dias. Escolha **Enviar dia** ou marque linhas/dias e use **Enviar selecionados**. Uma linha também usa a revisão de lote; o limite é 100 linhas por seleção.

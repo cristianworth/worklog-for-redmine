@@ -32,6 +32,7 @@ Prepare several days of time-entry drafts, check daily totals and review what wi
 - A reusable day template, copied explicitly into untouched dates.
 - Saved-row selection, review, confirmation and sequential batches with visible progress, partial results and explicit completion feedback.
 - Protected receipts, conservative duplicate checks and read-only recovery after uncertain results.
+- Explicit removal of confirmed time entries through **Remover linha**: verifies the receipt and account, deletes the remote time entry, then removes the local row while keeping an audit receipt. The demo simulates this flow. [Deletion and recovery](docs/time-entry-deletion.md).
 
 Saving and submitting are separate actions. Issue statuses stay unchanged. This project is independent of Redmine.
 

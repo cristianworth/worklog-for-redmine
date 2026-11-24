@@ -164,6 +164,10 @@ export function createHttpDataAccess(
         post(action === "confirm" ? { confirmed: true } : {}),
       );
     },
+    async deleteSubmission(id, revision) {
+      return json(`/api/submissions/${encodeURIComponent(id)}/delete`,
+        "Não foi possível confirmar a exclusão. Confira o resultado antes de continuar.", post({ confirmed: true, revision }));
+    },
     async prepareBatch(entries) {
       return readBatch("/api/submission-batches/prepare", post({ entries }));
     },

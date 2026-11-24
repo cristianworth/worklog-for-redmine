@@ -21,11 +21,20 @@ function snapshot(value: any): SubmissionSnapshot {
 }
 function record(value: any): SubmissionRecord {
   if (!value || value.simulated !== true || typeof value.id !== "string" || !value.id ||
-    !["prepared", "sending", "confirmed", "existing", "rejected", "uncertain"].includes(value.state) ||
+    !["prepared", "sending", "confirmed", "existing", "rejected", "uncertain", "deleted"].includes(value.state) ||
     !(value.remoteId === null || positive(value.remoteId)) || typeof value.message !== "string" ||
     !receiptTimestamp(value.preparedAt) || !receiptTimestamp(value.updatedAt) ||
     ["confirmedAt", "remoteCreatedAt", "lastCheckedAt"].some((key) => value[key] != null && !receiptTimestamp(value[key])) ||
     (value.verification != null && !["matched", "missing", "different", "unavailable"].includes(value.verification))) invalid();
+  if (value.deletion != null && (
+    !["deleting", "uncertain", "rejected", "remote_deleted", "deleted"].includes(value.deletion.state) ||
+    !receiptTimestamp(value.deletion.startedAt) || !receiptTimestamp(value.deletion.updatedAt) ||
+    (value.deletion.remoteDeletedAt != null && !receiptTimestamp(value.deletion.remoteDeletedAt)) ||
+    !Array.isArray(value.deletion.events) || !value.deletion.events.length ||
+    value.deletion.events.some((event: any) => !event || !receiptTimestamp(event.at) ||
+      !["deleting", "uncertain", "rejected", "remote_deleted", "deleted"].includes(event.state) || typeof event.message !== "string")
+  )) invalid();
+  if (value.state === "deleted" && (value.deletion?.state !== "deleted" || !value.deletion.remoteDeletedAt)) invalid();
   return { ...structuredClone(value), snapshot: snapshot(value.snapshot) };
 }
 function unique<T extends { id: string | number }>(values: T[]): T[] {

@@ -133,18 +133,35 @@ describe("explicit private-server certificate exception", () => {
     ["http://example.invalid/redmine/users/current.json", "GET"],
     ["https://user:secret@example.invalid/redmine/users/current.json", "GET"],
     ["https://example.invalid/redmine/users/current.json", "POST"],
+    ["https://other.invalid/redmine/time_entries/555.json", "DELETE"],
+    ["https://example.invalid/time_entries/555.json", "DELETE"],
+    ["https://example.invalid/redmine/issues/555.json", "DELETE"],
+    ["https://example.invalid/redmine/time_entries.json", "DELETE"],
+    ["https://example.invalid/redmine/time_entries/0.json", "DELETE"],
+    ["https://example.invalid/redmine/time_entries/555.json?key=synthetic", "DELETE"],
+    ["https://example.invalid/redmine/time_entries/9007199254740992.json", "DELETE"],
   ])(
     "refuses an unauthorized target or operation before connecting: %s %s",
     async (url, method) => {
       const { request } = mockHttps();
       await expect(
-        certificateExceptionRequest(env.REDMINE_URL)(url, { method }),
+        certificateExceptionRequest(readRedmineConfig(env)!.baseUrl)(url, { method }),
       ).rejects.toThrow(
-        "A exceção de certificado permite somente consultas e criação de horas no Redmine configurado.",
+        "A exceção de certificado permite somente consultas, criação e exclusão de horas no Redmine configurado.",
       );
       expect(request).not.toHaveBeenCalled();
     },
   );
+  it("allows DELETE only for a numeric time-entry ID in the configured installation", async () => {
+    const { request, end } = mockHttps(204);
+    const transport = certificateExceptionRequest("https://example.invalid/redmine/");
+    const url = "https://example.invalid/redmine/time_entries/555.json";
+    expect((await transport(url, { method: "DELETE" })).status).toBe(204);
+    expect(request.mock.calls[0][1]).toMatchObject({ method: "DELETE", agent: false, rejectUnauthorized: false });
+    expect(end).toHaveBeenCalledWith(undefined);
+    await expect(transport(url, { method: "DELETE", body: "{}" })).rejects.toThrow();
+    expect(request).toHaveBeenCalledTimes(1);
+  });
   it("does not follow a redirect with a key even to the same origin", async () => {
     const { request } = mockHttps(302, {}, [
       "location",
