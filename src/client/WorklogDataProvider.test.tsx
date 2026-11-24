@@ -19,9 +19,11 @@ describe("replaceable worklog data access", () => {
       <WorklogDataProvider value={value}><App /></WorklogDataProvider>,
     );
     expect(renderApp(demo)).toContain("dados e envios simulados");
-    expect(getItem).toHaveBeenLastCalledWith("worklog.demo.period");
+    expect(getItem).toHaveBeenCalledWith("worklog.demo.period");
+    expect(getItem).toHaveBeenCalledWith("worklog.demo.hiddenDates");
     expect(renderApp(local)).toContain("Banco local");
-    expect(getItem).toHaveBeenLastCalledWith("worklog.period");
+    expect(getItem).toHaveBeenCalledWith("worklog.period");
+    expect(getItem).toHaveBeenCalledWith("worklog.hiddenDates");
     const renderSettings = (value: WorklogDataAccess) => renderToStaticMarkup(
       <WorklogDataProvider value={value}><RedmineSettings onClose={() => {}} /></WorklogDataProvider>,
     );

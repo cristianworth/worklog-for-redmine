@@ -25,6 +25,7 @@ import { daySummary, missingEntryFields, type RequiredEntryField, type EditorDay
 
 interface Props {
   simulated?: boolean;
+  hiddenDay?: boolean;
   day: EditorDay;
   activities: Activity[];
   dirty: boolean;
@@ -43,14 +44,16 @@ interface Props {
   onCollapsedChange(collapsed: boolean): void;
   hasTemplate: boolean;
   onUseTemplate(): void;
+  onHide(): void;
 }
 
 export function DaySection({
   simulated = false,
+  hiddenDay = false,
   day,
   activities,
   dirty,
-  disabled,
+  disabled: appDisabled,
   today,
   submissions,
   selectedEntryIds,
@@ -63,6 +66,7 @@ export function DaySection({
   onCopy,
   hasTemplate,
   onUseTemplate,
+  onHide,
   collapsed: collapsedOverride,
   onCollapsedChange,
 }: Props) {
@@ -75,6 +79,7 @@ export function DaySection({
   }
   const focusId = useRef<string | null>(null);
   const section = useRef<HTMLElement>(null);
+  const disabled = appDisabled || hiddenDay;
   const summary = daySummary(day);
   const description = `${shortDate(day.date)}`;
   const dayReceipts = day.entries.map(
@@ -127,7 +132,7 @@ export function DaySection({
   return (
     <section
       ref={section}
-      className={`day-card ${day.date === today ? "is-today" : ""} ${appropriation.complete ? "is-appropriated-day" : ""} ${collapsed ? "is-collapsed" : ""}`}
+      className={`day-card ${day.date === today ? "is-today" : ""} ${appropriation.complete ? "is-appropriated-day" : ""} ${collapsed ? "is-collapsed" : ""} ${hiddenDay ? "is-hidden-day" : ""}`}
       data-weekday={new Date(`${day.date}T12:00:00Z`).getUTCDay()}
       aria-label={`Apontamentos de ${description}`}
     >
@@ -146,6 +151,7 @@ export function DaySection({
               ? `Alterações não salvas · ${statusLabel}`
               : statusLabel}
             {day.date === today && <span className="today-label">Hoje</span>}
+            {hiddenDay && <span className="hidden-day-label">Dia ocultado</span>}
           </span>
         </div>
         <div className="day-totals">
@@ -169,6 +175,15 @@ export function DaySection({
         >
           <Plus size={16} aria-hidden="true" />
           Adicionar linha
+        </button>
+        <button
+          id={`hide-day-${day.date}`}
+          className="button secondary hide-day"
+          onClick={onHide}
+          disabled={appDisabled}
+          aria-label={`${hiddenDay ? "Restaurar" : "Ocultar"} dia ${description}`}
+        >
+          {hiddenDay ? "Restaurar dia" : "Ocultar dia"}
         </button>
         <button
           className="icon-button day-toggle"

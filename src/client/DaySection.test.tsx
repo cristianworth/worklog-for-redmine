@@ -19,7 +19,7 @@ async function fixture() {
     dirty: false, disabled: false, today: "2026-10-26", submissions: receipts,
     selectedEntryIds: [], copied: null, hasTemplate: false,
     onChange() {}, onCopy() {}, onSelect() {}, onSelectDay() {}, onSendDay() {},
-    onResult() {}, onCollapsedChange() {}, onUseTemplate() {},
+    onResult() {}, onCollapsedChange() {}, onUseTemplate() {}, onHide() {},
   };
   const render = (changes: Partial<typeof props> = {}) => renderToStaticMarkup(
     <WorklogDataProvider value={data}><DaySection {...props} {...changes} /></WorklogDataProvider>,
@@ -28,6 +28,16 @@ async function fixture() {
 }
 
 describe("default day disclosure", () => {
+  it("shows a hidden day as inactive while allowing it to be restored", async () => {
+    const { render } = await fixture();
+    const html = render({ hiddenDay: true, submissions: {} });
+    expect(html).toContain("is-hidden-day");
+    expect(html).toContain("Dia ocultado");
+    expect(html).toMatch(/<button[^>]*aria-label="Restaurar dia 21\/10\/2026"[^>]*>/);
+    expect(html).not.toMatch(/<button[^>]*disabled=""[^>]*aria-label="Restaurar dia/);
+    expect(html).toMatch(/<input[^>]*aria-label="Selecionar linha 1[^>]*disabled=""/);
+    expect(html).toMatch(/<button[^>]*disabled=""[^>]*aria-label="Enviar dia/);
+  });
   it("shows the balance in the collapsed header and identifies unavailable balances", async () => {
     const { props, render } = await fixture();
     const header = render({ collapsed: true }).split("</header>")[0];

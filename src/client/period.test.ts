@@ -6,11 +6,18 @@ import {
   endDate,
   localDate,
   restorePeriod,
+  restoreHiddenDates,
   changeEndMode,
   normalizePeriod,
 } from "./period";
 
 describe("calendar period", () => {
+  it("restores distinct valid hidden dates without hiding other Fridays", () => {
+    const hidden = restoreHiddenDates(["2026-11-20", "2026-11-20", "2026-02-30", 7]);
+    expect(hidden).toEqual(["2026-11-20"]);
+    expect(workdayRange("2026-11-13", "2026-11-20").filter((date) => !hidden.includes(date))).toContain("2026-11-13");
+    expect(restoreHiddenDates(null)).toEqual([]);
+  });
   it("displays weekdays across month boundaries and omits weekend-only periods", () => {
     expect(workdayRange("2026-10-23", "2026-10-26")).toEqual(["2026-10-23", "2026-10-26"]);
     expect(workdayRange("2026-10-24", "2026-10-25")).toEqual([]);
