@@ -7,6 +7,12 @@ export interface PeriodPreference {
 }
 export const periodStorageKey = "worklog.period";
 
+export function restoreHiddenDates(value: unknown): string[] {
+  return Array.isArray(value)
+    ? [...new Set(value.filter((date): date is string => typeof date === "string" && isWorkDate(date)))]
+    : [];
+}
+
 export function localDate(now = new Date()): string {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 }

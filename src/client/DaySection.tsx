@@ -43,6 +43,7 @@ interface Props {
   onCollapsedChange(collapsed: boolean): void;
   hasTemplate: boolean;
   onUseTemplate(): void;
+  onHide(): void;
 }
 
 export function DaySection({
@@ -63,6 +64,7 @@ export function DaySection({
   onCopy,
   hasTemplate,
   onUseTemplate,
+  onHide,
   collapsed: collapsedOverride,
   onCollapsedChange,
 }: Props) {
@@ -169,6 +171,15 @@ export function DaySection({
         >
           <Plus size={16} aria-hidden="true" />
           Adicionar linha
+        </button>
+        <button
+          id={`hide-day-${day.date}`}
+          className="button secondary hide-day"
+          onClick={onHide}
+          disabled={disabled}
+          aria-label={`Ocultar dia ${description}`}
+        >
+          Ocultar dia
         </button>
         <button
           className="icon-button day-toggle"

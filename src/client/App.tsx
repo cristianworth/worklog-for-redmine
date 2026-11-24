@@ -12,7 +12,7 @@ import {
   acceptReceipt,
   type SubmissionRecord,
 } from "../shared/submissions";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   AlertCircle,
   ArrowRight,
@@ -37,6 +37,7 @@ import {
   periodStorageKey,
   newestFirst,
   restorePeriod,
+  restoreHiddenDates,
   shortDate,
   type PeriodPreference,
 } from "./period";
@@ -83,6 +84,7 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
 }) {
   const data = useWorklogData();
   const storageKey = data.mode === "demo" ? "worklog.demo.period" : periodStorageKey;
+  const hiddenStorageKey = data.mode === "demo" ? "worklog.demo.hiddenDates" : "worklog.hiddenDates";
   const saveLocation = data.mode === "demo"
     ? data.demo?.persistent ? "neste navegador" : "nesta sessão de demonstração"
     : "neste computador";
@@ -94,6 +96,14 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
     dirtyDates: [],
   });
   const [visibleDates, setVisibleDates] = useState<string[]>([]);
+  const [hiddenDates, setHiddenDates] = useState<string[]>(() => {
+    if (resetPeriod) return [];
+    try { return restoreHiddenDates(JSON.parse(localStorage.getItem(hiddenStorageKey) ?? "null")); }
+    catch { return []; }
+  });
+  const shownDates = visibleDates.filter((date) => !hiddenDates.includes(date));
+  const hiddenInPeriod = visibleDates.filter((date) => hiddenDates.includes(date));
+  const focusAfterVisibilityChange = useRef<string | null>(null);
   const [dayCollapseOverrides, setDayCollapseOverrides] = useState<Partial<Record<string, boolean>>>({});
   const [activeRange, setActiveRange] = useState<{
     from: string;
@@ -211,14 +221,14 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
     return () => controller.abort();
   }, [data, period.from, effectiveEnd, receiptRetry]);
   const canSelect = (date: string, entryId: string) => canSelectEntry(editor, receipts, date, entryId);
-  const visiblePending = pendingEntries(visibleDates, editor, receipts);
+  const visiblePending = pendingEntries(shownDates, editor, receipts);
   const canReview =
     !!selection.length &&
     selection.length <= 100 &&
     receiptsLoaded &&
     !loading &&
     !saving &&
-    selection.every((item) => canSelect(item.date, item.entryId));
+    selection.every((item) => shownDates.includes(item.date) && canSelect(item.date, item.entryId));
   function pendingDay(date: string) {
     return pendingEntries([date], editor, receipts);
   }
@@ -346,6 +356,15 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
   }, [period, storageKey]);
 
   useEffect(() => {
+    if (focusAfterVisibilityChange.current) {
+      document.getElementById(focusAfterVisibilityChange.current)?.focus();
+      focusAfterVisibilityChange.current = null;
+    }
+    try { localStorage.setItem(hiddenStorageKey, JSON.stringify(hiddenDates)); }
+    catch { setPreferenceNotice("O navegador não permitiu lembrar os dias ocultos. Os rascunhos não foram alterados."); }
+  }, [hiddenDates, hiddenStorageKey]);
+
+  useEffect(() => {
     const warn = (event: BeforeUnloadEvent) => {
       if (editor.dirtyDates.length || catalogDirty || templateDirty) {
         event.preventDefault();
@@ -437,6 +456,7 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
 
   function showPending() {
     const dates = [...editor.dirtyDates].sort();
+    setHiddenDates((current) => current.filter((date) => !dates.includes(date)));
     const next: PeriodPreference = {
       from: dates[0],
       to: dates[dates.length - 1],
@@ -447,7 +467,7 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
 
   const dirtyCount = editor.dirtyDates.length;
   const hiddenCount = editor.dirtyDates.filter(
-    (date) => !visibleDates.includes(date),
+    (date) => !shownDates.includes(date),
   ).length;
   const invalidDates = editor.dirtyDates.filter(
     (date) => daySummary(editor.days[date]).invalid,
@@ -765,8 +785,8 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
           <div className="notice pending-notice">
             <span>
               {hiddenCount === 1
-                ? "Há 1 dia alterado fora do período exibido. Ele também será salvo."
-                : `Há ${hiddenCount} dias alterados fora do período exibido. Eles também serão salvos.`}
+                ? "Há 1 dia alterado fora da visualização. Ele também será salvo."
+                : `Há ${hiddenCount} dias alterados fora da visualização. Eles também serão salvos.`}
             </span>
             <button
               className="text-button"
@@ -827,47 +847,69 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
             )}
           </span>
         </div>
+        {hiddenInPeriod.length > 0 && (
+          <div className="notice hidden-days" role="status">
+            <span>Dias ocultos neste período:</span>
+            {newestFirst(hiddenInPeriod).map((date) => (
+              <button key={date} id={`show-day-${date}`} className="text-button" onClick={() => {
+                focusAfterVisibilityChange.current = `hide-day-${date}`;
+                setHiddenDates((current) => current.filter((value) => value !== date));
+              }} aria-label={`Mostrar dia ${shortDate(date)}`}>
+                Mostrar {shortDate(date)}
+              </button>
+            ))}
+          </div>
+        )}
         <div className="days-list" aria-busy={loading}>
           {newestFirst(visibleDates).map((date) => (
-            <DaySection
-              key={date}
-              simulated={data.mode === "demo"}
-              collapsed={dayCollapseOverrides[date]}
-              onCollapsedChange={(collapsed) =>
-                setDayCollapseOverrides((current) => ({ ...current, [date]: collapsed }))
-              }
-              day={editor.days[date] ?? emptyDay(date)}
-              activities={catalog?.activities ?? []}
-              hasTemplate={!!dayTemplate?.entries.length}
-              onUseTemplate={() => useDayTemplate(date)}
-              dirty={editor.dirtyDates.includes(date)}
-              disabled={blocked || !receiptsLoaded}
-              submissions={receipts}
-              selectedEntryIds={selection
-                .filter((item) => item.date === date)
-                .map((item) => item.entryId)}
-              onSelect={(entryId) =>
-                setSelection((current) =>
-                  current.some(
-                    (item) => item.date === date && item.entryId === entryId,
+            <div key={date} hidden={hiddenDates.includes(date)}>
+              <DaySection
+                onHide={() => {
+                  focusAfterVisibilityChange.current = `show-day-${date}`;
+                  setSelection((current) => current.filter((item) => item.date !== date));
+                  setHiddenDates((current) => current.includes(date) ? current : [...current, date]);
+                }}
+                simulated={data.mode === "demo"}
+                collapsed={dayCollapseOverrides[date]}
+                onCollapsedChange={(collapsed) =>
+                  setDayCollapseOverrides((current) => ({ ...current, [date]: collapsed }))
+                }
+                day={editor.days[date] ?? emptyDay(date)}
+                activities={catalog?.activities ?? []}
+                hasTemplate={!!dayTemplate?.entries.length}
+                onUseTemplate={() => useDayTemplate(date)}
+                dirty={editor.dirtyDates.includes(date)}
+                disabled={blocked || !receiptsLoaded}
+                submissions={receipts}
+                selectedEntryIds={selection
+                  .filter((item) => item.date === date)
+                  .map((item) => item.entryId)}
+                onSelect={(entryId) =>
+                  setSelection((current) =>
+                    current.some(
+                      (item) => item.date === date && item.entryId === entryId,
+                    )
+                      ? current.filter(
+                          (item) =>
+                            item.date !== date || item.entryId !== entryId,
+                        )
+                      : [...current, { date, entryId }],
                   )
-                    ? current.filter(
-                        (item) =>
-                          item.date !== date || item.entryId !== entryId,
-                      )
-                    : [...current, { date, entryId }],
-                )
-              }
-              onSelectDay={() => toggleDay(date)}
-              onSendDay={() => openBatch(pendingDay(date))}
-              onResult={(entryId) => openReview(date, entryId)}
-              today={today}
-              copied={copied}
-              onChange={(entries) => changeEntries(date, entries)}
-              onCopy={copyCode}
-            />
+                }
+                onSelectDay={() => toggleDay(date)}
+                onSendDay={() => openBatch(pendingDay(date))}
+                onResult={(entryId) => openReview(date, entryId)}
+                today={today}
+                copied={copied}
+                onChange={(entries) => changeEntries(date, entries)}
+                onCopy={copyCode}
+              />
+            </div>
           ))}
         </div>
+        {!!visibleDates.length && !shownDates.length && !loading && !loadFailed && (
+          <p className="notice" role="status">Todos os dias úteis deste período estão ocultos. Use “Mostrar” para recuperá-los.</p>
+        )}
         {!visibleDates.length && loading && (
           <div className="initial-loading" role="status">
             <LoaderCircle className="spin" size={22} aria-hidden="true" />

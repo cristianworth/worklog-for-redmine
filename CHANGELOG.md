@@ -12,6 +12,11 @@ Histórico das versões. Criado em 23/10/2026 com a base anterior ao modelo regi
 - Antes de cada commit/merge, ler este arquivo e avaliar uma versão proporcional à entrega. Em 25/10/2026, Cristian delegou ao agente a decisão de versão neste projeto e pediu push automático dos commits coesos, sem nova confirmação rotineira. Commits e pushes seguem o escopo autorizado na branch de trabalho e o [processo de contribuição](CONTRIBUTING.md#issues-and-pull-requests); integração exige aprovação do diff e autorização próprias. Não incrementar a versão por commit da mesma entrega. Publicação e dados reais continuam sujeitos ao escopo autorizado.
 - Nunca incluir credenciais, planilhas privadas, bancos, backups ou dados reais nos registros, tags e arquivos distribuídos.
 
+## [0.13.0] — 2026-11-24
+
+- Dias úteis específicos podem ser ocultados e recuperados, sem apagar rascunhos ou recibos. A preferência é armazenada no navegador, separada entre demo e modo local; seleção e salvamento respeitam os dias ocultos.
+- 416 testes/32 arquivos, builds local/demo/Pages e auditorias aprovados. Na demo fictícia, conferidos ocultação, seleção, recarga, restauração, edição e salvamento de dia oculto; teclado e viewport de 375 px.
+
 ## [0.12.1] — 2026-11-20
 
 - Novos lotes apresentam, executam e mostram resultados com datas do dia mais recente para o mais antigo, tanto no modo local quanto na demo. Seleção manual e **Selecionar todos** seguem a mesma regra; a ordem relativa das linhas de cada dia e os lotes históricos são preservados. Corrige a issue #3.

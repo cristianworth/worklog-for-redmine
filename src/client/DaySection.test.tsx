@@ -19,7 +19,7 @@ async function fixture() {
     dirty: false, disabled: false, today: "2026-10-26", submissions: receipts,
     selectedEntryIds: [], copied: null, hasTemplate: false,
     onChange() {}, onCopy() {}, onSelect() {}, onSelectDay() {}, onSendDay() {},
-    onResult() {}, onCollapsedChange() {}, onUseTemplate() {},
+    onResult() {}, onCollapsedChange() {}, onUseTemplate() {}, onHide() {},
   };
   const render = (changes: Partial<typeof props> = {}) => renderToStaticMarkup(
     <WorklogDataProvider value={data}><DaySection {...props} {...changes} /></WorklogDataProvider>,
