@@ -3,6 +3,9 @@ import { submissionFingerprint } from "./submission-identity";
 import { canConfirmBatch, type SubmissionBatch } from "../shared/batches";
 import {
   isSubmissionLocked,
+  canDeleteSubmission,
+  matchesReceiptDraft,
+  nextDeletion,
   normalizeReceipt,
   receiptTimestamp,
   type SubmissionRecord,
@@ -222,6 +225,10 @@ export function openDraftStore(filename: string) {
     db.exec("BEGIN IMMEDIATE");
     try {
       assertSnapshot(record);
+      if (record.remoteId && db.prepare("SELECT details FROM submission_records WHERE id != ?").all(record.id)
+        .map((row) => decodeSubmission(row)!).some((other) => other.deletion &&
+          other.deletion.state !== "rejected" && other.remoteId === record.remoteId && other.snapshot.scope === record.snapshot.scope))
+        throw new ConflictError("Este lançamento possui exclusão iniciada ou concluída. Confira o histórico antes de vincular outra linha.");
       const previous = submissionForEntry(
         record.snapshot.date,
         record.snapshot.entryId,
@@ -316,11 +323,13 @@ export function openDraftStore(filename: string) {
       createdAt: string | null;
     },
   ): SubmissionRecord {
-    const record = submission(id);
+    const row = db.prepare("SELECT details FROM submission_records WHERE id = ?").get(id);
+    const record = decodeSubmission(row);
     if (!record || !["confirmed", "existing"].includes(record.state))
       throw new ConflictError(
         "Confira primeiro o resultado do envio iniciado.",
       );
+    if (record.deletion) return record;
     const now = new Date().toISOString();
     const messages = {
       matched:
@@ -342,11 +351,62 @@ export function openDraftStore(filename: string) {
       updatedAt: now,
       message: messages[check.result],
     };
-    db.prepare("UPDATE submission_records SET details = ? WHERE id = ?").run(
-      JSON.stringify(next),
-      id,
-    );
+    const changed = db.prepare("UPDATE submission_records SET details = ? WHERE id = ? AND details = ?")
+      .run(JSON.stringify(next), id, row!.details);
+    if (!changed.changes) throw new ConflictError("O recibo mudou durante a conferência. Recarregue o resultado.");
     return next;
+  }
+
+  function beginDeletion(id: string, revision: number): SubmissionRecord {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      const record = submission(id);
+      if (!record || !canDeleteSubmission(record))
+        throw new ConflictError("Este recibo não permite excluir. Confira o resultado antes de continuar.");
+      const day = read(record.snapshot.date);
+      if (day.revision !== revision || !matchesReceiptDraft(day, record))
+        throw new ConflictError("O dia mudou. Recarregue os rascunhos antes de excluir.");
+      const linked = db.prepare("SELECT details FROM submission_records WHERE id != ?").all(id)
+        .map((row) => decodeSubmission(row)!)
+        .some((other) => other.state !== "deleted" && other.remoteId === record.remoteId && other.snapshot.scope === record.snapshot.scope);
+      if (linked) throw new ConflictError("O ID remoto está vinculado a mais de uma linha. Confira os vínculos manualmente antes de excluir.");
+      const next = updateDeletion(id, "deleting", "Exclusão iniciada. Aguarde; não repita a operação.");
+      db.exec("COMMIT");
+      return next;
+    } catch (error) { db.exec("ROLLBACK"); throw error; }
+  }
+  function updateDeletion(id: string, state: NonNullable<SubmissionRecord["deletion"]>["state"], message: string, expectedEvents?: number): SubmissionRecord {
+    const row = db.prepare("SELECT details FROM submission_records WHERE id = ?").get(id);
+    const record = decodeSubmission(row);
+    if (!record) throw new ConflictError("Recibo não encontrado.");
+    if (record.state === "deleted") return record;
+    if (expectedEvents !== undefined && record.deletion?.events.length !== expectedEvents)
+      throw new ConflictError("A exclusão mudou durante a conferência. Recarregue o resultado antes de continuar.");
+    const now = new Date().toISOString();
+    const next = { ...record, deletion: nextDeletion(record, state, message, now), message, updatedAt: now };
+    const changed = db.prepare("UPDATE submission_records SET details = ? WHERE id = ? AND details = ?")
+      .run(JSON.stringify(next), id, row!.details);
+    if (!changed.changes) throw new ConflictError("O recibo mudou durante a exclusão. Recarregue o resultado para conferir.");
+    return next;
+  }
+  function finishDeletion(id: string): SubmissionRecord {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      const record = submission(id);
+      if (record?.state === "deleted") { db.exec("COMMIT"); return record; }
+      if (record?.deletion?.state !== "remote_deleted" || !record.deletion.remoteDeletedAt)
+        throw new ConflictError("A exclusão remota ainda não foi confirmada. A linha permanece protegida.");
+      const day = read(record.snapshot.date);
+      if (!matchesReceiptDraft(day, record)) throw new ConflictError("A linha local diverge do recibo. Confira os dados antes de concluir a remoção local.");
+      const now = new Date().toISOString();
+      const message = "Lançamento removido do Redmine e linha removida do Worklog. Recibo preservado para auditoria.";
+      const next: SubmissionRecord = { ...record, state: "deleted", deletion: nextDeletion(record, "deleted", message, now), message, updatedAt: now };
+      db.prepare("UPDATE draft_days SET revision = ?, entries = ? WHERE date = ?").run(day.revision + 1,
+        JSON.stringify(day.entries.filter((entry) => entry.id !== record.snapshot.entryId)), day.date);
+      db.prepare("UPDATE submission_records SET state = ?, details = ? WHERE id = ?").run(next.state, JSON.stringify(next), id);
+      db.exec("COMMIT");
+      return next;
+    } catch (error) { db.exec("ROLLBACK"); throw error; }
   }
 
   db.exec(`CREATE TABLE IF NOT EXISTS submission_batches (
@@ -445,6 +505,11 @@ export function openDraftStore(filename: string) {
       );
       const stored = read(day.date);
       for (const record of locked) {
+        if (record.state === "deleted") {
+          if (day.entries.some((entry) => entry.id === record.snapshot.entryId))
+            throw new ConflictError("Uma linha excluída não pode ser restaurada por um rascunho antigo. Recarregue o dia.");
+          continue;
+        }
         const previous = stored.entries.find(
           (e) => e.id === record.snapshot.entryId,
         );
@@ -645,6 +710,9 @@ export function openDraftStore(filename: string) {
     beginSubmission,
     finishSubmission,
     recordVerification,
+    beginDeletion,
+    updateDeletion,
+    finishDeletion,
     importConfirmed,
     backupTo: (filename: string) => backup(db, filename),
     assertSnapshot,

@@ -241,6 +241,7 @@ export function createSubmissionService(
   async function reconcile(id: string): Promise<SubmissionRecord> {
     const record = store.submission(id);
     if (!record) throw new SubmissionError("Envio não encontrado.", 404);
+    if (record.deletion) return record;
     if (record.state !== "uncertain" && record.state !== "sending")
       return record;
     if (
@@ -280,6 +281,7 @@ export function createSubmissionService(
   async function verify(id: string): Promise<SubmissionRecord> {
     const record = store.submission(id);
     if (!record) throw new SubmissionError("Envio não encontrado.", 404);
+    if (record.deletion) return record;
     if (!["confirmed", "existing"].includes(record.state)) return reconcile(id);
     const account = await redmine.account();
     if (

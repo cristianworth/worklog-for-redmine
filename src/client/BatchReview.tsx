@@ -11,6 +11,7 @@ import { shortDate } from "./period";
 import { demoSubmissionLabel, submissionLabel } from "./submission-labels";
 import { useWorklogData } from "./WorklogDataProvider";
 import { BatchProgress } from "./BatchProgress";
+import { formatReceiptDate } from "./ReceiptBadge";
 
 export function BatchReview({
   entries,
@@ -210,7 +211,8 @@ export function BatchReview({
                       : record
                         ? hasVerificationProblem(record)
                           ? "Apropriação a conferir"
-                          : (data.mode === "demo" ? demoSubmissionLabel : submissionLabel)[record.state]
+                          : record.deletion && record.state !== "deleted" ? "Exclusão a conferir"
+                            : (data.mode === "demo" ? demoSubmissionLabel : submissionLabel)[record.state]
                         : "Impedimento";
                   return (
                     <article
@@ -251,10 +253,12 @@ export function BatchReview({
                               record.state,
                             ) && (
                               <p className="settings-note">
-                                {record.message} Use Ver resultado na linha para
-                                conferir sem reenviar.
+                                {record.message}{record.state !== "deleted" && " Use Ver resultado na linha para conferir sem reenviar."}
                               </p>
                             )}
+                          {record?.deletion && <details><summary>Histórico da exclusão{record.simulated ? " simulada" : ""}</summary>
+                            <ul>{record.deletion.events.map((event, index) => <li key={index}>{formatReceiptDate(event.at)} · {event.message}</li>)}</ul>
+                          </details>}
                         </>
                       )}
                       {item.error && (

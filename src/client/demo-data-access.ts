@@ -112,6 +112,7 @@ export function createDemoDataAccess(options: DemoOptions = {}): WorklogDataAcce
     },
     prepareSubmission: submissions.prepare,
     actOnSubmission: submissions.act,
+    deleteSubmission: submissions.remove,
     prepareBatch: submissions.prepareBatch,
     readBatch: submissions.readBatch,
     confirmBatch: submissions.confirmBatch,

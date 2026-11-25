@@ -1,9 +1,10 @@
 import https from "node:https";
 
-// This transport is opt-in; writes are restricted to creating time entries on the configured base URL.
+// This transport is opt-in; writes stay within the configured time-entry endpoints.
 export function certificateExceptionRequest(baseUrl: string): typeof fetch {
   const origin = new URL(baseUrl).origin;
   const createPath = new URL("time_entries.json", baseUrl).pathname;
+  const entryPrefix = new URL("time_entries/", baseUrl).pathname;
   return async (input, options) => {
     const url = new URL(input instanceof Request ? input.url : String(input));
     if (
@@ -16,11 +17,15 @@ export function certificateExceptionRequest(baseUrl: string): typeof fetch {
         (options?.method === "POST" &&
           url.pathname === createPath &&
           !url.search &&
-          typeof options.body === "string")
+          typeof options.body === "string") ||
+        (options?.method === "DELETE" && !options.body && !url.search &&
+          url.pathname.startsWith(entryPrefix) &&
+          /^[1-9]\d*\.json$/.test(url.pathname.slice(entryPrefix.length)) &&
+          Number.isSafeInteger(Number(url.pathname.slice(entryPrefix.length, -5))))
       )
     ) {
       throw new Error(
-        "A exceção de certificado permite somente consultas e criação de horas no Redmine configurado.",
+        "A exceção de certificado permite somente consultas, criação e exclusão de horas no Redmine configurado.",
       );
     }
     return new Promise<Response>((resolve, reject) => {

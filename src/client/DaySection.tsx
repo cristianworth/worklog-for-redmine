@@ -1,5 +1,6 @@
 import {
   isSubmissionLocked,
+  canDeleteSubmission,
   isAppropriated,
   appropriationSummary,
   type SubmissionRecord,
@@ -36,6 +37,7 @@ interface Props {
   onSendDay(): void;
   onSelect(entryId: string): void;
   onResult(entryId: string): void;
+  onRemoveAppropriated?(entryId: string): void;
   copied: string | null;
   onChange(entries: EditorEntry[]): void;
   onCopy(id: string, issue: string): void;
@@ -58,6 +60,7 @@ export function DaySection({
   onSendDay,
   onSelect,
   onResult,
+  onRemoveAppropriated,
   copied,
   onChange,
   onCopy,
@@ -349,9 +352,9 @@ export function DaySection({
                         <button
                           className="icon-button remove-button"
                           aria-label={`Remover linha ${index + 1} em ${description}`}
-                          title="Remover linha"
-                          disabled={rowDisabled}
-                          onClick={() =>
+                          title={rowLocked && dirty ? "Salve as alterações deste dia antes de remover a linha apropriada" : "Remover linha"}
+                          disabled={disabled || (rowLocked && (dirty || !onRemoveAppropriated || !receipt || !canDeleteSubmission(receipt)))}
+                          onClick={() => rowLocked ? onRemoveAppropriated?.(entry.id) :
                             onChange(
                               day.entries.filter(
                                 (item) => item.id !== entry.id,

@@ -1,6 +1,13 @@
 import { isWorkDate, type Draft, type DraftDay } from "./worklogs";
 export type SubmissionState =
-  "prepared" | "sending" | "confirmed" | "rejected" | "uncertain" | "existing";
+  "prepared" | "sending" | "confirmed" | "rejected" | "uncertain" | "existing" | "deleted";
+export interface SubmissionDeletion {
+  state: "deleting" | "uncertain" | "rejected" | "remote_deleted" | "deleted";
+  startedAt: string;
+  updatedAt: string;
+  remoteDeletedAt?: string;
+  events: { at: string; state: SubmissionDeletion["state"]; message: string }[];
+}
 export interface SubmissionSnapshot {
   date: string;
   entryId: string;
@@ -20,6 +27,7 @@ export interface SubmissionSnapshot {
   statusName: string;
 }
 export interface SubmissionRecord {
+  deletion?: SubmissionDeletion;
   simulated?: boolean;
   id: string;
   snapshot: SubmissionSnapshot;
@@ -38,7 +46,25 @@ export interface SubmissionRecord {
   sourceSubmissionId?: string;
 }
 export const isSubmissionLocked = (state: SubmissionState) =>
-  ["sending", "confirmed", "uncertain", "existing"].includes(state);
+  ["sending", "confirmed", "uncertain", "existing", "deleted"].includes(state);
+export function canDeleteSubmission(record: SubmissionRecord): boolean {
+  return ["confirmed", "existing"].includes(record.state) &&
+    Number.isSafeInteger(record.remoteId) && record.remoteId! > 0 &&
+    (!record.deletion || record.deletion.state === "rejected");
+}
+export function matchesReceiptDraft(day: DraftDay, record: SubmissionRecord): boolean {
+  const entry = day.entries.find((entry) => entry.id === record.snapshot.entryId);
+  const s = record.snapshot;
+  return !!entry && Number(entry.issue.trim()) === s.issueId && entry.minutes === s.minutes &&
+    entry.activity === s.activityName && entry.comment === s.comment;
+}
+export function nextDeletion(record: SubmissionRecord, state: SubmissionDeletion["state"], message: string, now: string): SubmissionDeletion {
+  return {
+    ...record.deletion, state, startedAt: record.deletion?.startedAt ?? now, updatedAt: now,
+    ...(state === "remote_deleted" ? { remoteDeletedAt: now } : {}),
+    events: [...(record.deletion?.events ?? []), { at: now, state, message }],
+  };
+}
 export function submissionDraft(day: DraftDay, entryId: string): Draft {
   const entry = day.entries.find((entry) => entry.id === entryId);
   if (!isWorkDate(day.date) || !entry)
@@ -119,6 +145,7 @@ export function isAppropriated(record?: SubmissionRecord): boolean {
   return (
     !!record &&
     ["confirmed", "existing"].includes(record.state) &&
+    !record.deletion &&
     !hasVerificationProblem(record)
   );
 }
@@ -165,9 +192,11 @@ export function acceptReceipt(
   next: SubmissionRecord,
 ): boolean {
   if (!previous) return true;
+  if (previous.state === "deleted") return next.state === "deleted";
+  if (previous.deletion && (!next.deletion || next.deletion.events.length < previous.deletion.events.length)) return false;
   if (
     ["confirmed", "existing"].includes(previous.state) &&
-    !["confirmed", "existing"].includes(next.state)
+    !["confirmed", "existing", "deleted"].includes(next.state)
   )
     return false;
   return Date.parse(next.updatedAt) >= Date.parse(previous.updatedAt);

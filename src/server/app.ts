@@ -4,6 +4,7 @@ import { createBatchService } from "./batches";
 import { createSubmissionService, SubmissionError } from "./submissions";
 import { validateActivityCatalog } from "../shared/activities";
 import express from "express";
+import { createDeletionService } from "./deletions";
 import { timingSafeEqual } from "node:crypto";
 import {
   isWorkDate,
@@ -27,6 +28,7 @@ export function createApp(
   const app = express();
   const issueLookup = createIssueLookup(redmine);
   const submissionService = createSubmissionService(store, redmine);
+  const deletionService = createDeletionService(store, redmine);
   const batchService = createBatchService(store, submissionService);
   app.disable("x-powered-by");
   app.use((req, res, next) => {
@@ -153,6 +155,14 @@ export function createApp(
     res
       .set("Cache-Control", "no-store")
       .json(await submissionService.verify(req.params.id)),
+  );
+  app.post("/api/submissions/:id/delete", async (req, res) => {
+    if (req.body?.confirmed !== true || !Number.isSafeInteger(req.body?.revision) || req.body.revision < 1)
+      throw new SubmissionError("Confirme explicitamente a exclusão no Redmine e no Worklog, com a revisão salva do dia.");
+    res.set("Cache-Control", "no-store").json(await deletionService.remove(req.params.id, req.body.revision));
+  });
+  app.post("/api/submissions/:id/recover-deletion", async (req, res) =>
+    res.set("Cache-Control", "no-store").json(await deletionService.recover(req.params.id)),
   );
   app.post("/api/submissions/:id/reconcile", async (req, res) =>
     res.json(await submissionService.reconcile(req.params.id)),

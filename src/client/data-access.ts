@@ -15,7 +15,7 @@ export interface ConnectionStatus {
   hasApiKey: boolean;
   certificateException: boolean;
 }
-export type SubmissionAction = "confirm" | "verify" | "reconcile";
+export type SubmissionAction = "confirm" | "verify" | "reconcile" | "recover-deletion";
 
 export interface DemoSession {
   readonly exampleStartDate: string;
@@ -42,6 +42,7 @@ export interface WorklogDataAccess {
   listBatches(from: string, to: string, signal?: AbortSignal): Promise<SubmissionBatch[]>;
   prepareSubmission(selection: BatchSelection, signal?: AbortSignal): Promise<SubmissionRecord>;
   actOnSubmission(id: string, action: SubmissionAction): Promise<SubmissionRecord>;
+  deleteSubmission(id: string, revision: number): Promise<SubmissionRecord>;
   prepareBatch(entries: BatchSelection[]): Promise<SubmissionBatch>;
   readBatch(id: string): Promise<SubmissionBatch>;
   confirmBatch(id: string): Promise<SubmissionBatch>;

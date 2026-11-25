@@ -28,6 +28,18 @@ async function fixture() {
 }
 
 describe("default day disclosure", () => {
+  it("allows explicit removal of confirmed receipts while keeping fields locked and blocking unsafe receipts", async () => {
+    const { props, render } = await fixture();
+    const html = render({ onRemoveAppropriated() {} });
+    expect(html).toMatch(/aria-label="Remover linha 1 em 21\/10\/2026" title="Remover linha">/);
+    expect(html).toMatch(/<input(?=[^>]*aria-label="Tarefa da linha 1)(?=[^>]*disabled="")[^>]*>/);
+    const dirty = render({ onRemoveAppropriated() {}, dirty: true });
+    expect(dirty).toMatch(/aria-label="Remover linha 1[^>]*disabled=""/);
+    for (const changes of [{ state: "uncertain" as const }, { remoteId: null }]) {
+      const submissions = Object.fromEntries(Object.entries(props.submissions).map(([key, receipt]) => [key, { ...receipt, ...changes }]));
+      expect(render({ submissions, onRemoveAppropriated() {} })).toMatch(/aria-label="Remover linha 1[^>]*disabled=""/);
+    }
+  });
   it("shows the balance in the collapsed header and identifies unavailable balances", async () => {
     const { props, render } = await fixture();
     const header = render({ collapsed: true }).split("</header>")[0];

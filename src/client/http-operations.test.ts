@@ -38,7 +38,9 @@ const operations: Operation[] = [
     run: (data, signal) => data.listBatches("2026-10-26", "2026-10-27", signal) },
   { name: "prepare receipt", url: "/api/submissions/prepare", method: "POST", body: selection, response: receipt, expected: receipt, signal: true,
     run: (data, signal) => data.prepareSubmission(selection, signal) },
-  ...(["confirm", "verify", "reconcile"] as const).map((action): Operation => ({
+  { name: "delete receipt", url: "/api/submissions/receipt%20%2F%3F/delete", method: "POST", body: { confirmed: true, revision: 1 }, response: receipt, expected: receipt,
+    run: (data) => data.deleteSubmission("receipt /?", 1) },
+  ...(["confirm", "verify", "reconcile", "recover-deletion"] as const).map((action): Operation => ({
     name: `${action} receipt`, url: `/api/submissions/receipt%20%2F%3F/${action}`, method: "POST",
     body: action === "confirm" ? { confirmed: true } : {}, response: receipt, expected: receipt,
     run: (data) => data.actOnSubmission("receipt /?", action),

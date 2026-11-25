@@ -2,6 +2,8 @@
 
 Entregue em 23/10/2026, antes do modelo do dia (P5). A proteção contra reenvio da P3/P4 foi preservada e os três dias confirmados foram incorporados ao banco de uso.
 
+A v0.13.0 acrescenta um fluxo explícito de exclusão pelo ID remoto, preservando o recibo. Esse fluxo é uma exceção deliberada ao bloqueio de remoção descrito neste marco histórico; [contrato atual de exclusão e recuperação](time-entry-deletion.md).
+
 ## Interface e estados
 
 | Situação                            | Indicação                                                         | Consequência                                          |

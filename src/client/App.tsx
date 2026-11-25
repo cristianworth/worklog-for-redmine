@@ -7,6 +7,7 @@ import { BatchReview } from "./BatchReview";
 import { canSelectEntry, pendingEntries } from "./submission-selection";
 import type { BatchSelection, SubmissionBatch } from "../shared/batches";
 import { SubmissionReview } from "./SubmissionReview";
+import { DeletionReview } from "./DeletionReview";
 import { publicDemoUrl, repositoryUrl } from "./app-links";
 import {
   acceptReceipt,
@@ -149,6 +150,13 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
     entryId: string;
     revision: number;
   } | null>(null);
+  const [deletionReview, setDeletionReview] = useState<{ record: SubmissionRecord; revision: number } | null>(null);
+  const [removedDate, setRemovedDate] = useState<string | null>(null);
+  useEffect(() => {
+    if (!removedDate) return;
+    document.querySelector<HTMLButtonElement>(`button[aria-controls="day-content-${removedDate}"]`)?.focus();
+    setRemovedDate(null);
+  }, [removedDate]);
   const [receipts, setReceipts] = useState<Record<string, SubmissionRecord>>(
     {},
   );
@@ -157,10 +165,10 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
   const [receiptRetry, setReceiptRetry] = useState(0);
   const receiveRecord = useCallback(
     (record: SubmissionRecord) =>
-      setReceipts((current) => ({
+      setReceipts((current) => acceptReceipt(current[`${record.snapshot.date}:${record.snapshot.entryId}`], record) ? ({
         ...current,
         [`${record.snapshot.date}:${record.snapshot.entryId}`]: record,
-      })),
+      }) : current),
     [],
   );
   const receiveBatch = useCallback((batch: SubmissionBatch) => {
@@ -253,6 +261,8 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
   }
   function openReview(date: string, entryId: string) {
     const day = editor.days[date];
+    const record = receipts[`${date}:${entryId}`];
+    if (day && record?.deletion) { setDeletionReview({ record, revision: day.revision }); return; }
     if (day) setReview({ date, entryId, revision: day.revision });
   }
 
@@ -497,6 +507,24 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
           </div>
         </div>
       </header>
+      {deletionReview && <DeletionReview initial={deletionReview.record} revision={deletionReview.revision}
+        onRecord={receiveRecord}
+        onClose={() => { setDeletionReview(null); setReceiptRetry((value) => value + 1); }}
+        onDeleted={() => {
+          const { date, entryId } = deletionReview.record.snapshot;
+          setEditor((current) => {
+            const day = current.days[date];
+            return day ? { ...current, days: { ...current.days, [date]: {
+              ...day, entries: day.entries.filter((entry) => entry.id !== entryId),
+            } } } : current;
+          });
+          setDeletionReview(null);
+          setRemovedDate(date);
+          setSelection([]);
+          setRetry((value) => value + 1);
+          setReceiptRetry((value) => value + 1);
+          setMessage(data.mode === "demo" ? "Exclusão simulada concluída. Nenhum acesso ao Redmine." : "Linha removida do Redmine e do Worklog. Recibo preservado no histórico.");
+        }} />}
       {review && (
         <SubmissionReview
           {...review}
@@ -861,6 +889,11 @@ function WorklogApp({ resetPeriod, onDemoRestored }: {
               onSelectDay={() => toggleDay(date)}
               onSendDay={() => openBatch(pendingDay(date))}
               onResult={(entryId) => openReview(date, entryId)}
+              onRemoveAppropriated={(entryId) => {
+                const record = receipts[`${date}:${entryId}`];
+                if (record && !editor.dirtyDates.includes(date))
+                  setDeletionReview({ record, revision: editor.days[date].revision });
+              }}
               today={today}
               copied={copied}
               onChange={(entries) => changeEntries(date, entries)}

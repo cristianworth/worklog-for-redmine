@@ -12,6 +12,14 @@ Histórico das versões. Criado em 23/10/2026 com a base anterior ao modelo regi
 - Antes de cada commit/merge, ler este arquivo e avaliar uma versão proporcional à entrega. Em 25/10/2026, Cristian delegou ao agente a decisão de versão neste projeto e pediu push automático dos commits coesos, sem nova confirmação rotineira. Commits e pushes seguem o escopo autorizado na branch de trabalho e o [processo de contribuição](CONTRIBUTING.md#issues-and-pull-requests); integração exige aprovação do diff e autorização próprias. Não incrementar a versão por commit da mesma entrega. Publicação e dados reais continuam sujeitos ao escopo autorizado.
 - Nunca incluir credenciais, planilhas privadas, bancos, backups ou dados reais nos registros, tags e arquivos distribuídos.
 
+## [0.13.0] — 2026-11-24
+
+- **Remover linha** permite excluir uma apropriação com confirmação explícita de tarefa, data e duração, removendo o lançamento de horas do Redmine e a linha do Worklog. A tarefa/card permanece intacta. Resolve a issue #7.
+- Conta/instância, ID remoto e snapshot são conferidos antes do DELETE. Só HTTP 204 permite a remoção local; recibo, datas originais e eventos permanecem auditáveis. Incerteza mantém a linha protegida, sem repetição automática; confirmação remota persistida permite recuperar falha local sem novo DELETE. Vínculos duplicados são bloqueados e salvamentos antigos não restauram linhas excluídas.
+- Demo simula criação/remoção no navegador sem rede, com persistência atômica e histórico. Documentação de uso e recuperação atualizada; versão exibida deriva do manifest.
+- 458 testes em 35 arquivos, builds local/demo/Pages e auditorias dos dois caminhos da demo aprovados; incluem respostas remotas ambíguas, identidade/vínculos, concorrência, falha de transação local e recuperação após reabrir SQLite, tombstones, HTTP e persistência da demo.
+- Conferência manual fictícia: cancelamento sem mutação, confirmação por teclado, remoção de uma linha e de todas as linhas do dia, totais, recarga, histórico do lote e foco no botão do dia após remover. Diálogo conferido em desktop e 375 px, sem transbordamento ou erros de console. Nenhum acesso ao banco de uso ou exclusão real.
+
 ## [0.12.1] — 2026-11-20
 
 - Novos lotes apresentam, executam e mostram resultados com datas do dia mais recente para o mais antigo, tanto no modo local quanto na demo. Seleção manual e **Selecionar todos** seguem a mesma regra; a ordem relativa das linhas de cada dia e os lotes históricos são preservados. Corrige a issue #3.

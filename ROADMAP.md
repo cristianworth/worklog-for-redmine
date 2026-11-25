@@ -1,6 +1,6 @@
 # Roadmap — Worklog for Redmine
 
-Atualizado em 20/11/2026. Versão da entrega: **v0.12.1**; P8 concluída, lançador Windows entregue e interface Azulejos com linhas compactas, soma rápida à direita e sinalização de campos obrigatórios. Novos lotes seguem datas decrescentes na revisão e na execução. Código público sob MIT; demo publicada no GitHub Pages. Histórico no [changelog](CHANGELOG.md), invariantes nas [decisões](docs/project-decisions.md) e detalhes técnicos no [plano](docs/development-plan.md).
+Atualizado em 24/11/2026. Versão proposta nesta branch: **v0.13.0**, com exclusão explícita de linhas apropriadas no Redmine e no Worklog ([issue #7](https://github.com/cristianworth/worklog-for-redmine/issues/7)). Implementação em revisão; integração e publicação dependem da aprovação do PR. P8 concluída; avaliação independente por visitante permanece pendente. Histórico no [changelog](CHANGELOG.md), invariantes nas [decisões](docs/project-decisions.md) e detalhes técnicos no [plano](docs/development-plan.md).
 
 ## Objetivo e prioridades
 

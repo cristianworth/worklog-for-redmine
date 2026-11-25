@@ -384,6 +384,20 @@ export function createRedmineClient(
         matchesTimeEntry(data.time_entry, snapshot)
       );
     },
+    async deleteTimeEntry(id: number): Promise<"deleted" | "rejected" | "uncertain"> {
+      if (!config || !positiveId(id))
+        throw new RedmineError("configuration", "Configuração ou identificador remoto inválido.", 400);
+      try {
+        const response = await request(new URL(`time_entries/${id}.json`, config.baseUrl), {
+          method: "DELETE", redirect: "manual", signal: AbortSignal.timeout(10000),
+          headers: { Accept: "application/json", ...(config.apiKey ? { "X-Redmine-API-Key": config.apiKey } : {}) },
+        });
+        await response.body?.cancel();
+        if (response.status === 204) return "deleted";
+        if ([400, 401, 403, 405, 422].includes(response.status)) return "rejected";
+      } catch { /* A lost response cannot authorize local removal or an automatic retry. */ }
+      return "uncertain";
+    },
     async createTimeEntry(snapshot: SubmissionSnapshot): Promise<{
       state: "confirmed" | "rejected" | "uncertain";
       remoteCreatedAt?: string | null;
